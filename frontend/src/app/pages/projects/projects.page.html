@@ -1,11 +1,18 @@
 <ion-header class="ion-no-border">
   <ion-toolbar class="header-toolbar">
-    <ion-title class="page-title">Projects</ion-title>
-    <ion-buttons slot="end">
-      <ion-button class="add-button" (click)="addProject()">
-        <ion-icon name="add"></ion-icon>
-      </ion-button>
-    </ion-buttons>
+    <div class="header-content ion-padding-horizontal">
+      <div class="header-left">
+        <h1 class="header-title">Projects</h1>
+      </div>
+      <div class="header-right">
+        <ion-button class="header-icon-btn" fill="clear" (click)="addProject()">
+          <ion-icon name="add"></ion-icon>
+        </ion-button>
+        <div class="profile-avatar">
+          <ion-icon name="person-circle-outline"></ion-icon>
+        </div>
+      </div>
+    </div>
   </ion-toolbar>
 </ion-header>
 

@@ -9,22 +9,27 @@ const routes: Routes = [
     children: [
       {
         path: 'dashboard',
+        title: 'Dashboard - DevFocus',
         loadChildren: () => import('../dashboard/dashboard.module').then(m => m.DashboardPageModule)
       },
       {
         path: 'tasks',
+        title: 'Tasks - DevFocus',
         loadChildren: () => import('../tasks/tasks.module').then(m => m.TasksPageModule)
       },
       {
         path: 'pomodoro',
+        title: 'Pomodoro - DevFocus',
         loadChildren: () => import('../pomodoro/pomodoro.module').then(m => m.PomodoroPageModule)
       },
       {
         path: 'projects',
+        title: 'Projects - DevFocus',
         loadChildren: () => import('../projects/projects.module').then(m => m.ProjectsPageModule)
       },
       {
         path: 'profile',
+        title: 'Settings - DevFocus',
         loadChildren: () => import('../profile/profile.module').then(m => m.ProfilePageModule)
       },
       {

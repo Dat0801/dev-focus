@@ -10,10 +10,12 @@ const routes: Routes = [
   },
   {
     path: 'login',
+    title: 'Login - DevFocus',
     loadChildren: () => import('./pages/login/login.module').then( m => m.LoginPageModule)
   },
   {
     path: 'register',
+    title: 'Register - DevFocus',
     loadChildren: () => import('./pages/register/register.module').then( m => m.RegisterPageModule)
   },
   {
@@ -23,6 +25,7 @@ const routes: Routes = [
   },
   {
     path: 'profile',
+    title: 'Profile - DevFocus',
     loadChildren: () => import('./pages/profile/profile.module').then( m => m.ProfilePageModule)
   }
 ];

@@ -6,6 +6,7 @@ import { FolderPage } from './folder.page';
 const routes: Routes = [
   {
     path: '',
+    title: 'Folder - DevFocus',
     component: FolderPage
   }
 ];
