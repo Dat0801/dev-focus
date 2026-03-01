@@ -1,72 +1,121 @@
-<ion-header [translucent]="true">
-  <ion-toolbar>
-    <ion-buttons slot="start">
-      <ion-menu-button></ion-menu-button>
-    </ion-buttons>
-    <ion-title>Dashboard</ion-title>
-  </ion-toolbar>
-</ion-header>
-
 <ion-content [fullscreen]="true" class="ion-padding">
-  <div class="welcome">
-    <h2>Welcome back!</h2>
-    <p>Here's your productivity overview.</p>
+  <!-- Header -->
+  <div class="header-container">
+    <div class="user-info">
+      <div class="avatar">
+        <img src="https://ionicframework.com/docs/img/demos/avatar.svg" alt="Avatar" />
+      </div>
+      <div class="greeting">
+        <h1>Hello, Alex!</h1>
+        <p>{{ currentDate }}</p>
+      </div>
+    </div>
+    <div class="notification-btn">
+      <ion-icon name="notifications"></ion-icon>
+    </div>
   </div>
 
-  <ion-grid>
-    <ion-row>
-      <ion-col size="6">
-        <ion-card color="primary">
-          <ion-card-header>
-            <ion-card-subtitle>Tasks Today</ion-card-subtitle>
-            <ion-card-title>{{ metrics.tasks_today }}</ion-card-title>
-          </ion-card-header>
-        </ion-card>
-      </ion-col>
-      <ion-col size="6">
-        <ion-card color="success">
-          <ion-card-header>
-            <ion-card-subtitle>Completed</ion-card-subtitle>
-            <ion-card-title>{{ metrics.completed_today }}</ion-card-title>
-          </ion-card-header>
-        </ion-card>
-      </ion-col>
-    </ion-row>
+  <!-- Stats Grid -->
+  <div class="stats-grid">
+    <div class="stat-card purple">
+      <div class="stat-header">
+        <div class="icon-box">
+          <ion-icon name="clipboard-outline"></ion-icon>
+        </div>
+        <div class="badge">+2</div>
+      </div>
+      <div class="stat-label">Tasks Today</div>
+      <div class="stat-value">{{ metrics.tasks_today || 12 }}</div>
+    </div>
 
-    <ion-row>
-      <ion-col size="12">
-        <ion-card color="tertiary">
-          <ion-card-header>
-            <ion-card-subtitle>Focus Time Today</ion-card-subtitle>
-            <ion-card-title>{{ metrics.focus_time_today }} mins</ion-card-title>
-          </ion-card-header>
-        </ion-card>
-      </ion-col>
-    </ion-row>
+    <div class="stat-card blue">
+      <div class="stat-header">
+        <div class="icon-box">
+          <ion-icon name="checkmark-circle-outline"></ion-icon>
+        </div>
+        <div class="badge">+5</div>
+      </div>
+      <div class="stat-label">Completed</div>
+      <div class="stat-value">{{ metrics.completed_today || 8 }}</div>
+    </div>
 
-    <ion-row>
-      <ion-col size="12">
-        <ion-card>
-          <ion-card-header>
-            <ion-card-subtitle>Weekly Focus Hours</ion-card-subtitle>
-            <ion-card-title>{{ metrics.weekly_focus_hours }}h</ion-card-title>
-          </ion-card-header>
-        </ion-card>
-      </ion-col>
-    </ion-row>
-  </ion-grid>
+    <div class="stat-card green">
+      <div class="stat-header">
+        <div class="icon-box">
+          <ion-icon name="timer-outline"></ion-icon>
+        </div>
+        <div class="badge">+30m</div>
+      </div>
+      <div class="stat-label">Focus Time</div>
+      <div class="stat-value">4.5h</div>
+    </div>
 
-  <ion-list lines="none">
-    <ion-list-header>
-      <ion-label>Quick Actions</ion-label>
-    </ion-list-header>
-    <ion-item routerLink="/tasks" button>
-      <ion-icon slot="start" name="checkbox-outline" color="primary"></ion-icon>
-      <ion-label>Manage Tasks</ion-label>
-    </ion-item>
-    <ion-item routerLink="/pomodoro" button>
-      <ion-icon slot="start" name="timer-outline" color="secondary"></ion-icon>
-      <ion-label>Start Focus Session</ion-label>
-    </ion-item>
-  </ion-list>
+    <div class="stat-card yellow">
+      <div class="stat-header">
+        <div class="icon-box">
+          <ion-icon name="flame-outline"></ion-icon>
+        </div>
+        <div class="badge">+1</div>
+      </div>
+      <div class="stat-label">Streak</div>
+      <div class="stat-value">15d</div>
+    </div>
+  </div>
+
+  <!-- Daily Performance -->
+  <div class="section-title">Daily Performance</div>
+  <div class="performance-card">
+    <div class="circular-chart">
+      <svg viewBox="0 0 36 36" class="circular-progress">
+        <path class="circle-bg"
+          d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+        />
+        <path class="circle"
+          stroke-dasharray="70, 100"
+          d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+        />
+      </svg>
+      <div class="chart-content">
+        <span class="percentage">70%</span>
+        <span class="label">OF DAILY GOAL</span>
+      </div>
+    </div>
+
+    <div class="bar-chart">
+      <div class="bar-item" *ngFor="let day of ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN']; let i = index">
+        <div class="bar" [style.height.%]="[30, 45, 35, 55, 25, 75, 10][i]"></div>
+        <div class="day-label">{{ day }}</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Upcoming Tasks -->
+  <div class="section-header">
+    <div class="section-title">Upcoming Tasks</div>
+    <div class="view-all">View all</div>
+  </div>
+
+  <div class="task-list">
+    <div class="task-item" *ngFor="let task of upcomingTasks" [class.completed]="task.completed">
+      <div class="task-check">
+        <ion-icon *ngIf="task.completed" name="checkmark-circle"></ion-icon>
+        <div *ngIf="!task.completed" class="checkbox"></div>
+      </div>
+      <div class="task-info">
+        <h3>{{ task.title }}</h3>
+        <p>{{ task.time }} • {{ task.priority }}</p>
+      </div>
+      <div *ngIf="task.userInitials && !task.completed" class="task-avatar">{{ task.userInitials }}</div>
+      <div *ngIf="!task.userInitials && !task.completed" class="task-more">
+        <ion-icon name="ellipsis-vertical"></ion-icon>
+      </div>
+    </div>
+  </div>
+
+  <!-- Floating Action Button -->
+  <ion-fab slot="fixed" vertical="bottom" horizontal="end">
+    <ion-fab-button class="main-fab">
+      <ion-icon name="add"></ion-icon>
+    </ion-fab-button>
+  </ion-fab>
 </ion-content>

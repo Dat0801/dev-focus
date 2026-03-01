@@ -12,6 +12,7 @@ import { AuthService } from '../../services/auth';
 })
 export class LoginPage implements OnInit {
   loginForm: FormGroup;
+  showPassword = false;
 
   constructor(
     private fb: FormBuilder,
@@ -22,11 +23,25 @@ export class LoginPage implements OnInit {
   ) {
     this.loginForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
-      password: ['', [Validators.required, Validators.minLength(6)]]
+      password: ['', [Validators.required, Validators.minLength(6)]],
+      rememberMe: [false]
     });
   }
 
   ngOnInit() {}
+
+  togglePassword() {
+    this.showPassword = !this.showPassword;
+  }
+
+  onForgotPassword() {
+    console.log('Forgot password clicked');
+    // Implement forgot password logic
+  }
+
+  onCreateAccount() {
+    this.router.navigateByUrl('/register');
+  }
 
   async onLogin() {
     if (this.loginForm.invalid) return;

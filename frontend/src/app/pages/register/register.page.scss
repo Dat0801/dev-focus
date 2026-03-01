@@ -1,31 +1,192 @@
+ion-content {
+  --background: #fdfdfd;
+}
+
 .register-container {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  height: 100%;
-  max-width: 400px;
+  padding: 20px 24px;
+  max-width: 500px;
   margin: 0 auto;
 
-  .logo {
-    text-align: center;
-    margin-bottom: 30px;
+  .header-section {
+    margin-bottom: 32px;
     h1 {
-      margin-top: 10px;
-      font-weight: 700;
-      color: var(--ion-color-primary);
+      font-size: 32px;
+      font-weight: 800;
+      color: #1a1c2e;
+      margin: 0 0 8px 0;
+    }
+    p {
+      font-size: 16px;
+      color: #7c8091;
+      line-height: 1.5;
+      margin: 0;
     }
   }
 
-  form {
-    width: 100%;
+  .input-group {
+    margin-bottom: 20px;
+    label {
+      display: block;
+      font-size: 14px;
+      font-weight: 600;
+      color: #1a1c2e;
+      margin-bottom: 8px;
+    }
+    .input-wrapper {
+      display: flex;
+      align-items: center;
+      background: #f8faff;
+      border: 1px solid #eef2f8;
+      border-radius: 16px;
+      padding: 4px 16px;
+      height: 56px;
+      transition: all 0.3s ease;
+
+      &:focus-within {
+        border-color: #6c28f3;
+        box-shadow: 0 0 0 2px rgba(108, 40, 243, 0.1);
+      }
+
+      ion-icon {
+        font-size: 20px;
+        color: #9ea3b0;
+        margin-right: 12px;
+      }
+
+      ion-input {
+        --padding-start: 0;
+        font-size: 16px;
+        color: #1a1c2e;
+        --placeholder-color: #9ea3b0;
+        --placeholder-opacity: 1;
+      }
+
+      .eye-icon {
+        margin-right: 0;
+        margin-left: 12px;
+        cursor: pointer;
+      }
+    }
   }
 
-  .error {
+  .password-strength-container {
     margin-top: -10px;
-    margin-bottom: 10px;
-    small {
-      color: var(--ion-color-danger);
+    margin-bottom: 20px;
+    .strength-bars {
+      display: flex;
+      gap: 4px;
+      margin-bottom: 8px;
+      .bar {
+        height: 4px;
+        flex: 1;
+        background: #eef2f8;
+        border-radius: 2px;
+        transition: all 0.3s ease;
+        &.active {
+          background: #6c28f3;
+        }
+      }
+    }
+    .strength-text {
+      font-size: 12px;
+      color: #7c8091;
+      margin: 0;
+      span {
+        font-weight: 600;
+        &.weak { color: #ff4d4d; }
+        &.fair { color: #ffa500; }
+        &.medium { color: #6c28f3; }
+        &.strong { color: #2ecc71; }
+      }
+    }
+  }
+
+  .terms-container {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 32px;
+    ion-checkbox {
+      --size: 20px;
+      --border-radius: 6px;
+      --checkbox-background-checked: #6c28f3;
+      --border-color-checked: #6c28f3;
+      margin-top: 2px;
+    }
+    p {
+      font-size: 14px;
+      color: #7c8091;
+      margin: 0;
+      line-height: 1.4;
+      a {
+        color: #6c28f3;
+        text-decoration: underline;
+        font-weight: 500;
+      }
+    }
+  }
+
+  .create-button {
+    --background: #6c28f3;
+    --background-activated: #5a21cc;
+    --border-radius: 16px;
+    --box-shadow: 0 8px 24px rgba(108, 40, 243, 0.3);
+    height: 56px;
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 32px;
+    text-transform: none;
+  }
+
+  .divider {
+    display: flex;
+    align-items: center;
+    text-align: center;
+    margin-bottom: 24px;
+    &::before, &::after {
+      content: '';
+      flex: 1;
+      border-bottom: 1px solid #eef2f8;
+    }
+    span {
+      padding: 0 16px;
+      font-size: 12px;
+      font-weight: 600;
+      color: #9ea3b0;
+      letter-spacing: 0.5px;
+    }
+  }
+
+  .social-login {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 40px;
+    .social-button {
+      flex: 1;
+      --border-radius: 16px;
+      --border-color: #eef2f8;
+      --color: #1a1c2e;
+      height: 56px;
+      font-size: 14px;
+      font-weight: 600;
+      text-transform: none;
+      ion-icon {
+        font-size: 20px;
+      }
+    }
+  }
+
+  .footer-link {
+    text-align: center;
+    p {
+      font-size: 14px;
+      color: #7c8091;
+      a {
+        color: #6c28f3;
+        font-weight: 700;
+        text-decoration: none;
+        margin-left: 4px;
+      }
     }
   }
 }

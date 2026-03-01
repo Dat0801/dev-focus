@@ -1,51 +1,80 @@
-<ion-header [translucent]="true">
-  <ion-toolbar>
-    <ion-buttons slot="start">
-      <ion-back-button defaultHref="/login"></ion-back-button>
-    </ion-buttons>
-    <ion-title>Register</ion-title>
-  </ion-toolbar>
-</ion-header>
-
-<ion-content [fullscreen]="true" class="ion-padding">
+<ion-content>
   <div class="register-container">
-    <div class="logo">
-      <ion-icon name="flash" color="primary" size="large"></ion-icon>
-      <h1>Join DevFocus</h1>
+    <div class="header-section">
+      <h1>Create Account</h1>
+      <p>Join thousands of users managing tasks and focus sessions better.</p>
     </div>
 
     <form [formGroup]="registerForm" (ngSubmit)="onRegister()">
-      <ion-item lines="full" class="ion-margin-bottom">
-        <ion-label position="stacked">Full Name</ion-label>
-        <ion-input type="text" formControlName="name" placeholder="John Doe"></ion-input>
-      </ion-item>
-
-      <ion-item lines="full" class="ion-margin-bottom">
-        <ion-label position="stacked">Email</ion-label>
-        <ion-input type="email" formControlName="email" placeholder="email@example.com"></ion-input>
-      </ion-item>
-
-      <ion-item lines="full" class="ion-margin-bottom">
-        <ion-label position="stacked">Password</ion-label>
-        <ion-input type="password" formControlName="password" placeholder="At least 8 characters"></ion-input>
-      </ion-item>
-
-      <ion-item lines="full" class="ion-margin-bottom">
-        <ion-label position="stacked">Confirm Password</ion-label>
-        <ion-input type="password" formControlName="password_confirmation" placeholder="Repeat password"></ion-input>
-      </ion-item>
-
-      <div class="error" *ngIf="registerForm.hasError('mismatch') && registerForm.get('password_confirmation')?.touched">
-        <small class="ion-padding-start" color="danger">Passwords do not match.</small>
+      <!-- Full Name -->
+      <div class="input-group">
+        <label>Full Name</label>
+        <div class="input-wrapper">
+          <ion-icon name="person-outline"></ion-icon>
+          <ion-input type="text" formControlName="name" placeholder="John Doe"></ion-input>
+        </div>
       </div>
 
-      <ion-button expand="block" type="submit" [disabled]="registerForm.invalid" class="ion-margin-top">
+      <!-- Email Address -->
+      <div class="input-group">
+        <label>Email Address</label>
+        <div class="input-wrapper">
+          <ion-icon name="mail-outline"></ion-icon>
+          <ion-input type="email" formControlName="email" placeholder="name@example.com"></ion-input>
+        </div>
+      </div>
+
+      <!-- Password -->
+      <div class="input-group">
+        <label>Password</label>
+        <div class="input-wrapper">
+          <ion-icon name="lock-closed-outline"></ion-icon>
+          <ion-input [type]="showPassword ? 'text' : 'password'" formControlName="password" placeholder="••••••••"></ion-input>
+          <ion-icon [name]="showPassword ? 'eye-off-outline' : 'eye-outline'" class="eye-icon" (click)="togglePasswordVisibility()"></ion-icon>
+        </div>
+      </div>
+
+      <!-- Password Strength -->
+      <div class="password-strength-container" *ngIf="registerForm.get('password')?.value">
+        <div class="strength-bars">
+          <div class="bar" [class.active]="passwordStrength >= 1"></div>
+          <div class="bar" [class.active]="passwordStrength >= 2"></div>
+          <div class="bar" [class.active]="passwordStrength >= 3"></div>
+          <div class="bar" [class.active]="passwordStrength >= 4"></div>
+        </div>
+        <p class="strength-text">Password strength: <span [class]="passwordStrengthLabel.toLowerCase()">{{ passwordStrengthLabel }}</span></p>
+      </div>
+
+      <!-- Terms Checkbox -->
+      <div class="terms-container">
+        <ion-checkbox formControlName="agreeTerms"></ion-checkbox>
+        <p>I agree to the <a href="#">Terms & Conditions</a> and <a href="#">Privacy Policy</a>.</p>
+      </div>
+
+      <!-- Create Account Button -->
+      <ion-button expand="block" type="submit" [disabled]="registerForm.invalid" class="create-button">
         Create Account
       </ion-button>
     </form>
 
-    <div class="ion-text-center ion-margin-top">
-      <p>Already have an account? <ion-text color="primary" routerLink="/login">Login</ion-text></p>
+    <div class="divider">
+      <span>OR SIGN UP WITH</span>
+    </div>
+
+    <!-- Social Login -->
+    <div class="social-login">
+      <ion-button fill="outline" class="social-button">
+        <ion-icon slot="start" name="logo-google"></ion-icon>
+        Google
+      </ion-button>
+      <ion-button fill="outline" class="social-button">
+        <ion-icon slot="start" name="logo-apple"></ion-icon>
+        Apple
+      </ion-button>
+    </div>
+
+    <div class="footer-link">
+      <p>Already have an account? <a routerLink="/login">Log In</a></p>
     </div>
   </div>
 </ion-content>

@@ -10,14 +10,29 @@ import { environment } from '../../../environments/environment';
 })
 export class DashboardPage implements OnInit {
   metrics: any = {
-    tasks_today: 0,
-    completed_today: 0,
-    focus_time_today: 0,
-    weekly_focus_hours: 0,
-    productivity_streak: 0
+    tasks_today: 12,
+    completed_today: 8,
+    focus_time_today: '4.5h',
+    weekly_focus_hours: 15.2,
+    productivity_streak: 15,
+    daily_goal_percentage: 70
   };
 
-  constructor(private http: HttpClient) {}
+  upcomingTasks: any[] = [
+    { id: 1, title: 'Finish Dashboard Design', time: '10:00 AM', priority: 'High Priority', userInitials: 'JD', completed: false },
+    { id: 2, title: 'Review Sprint Backlog', time: '09:00 AM', priority: 'Routine', userInitials: '', completed: true },
+    { id: 3, title: 'Team Sync Meeting', time: '02:30 PM', priority: 'Meeting', userInitials: '', completed: false }
+  ];
+
+  currentDate: string = '';
+
+  constructor(private http: HttpClient) {
+    this.currentDate = new Intl.DateTimeFormat('en-US', {
+      weekday: 'long',
+      month: 'short',
+      day: 'numeric'
+    }).format(new Date()).toUpperCase();
+  }
 
   ngOnInit() {
     this.loadMetrics();

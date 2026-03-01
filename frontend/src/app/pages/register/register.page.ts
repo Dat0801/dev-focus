@@ -12,6 +12,9 @@ import { AuthService } from '../../services/auth';
 })
 export class RegisterPage implements OnInit {
   registerForm: FormGroup;
+  showPassword = false;
+  passwordStrength = 0;
+  passwordStrengthLabel = '';
 
   constructor(
     private fb: FormBuilder,
@@ -24,15 +27,51 @@ export class RegisterPage implements OnInit {
       name: ['', [Validators.required]],
       email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required, Validators.minLength(8)]],
-      password_confirmation: ['', [Validators.required]]
-    }, { validator: this.passwordMatchValidator });
+      agreeTerms: [false, [Validators.requiredTrue]]
+    });
   }
 
-  ngOnInit() {}
+  ngOnInit() {
+    this.registerForm.get('password')?.valueChanges.subscribe(value => {
+      this.calculatePasswordStrength(value);
+    });
+  }
 
-  passwordMatchValidator(g: FormGroup) {
-    return g.get('password')?.value === g.get('password_confirmation')?.value
-      ? null : { 'mismatch': true };
+  calculatePasswordStrength(password: string) {
+    if (!password) {
+      this.passwordStrength = 0;
+      this.passwordStrengthLabel = '';
+      return;
+    }
+
+    let strength = 0;
+    if (password.length >= 8) strength++;
+    if (/[a-z]/.test(password) && /[A-Z]/.test(password)) strength++;
+    if (/\d/.test(password)) strength++;
+    if (/[!@#$%^&*(),.?":{}|<>]/.test(password)) strength++;
+
+    this.passwordStrength = strength;
+    
+    switch (strength) {
+      case 1:
+        this.passwordStrengthLabel = 'Weak';
+        break;
+      case 2:
+        this.passwordStrengthLabel = 'Fair';
+        break;
+      case 3:
+        this.passwordStrengthLabel = 'Medium';
+        break;
+      case 4:
+        this.passwordStrengthLabel = 'Strong';
+        break;
+      default:
+        this.passwordStrengthLabel = '';
+    }
+  }
+
+  togglePasswordVisibility() {
+    this.showPassword = !this.showPassword;
   }
 
   async onRegister() {

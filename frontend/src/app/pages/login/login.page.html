@@ -1,40 +1,72 @@
-<ion-header [translucent]="true">
-  <ion-toolbar>
-    <ion-title>Login</ion-title>
-  </ion-toolbar>
-</ion-header>
-
-<ion-content [fullscreen]="true" class="ion-padding">
+<ion-content class="ion-padding">
   <div class="login-container">
-    <div class="logo">
-      <ion-icon name="flash" color="primary" size="large"></ion-icon>
-      <h1>DevFocus</h1>
-    </div>
-
-    <form [formGroup]="loginForm" (ngSubmit)="onLogin()">
-      <ion-item lines="full" class="ion-margin-bottom">
-        <ion-label position="stacked">Email</ion-label>
-        <ion-input type="email" formControlName="email" placeholder="email@example.com"></ion-input>
-      </ion-item>
-      <div class="error" *ngIf="loginForm.get('email')?.touched && loginForm.get('email')?.invalid">
-        <small class="ion-padding-start" color="danger">Please enter a valid email.</small>
+    <div class="login-wrapper">
+      <!-- Logo Section -->
+      <div class="logo-container">
+        <div class="logo-box">
+          <ion-icon name="timer"></ion-icon>
+        </div>
       </div>
 
-      <ion-item lines="full" class="ion-margin-bottom">
-        <ion-label position="stacked">Password</ion-label>
-        <ion-input type="password" formControlName="password" placeholder="Enter password"></ion-input>
-      </ion-item>
-      <div class="error" *ngIf="loginForm.get('password')?.touched && loginForm.get('password')?.invalid">
-        <small class="ion-padding-start" color="danger">Password must be at least 6 characters.</small>
+      <!-- Header Text -->
+      <div class="header-text ion-text-center">
+        <h1>Welcome Back</h1>
+        <p>Log in to manage your focus and tasks</p>
       </div>
 
-      <ion-button expand="block" type="submit" [disabled]="loginForm.invalid" class="ion-margin-top">
-        Login
-      </ion-button>
-    </form>
+      <!-- Login Form -->
+      <form [formGroup]="loginForm" (ngSubmit)="onLogin()">
+        <div class="input-group">
+          <ion-label>Email Address</ion-label>
+          <ion-item lines="none" class="custom-input">
+            <ion-input type="email" formControlName="email" placeholder="name@example.com"></ion-input>
+          </ion-item>
+        </div>
 
-    <div class="ion-text-center ion-margin-top">
-      <p>Don't have an account? <ion-text color="primary" routerLink="/register">Register</ion-text></p>
+        <div class="input-group">
+          <ion-label>Password</ion-label>
+          <ion-item lines="none" class="custom-input">
+            <ion-input [type]="showPassword ? 'text' : 'password'" formControlName="password" placeholder="Enter your password"></ion-input>
+            <ion-button slot="end" fill="clear" (click)="togglePassword()" class="eye-btn">
+              <ion-icon [name]="showPassword ? 'eye-off-outline' : 'eye-outline'"></ion-icon>
+            </ion-button>
+          </ion-item>
+        </div>
+
+        <div class="form-options">
+          <ion-item lines="none" class="remember-me">
+            <ion-checkbox slot="start" formControlName="rememberMe"></ion-checkbox>
+            <ion-label>Remember me</ion-label>
+          </ion-item>
+          <a class="forgot-password" (click)="onForgotPassword()">Forgot Password?</a>
+        </div>
+
+        <ion-button expand="block" type="submit" [disabled]="loginForm.invalid" class="sign-in-btn">
+          Sign In
+        </ion-button>
+      </form>
+
+      <!-- Divider -->
+      <div class="divider">
+        <span>Or continue with</span>
+      </div>
+
+      <!-- Social Login -->
+      <div class="social-login">
+        <ion-button fill="outline" class="social-btn">
+          <ion-icon slot="start" name="logo-google" class="google-icon"></ion-icon>
+          Google
+        </ion-button>
+        <ion-button fill="outline" class="social-btn">
+          <ion-icon slot="start" name="logo-apple"></ion-icon>
+          Apple
+        </ion-button>
+      </div>
+
+      <!-- Footer -->
+      <div class="footer-text ion-text-center">
+        <p>Don't have an account? <a (click)="onCreateAccount()">Create an account</a></p>
+      </div>
     </div>
   </div>
 </ion-content>

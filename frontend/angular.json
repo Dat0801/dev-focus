@@ -20,10 +20,12 @@
             "tsConfig": "tsconfig.app.json",
             "inlineStyleLanguage": "scss",
             "assets": [
+              "src/assets",
+              "src/manifest.json",
               {
                 "glob": "**/*",
-                "input": "src/assets",
-                "output": "assets"
+                "input": "src/icons",
+                "output": "icons"
               },
               {
                 "glob": "**/*.svg",
@@ -102,11 +104,8 @@
             "karmaConfig": "karma.conf.js",
             "inlineStyleLanguage": "scss",
             "assets": [
-              {
-                "glob": "**/*",
-                "input": "src/assets",
-                "output": "assets"
-              },
+              "src/assets",
+              "src/manifest.json",
               {
                 "glob": "**/*.svg",
                 "input": "node_modules/ionicons/dist/ionicons/svg",

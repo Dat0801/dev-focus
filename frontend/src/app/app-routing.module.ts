@@ -5,7 +5,7 @@ import { AuthGuard } from './guards/auth-guard';
 const routes: Routes = [
   {
     path: '',
-    redirectTo: 'dashboard',
+    redirectTo: 'tabs',
     pathMatch: 'full'
   },
   {
@@ -17,24 +17,9 @@ const routes: Routes = [
     loadChildren: () => import('./pages/register/register.module').then( m => m.RegisterPageModule)
   },
   {
-    path: 'tasks',
+    path: 'tabs',
     canActivate: [AuthGuard],
-    loadChildren: () => import('./pages/tasks/tasks.module').then( m => m.TasksPageModule)
-  },
-  {
-    path: 'projects',
-    canActivate: [AuthGuard],
-    loadChildren: () => import('./pages/projects/projects.module').then( m => m.ProjectsPageModule)
-  },
-  {
-    path: 'pomodoro',
-    canActivate: [AuthGuard],
-    loadChildren: () => import('./pages/pomodoro/pomodoro.module').then( m => m.PomodoroPageModule)
-  },
-  {
-    path: 'dashboard',
-    canActivate: [AuthGuard],
-    loadChildren: () => import('./pages/dashboard/dashboard.module').then( m => m.DashboardPageModule)
+    loadChildren: () => import('./pages/tabs/tabs.module').then(m => m.TabsPageModule)
   }
 ];
 

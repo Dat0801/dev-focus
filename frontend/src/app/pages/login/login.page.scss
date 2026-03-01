@@ -1,31 +1,226 @@
+:host {
+  --primary-purple: #6c28f3;
+  --light-purple: #f0e8ff;
+  --text-dark: #1a1c2e;
+  --text-muted: #7e8494;
+  --border-color: #e5e7eb;
+}
+
+ion-content {
+  --background: #fff;
+}
+
 .login-container {
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  height: 100%;
-  max-width: 400px;
-  margin: 0 auto;
+  min-height: 100%;
+  width: 100%;
+}
 
-  .logo {
-    text-align: center;
-    margin-bottom: 30px;
-    h1 {
-      margin-top: 10px;
-      font-weight: 700;
-      color: var(--ion-color-primary);
+.login-wrapper {
+  width: 100%;
+  max-width: 450px;
+  margin: 0 auto;
+  padding: 20px 10px;
+}
+
+/* Logo Styles */
+.logo-container {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+  margin-bottom: 30px;
+
+  .logo-box {
+    background-color: var(--light-purple);
+    width: 80px;
+    height: 80px;
+    border-radius: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    ion-icon {
+      font-size: 40px;
+      color: var(--primary-purple);
+    }
+  }
+}
+
+/* Header Text Styles */
+.header-text {
+  margin-bottom: 40px;
+
+  h1 {
+    font-size: 32px;
+    font-weight: 800;
+    color: var(--text-dark);
+    margin: 0 0 10px 0;
+  }
+
+  p {
+    font-size: 16px;
+    color: var(--text-muted);
+    margin: 0;
+  }
+}
+
+/* Form Styles */
+form {
+  .input-group {
+    margin-bottom: 20px;
+
+    ion-label {
+      display: block;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-dark);
+      margin-bottom: 8px;
+      margin-left: 4px;
+    }
+
+    .custom-input {
+      --background: #fff;
+      --border-radius: 25px;
+      --padding-start: 16px;
+      --padding-end: 8px;
+      --inner-padding-end: 0;
+      border: 1px solid var(--border-color);
+      border-radius: 25px;
+      margin-bottom: 0;
+      height: 56px;
+      --highlight-height: 0;
+      --border-width: 0;
+
+      ion-input {
+        --padding-top: 0;
+        --padding-bottom: 0;
+        font-size: 15px;
+      }
+
+      .eye-btn {
+        --color: var(--text-muted);
+        margin: 0;
+        height: 100%;
+        ion-icon {
+          font-size: 20px;
+        }
+      }
     }
   }
 
-  form {
-    width: 100%;
+  .form-options {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    padding: 0 4px;
+
+    .remember-me {
+      --background: transparent;
+      --padding-start: 0;
+      --inner-padding-end: 0;
+      font-size: 14px;
+      color: var(--text-muted);
+      min-height: auto;
+      flex: 1; /* Cho phép phần này chiếm không gian còn lại */
+
+      ion-checkbox {
+        --size: 18px;
+        --border-radius: 6px;
+        --border-color: var(--border-color);
+        --checkbox-background-checked: var(--primary-purple);
+        --border-color-checked: var(--primary-purple);
+        margin-right: 12px; /* Tăng khoảng cách một chút */
+      }
+
+      ion-label {
+        margin: 0;
+        color: var(--text-muted);
+        white-space: nowrap; /* Đảm bảo chữ không bị xuống dòng */
+      }
+    }
+
+    .forgot-password {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--primary-purple);
+      text-decoration: none;
+    }
   }
 
-  .error {
-    margin-top: -10px;
-    margin-bottom: 10px;
-    small {
-      color: var(--ion-color-danger);
+  .sign-in-btn {
+    --background: var(--primary-purple);
+    --border-radius: 25px;
+    --box-shadow: 0 10px 20px rgba(108, 40, 243, 0.2);
+    height: 56px;
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 40px;
+    text-transform: none;
+  }
+}
+
+/* Divider Styles */
+.divider {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  margin-bottom: 30px;
+  color: var(--text-muted);
+  font-size: 14px;
+
+  &::before,
+  &::after {
+    content: '';
+    flex: 1;
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  span {
+    padding: 0 15px;
+  }
+}
+
+/* Social Login Styles */
+.social-login {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 40px;
+
+  .social-btn {
+    flex: 1;
+    --border-radius: 25px;
+    --border-color: var(--border-color);
+    --color: var(--text-dark);
+    height: 56px;
+    font-weight: 600;
+    text-transform: none;
+
+    ion-icon {
+      font-size: 20px;
+      margin-right: 8px;
+    }
+    
+    .google-icon {
+      color: #ea4335;
+    }
+  }
+}
+
+/* Footer Styles */
+.footer-text {
+  p {
+    font-size: 15px;
+    color: var(--text-muted);
+
+    a {
+      color: var(--primary-purple);
+      font-weight: 700;
+      text-decoration: none;
+      cursor: pointer;
     }
   }
 }
