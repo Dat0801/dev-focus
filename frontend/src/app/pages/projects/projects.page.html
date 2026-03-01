@@ -1,30 +1,88 @@
-<ion-header [translucent]="true">
-  <ion-toolbar>
-    <ion-buttons slot="start">
-      <ion-menu-button></ion-menu-button>
-    </ion-buttons>
-    <ion-title>Projects</ion-title>
+<ion-header class="ion-no-border">
+  <ion-toolbar class="header-toolbar">
+    <ion-title class="page-title">Projects</ion-title>
     <ion-buttons slot="end">
-      <ion-button (click)="addProject()">
-        <ion-icon slot="icon-only" name="add"></ion-icon>
+      <ion-button class="add-button" (click)="addProject()">
+        <ion-icon name="add"></ion-icon>
       </ion-button>
     </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
-<ion-content [fullscreen]="true" class="ion-padding">
-  <ion-list lines="full">
-    <ion-item *ngFor="let project of projects">
-      <div slot="start" class="color-dot" [style.background]="project.color"></div>
-      <ion-label>
-        <h2>{{ project.name }}</h2>
-        <p>Progress: {{ project.progress }}%</p>
-      </ion-label>
-      <ion-progress-bar [value]="project.progress / 100" slot="bottom"></ion-progress-bar>
-    </ion-item>
-  </ion-list>
+<ion-content class="ion-padding-horizontal">
+  <div class="tabs-container">
+    <div class="custom-tabs">
+      <div 
+        class="tab-item" 
+        [class.active]="selectedTab === 'all'" 
+        (click)="selectedTab = 'all'">
+        All Projects
+      </div>
+      <div 
+        class="tab-item" 
+        [class.active]="selectedTab === 'in_progress'" 
+        (click)="selectedTab = 'in_progress'">
+        In Progress
+      </div>
+      <div 
+        class="tab-item" 
+        [class.active]="selectedTab === 'completed'" 
+        (click)="selectedTab = 'completed'">
+        Completed
+      </div>
+    </div>
+  </div>
 
-  <div class="ion-text-center ion-padding" *ngIf="projects.length === 0">
-    <p>No projects yet.</p>
+  <div class="projects-list">
+    <div class="project-card" *ngFor="let project of filteredProjects">
+      <div class="card-header">
+        <div class="category-info">
+          <div class="category-dot" [style.background]="project.categoryColor"></div>
+          <span class="category-name">{{ project.category }}</span>
+        </div>
+        <div class="more-options">
+          <ion-icon name="ellipsis-horizontal" *ngIf="project.status !== 'completed'"></ion-icon>
+          <ion-icon name="checkmark-circle" class="completed-icon" *ngIf="project.status === 'completed'"></ion-icon>
+        </div>
+      </div>
+
+      <h2 class="project-name" [class.completed]="project.status === 'completed'">{{ project.name }}</h2>
+
+      <div class="progress-section">
+        <div class="progress-labels">
+          <span class="label-text">{{ project.status === 'completed' ? 'Complete' : 'Progress' }}</span>
+          <span class="percentage" [class.completed-text]="project.status === 'completed'">{{ project.progress }}%</span>
+        </div>
+        <div class="progress-bar-container">
+          <div 
+            class="progress-bar-fill" 
+            [style.width.%]="project.progress"
+            [class.completed-fill]="project.status === 'completed'">
+          </div>
+        </div>
+      </div>
+
+      <div class="card-footer">
+        <div class="info-items">
+          <div class="info-item">
+            <ion-icon name="calendar-outline"></ion-icon>
+            <span>{{ project.dueDate }}</span>
+          </div>
+          <div class="info-item" *ngIf="project.tasksCount > 0">
+            <ion-icon name="checkmark-circle-outline"></ion-icon>
+            <span>{{ project.tasksCount }} tasks</span>
+          </div>
+        </div>
+        <div class="member-avatars" *ngIf="project.members && project.members.length > 0">
+          <div class="avatar" *ngFor="let member of project.members">
+            <img src="https://i.pravatar.cc/100?u={{member.avatar}}" alt="avatar">
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="empty-state" *ngIf="filteredProjects.length === 0">
+    <p>No projects in this category.</p>
   </div>
 </ion-content>

@@ -10,7 +10,58 @@ import { AlertController, LoadingController, ToastController } from '@ionic/angu
   standalone: false,
 })
 export class ProjectsPage implements OnInit {
-  projects: any[] = [];
+  projects: any[] = [
+    {
+      id: 1,
+      name: 'Mobile App Refresh',
+      category: 'DESIGN SYSTEM',
+      categoryColor: '#3498db',
+      progress: 65,
+      dueDate: 'Oct 24',
+      tasksCount: 12,
+      members: [
+        { avatar: 'assets/avatars/user1.png' },
+        { avatar: 'assets/avatars/user2.png' }
+      ],
+      status: 'in_progress'
+    },
+    {
+      id: 2,
+      name: 'API Integration',
+      category: 'DEVELOPMENT',
+      categoryColor: '#2ecc71',
+      progress: 32,
+      dueDate: 'Nov 02',
+      tasksCount: 8,
+      members: [
+        { avatar: 'assets/avatars/user3.png' }
+      ],
+      status: 'in_progress'
+    },
+    {
+      id: 3,
+      name: 'Learning Rust',
+      category: 'PERSONAL',
+      categoryColor: '#f39c12',
+      progress: 88,
+      dueDate: 'Dec 15',
+      tasksCount: 24,
+      members: [],
+      status: 'in_progress'
+    },
+    {
+      id: 4,
+      name: 'Brand Identity',
+      category: 'MARKETING',
+      categoryColor: '#95a5a6',
+      progress: 100,
+      dueDate: 'Finished Sep 20',
+      tasksCount: 0,
+      members: [],
+      status: 'completed'
+    }
+  ];
+  selectedTab: string = 'all';
 
   constructor(
     private http: HttpClient,
@@ -20,7 +71,12 @@ export class ProjectsPage implements OnInit {
   ) {}
 
   ngOnInit() {
-    this.loadProjects();
+    // this.loadProjects(); // Temporarily disabled to use mock data
+  }
+
+  get filteredProjects() {
+    if (this.selectedTab === 'all') return this.projects;
+    return this.projects.filter(p => p.status === this.selectedTab);
   }
 
   async loadProjects() {

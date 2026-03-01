@@ -1,5 +1,5 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { ToastController } from '@ionic/angular';
+import { ToastController, AlertController } from '@ionic/angular';
 import { TaskService } from '../../services/task';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
@@ -14,15 +14,37 @@ export class PomodoroPage implements OnInit, OnDestroy {
   timeDisplay: string = '25:00';
   timer: any;
   timeLeft: number = 25 * 60;
+  totalTime: number = 25 * 60;
   isRunning: boolean = false;
   isBreak: boolean = false;
   
   tasks: any[] = [];
   selectedTaskId: string | null = null;
+  selectedTaskName: string = 'Select a task';
+
+  // Stats for the UI
+  dailyGoalMinutes: number = 360; // 6h
+  focusedMinutesToday: number = 270; // 4.5h
+  
+  get progressPercentage(): number {
+    return (1 - (this.timeLeft / this.totalTime)) * 100;
+  }
+
+  get circularProgressOffset(): number {
+    // Circumference = 2 * PI * r
+    // For r=45, circumference is ~282.7
+    const circumference = 282.7;
+    return circumference - (this.progressPercentage / 100) * circumference;
+  }
+
+  get selectedTask(): any {
+    return this.tasks.find(t => t.id === this.selectedTaskId);
+  }
 
   constructor(
     private taskService: TaskService,
     private toastCtrl: ToastController,
+    private alertCtrl: AlertController,
     private http: HttpClient
   ) {}
 
@@ -38,6 +60,28 @@ export class PomodoroPage implements OnInit, OnDestroy {
     this.taskService.getTasks({ status: 'todo' }).subscribe((res: any) => {
       this.tasks = res.data;
     });
+  }
+
+  async selectTask() {
+    const alert = await this.alertCtrl.create({
+      header: 'Select Task',
+      inputs: this.tasks.map(task => ({
+        type: 'radio',
+        label: task.title,
+        value: task.id,
+        checked: this.selectedTaskId === task.id
+      })),
+      buttons: [
+        { text: 'Cancel', role: 'cancel' },
+        { 
+          text: 'Select',
+          handler: (data) => {
+            this.selectedTaskId = data;
+          }
+        }
+      ]
+    });
+    await alert.present();
   }
 
   toggleTimer() {
@@ -68,6 +112,7 @@ export class PomodoroPage implements OnInit, OnDestroy {
   resetTimer() {
     this.stopTimer();
     this.timeLeft = this.isBreak ? 5 * 60 : 25 * 60;
+    this.totalTime = this.timeLeft;
     this.updateDisplay();
   }
 

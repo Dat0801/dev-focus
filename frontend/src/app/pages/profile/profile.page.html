@@ -1,0 +1,130 @@
+<ion-header class="ion-no-border">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/tabs/dashboard" color="primary"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Settings</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding-horizontal">
+  <!-- Profile Header Card -->
+  <ion-card class="profile-card">
+    <ion-card-content class="profile-content">
+      <div class="avatar-container">
+        <img src="https://i.pravatar.cc/150?u=alex" alt="Profile Picture" class="profile-img" />
+        <div class="edit-icon">
+          <ion-icon name="pencil" color="light"></ion-icon>
+        </div>
+      </div>
+      <div class="profile-info">
+        <h2 class="user-name">Alex Johnson</h2>
+        <p class="membership">Pro Plan Member</p>
+        <p class="email">alex.j@pomoapp.com</p>
+      </div>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- Account Section -->
+  <div class="section-label">ACCOUNT</div>
+  <ion-list lines="none" class="custom-list">
+    <ion-item button detail="true" class="custom-item">
+      <div class="icon-wrapper purple-bg">
+        <ion-icon name="person"></ion-icon>
+      </div>
+      <ion-label>Profile Details</ion-label>
+    </ion-item>
+    <ion-item button detail="true" class="custom-item">
+      <div class="icon-wrapper purple-bg">
+        <ion-icon name="lock-closed"></ion-icon>
+      </div>
+      <ion-label>Password & Security</ion-label>
+    </ion-item>
+  </ion-list>
+
+  <!-- Preferences Section -->
+  <div class="section-label">PREFERENCES</div>
+  <ion-list lines="none" class="custom-list">
+    <ion-item class="custom-item">
+      <div class="icon-wrapper purple-bg">
+        <ion-icon name="moon"></ion-icon>
+      </div>
+      <ion-label>Dark Mode</ion-label>
+      <ion-toggle slot="end" color="primary"></ion-toggle>
+    </ion-item>
+    <ion-item button detail="true" class="custom-item">
+      <div class="icon-wrapper purple-bg">
+        <ion-icon name="globe"></ion-icon>
+      </div>
+      <ion-label>Language</ion-label>
+      <div slot="end" class="item-value">English</div>
+    </ion-item>
+  </ion-list>
+
+  <!-- Pomodoro Timer Section -->
+  <div class="section-label">POMODORO TIMER (MIN)</div>
+  <ion-list lines="none" class="custom-list">
+    <ion-item class="custom-item">
+      <div class="icon-wrapper purple-text">
+        <ion-icon name="timer"></ion-icon>
+      </div>
+      <ion-label>Focus Duration</ion-label>
+      <div slot="end" class="badge-value">25</div>
+    </ion-item>
+    <ion-item class="custom-item">
+      <div class="icon-wrapper green-text">
+        <ion-icon name="leaf"></ion-icon>
+      </div>
+      <ion-label>Short Break</ion-label>
+      <div slot="end" class="badge-value green">5</div>
+    </ion-item>
+    <ion-item class="custom-item">
+      <div class="icon-wrapper blue-text">
+        <ion-icon name="moon"></ion-icon>
+      </div>
+      <ion-label>Long Break</ion-label>
+      <div slot="end" class="badge-value blue">15</div>
+    </ion-item>
+  </ion-list>
+
+  <!-- Notifications Section -->
+  <div class="section-label">NOTIFICATIONS</div>
+  <ion-list lines="none" class="custom-list">
+    <ion-item class="custom-item">
+      <div class="icon-wrapper purple-bg">
+        <ion-icon name="notifications"></ion-icon>
+      </div>
+      <ion-label>Push Notifications</ion-label>
+      <ion-toggle slot="end" color="primary" checked="true"></ion-toggle>
+    </ion-item>
+    <ion-item class="custom-item">
+      <div class="icon-wrapper purple-bg">
+        <ion-icon name="mail"></ion-icon>
+      </div>
+      <ion-label>Email Summaries</ion-label>
+      <ion-toggle slot="end" color="primary"></ion-toggle>
+    </ion-item>
+  </ion-list>
+
+  <!-- App Info Section -->
+  <div class="section-label">APP INFO</div>
+  <ion-list lines="none" class="custom-list">
+    <ion-item button detail="true" class="custom-item">
+      <div class="icon-wrapper purple-bg">
+        <ion-icon name="help-circle"></ion-icon>
+      </div>
+      <ion-label>Help Center</ion-label>
+    </ion-item>
+    <ion-item class="custom-item">
+      <div class="icon-wrapper purple-bg">
+        <ion-icon name="information-circle"></ion-icon>
+      </div>
+      <ion-label>Version</ion-label>
+      <div slot="end" class="item-value">2.4.0 (Stable)</div>
+    </ion-item>
+  </ion-list>
+
+  <ion-button expand="block" fill="outline" class="logout-btn">
+    Log Out
+  </ion-button>
+</ion-content>

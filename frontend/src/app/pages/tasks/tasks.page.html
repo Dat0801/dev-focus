@@ -1,47 +1,123 @@
-<ion-header [translucent]="true">
-  <ion-toolbar>
-    <ion-buttons slot="start">
-      <ion-menu-button></ion-menu-button>
-    </ion-buttons>
-    <ion-title>Tasks</ion-title>
-    <ion-buttons slot="end">
-      <ion-button (click)="addTask()">
-        <ion-icon slot="icon-only" name="add"></ion-icon>
-      </ion-button>
-    </ion-buttons>
+<ion-header class="ion-no-border">
+  <ion-toolbar class="header-toolbar">
+    <div class="header-content ion-padding-horizontal">
+      <div class="header-left">
+        <h1 class="header-title">Today</h1>
+        <p class="header-subtitle">{{ todayDate }}</p>
+      </div>
+      <div class="header-right">
+        <ion-avatar class="profile-avatar">
+          <ion-icon name="person-circle-outline"></ion-icon>
+        </ion-avatar>
+      </div>
+    </div>
   </ion-toolbar>
-  <ion-toolbar>
-    <ion-segment (ionChange)="segmentChanged($event)" value="all">
-      <ion-segment-button value="all">All</ion-segment-button>
-      <ion-segment-button value="today">Today</ion-segment-button>
-      <ion-segment-button value="upcoming">Upcoming</ion-segment-button>
+
+  <div class="search-container ion-padding-horizontal">
+    <ion-searchbar 
+      placeholder="Search tasks..." 
+      class="custom-searchbar"
+      [(ngModel)]="searchQuery"
+      (ionInput)="handleSearch($event)">
+    </ion-searchbar>
+  </div>
+
+  <div class="segment-container ion-padding-horizontal">
+    <ion-segment (ionChange)="segmentChanged($event)" value="all" mode="md" scrollable="true">
+      <ion-segment-button value="all">
+        <ion-label>All</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="today">
+        <ion-label>Today</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="upcoming">
+        <ion-label>Upcoming</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="completed">
+        <ion-label>Completed</ion-label>
+      </ion-segment-button>
     </ion-segment>
-  </ion-toolbar>
+  </div>
+
+  <div class="filters-container ion-padding-horizontal">
+    <ion-button fill="clear" class="filter-btn">
+      <ion-icon slot="start" name="filter-outline"></ion-icon>
+      <ion-label>Priority</ion-label>
+    </ion-button>
+    <ion-button fill="clear" class="filter-btn">
+      <ion-icon slot="start" name="bookmark"></ion-icon>
+      <ion-label>Labels</ion-label>
+    </ion-button>
+    <ion-button fill="clear" class="filter-btn">
+      <ion-icon slot="start" name="folder"></ion-icon>
+      <ion-label>Project</ion-label>
+    </ion-button>
+  </div>
 </ion-header>
 
 <ion-content [fullscreen]="true">
-  <ion-list lines="full">
-    <ion-item-sliding *ngFor="let task of tasks">
-      <ion-item>
-        <ion-checkbox slot="start" [checked]="task.status === 'done'" (ionChange)="toggleStatus(task)"></ion-checkbox>
-        <ion-label [class.completed]="task.status === 'done'">
-          <h2>{{ task.title }}</h2>
-          <p>{{ task.description }}</p>
-          <ion-badge *ngIf="task.priority" [color]="task.priority === 'high' ? 'danger' : (task.priority === 'medium' ? 'warning' : 'success')">
-            {{ task.priority }}
-          </ion-badge>
-        </ion-label>
-      </ion-item>
+  <ion-list lines="none" class="task-list">
+    <div *ngFor="let task of filteredTasks">
+      <ion-item-sliding class="task-item-sliding">
+        <ion-item class="task-item" [class.completed]="task.status === 'done'">
+          <div class="checkbox-container" slot="start">
+            <div 
+              class="custom-checkbox" 
+              [class.checked]="task.status === 'done'"
+              (click)="toggleStatus(task)">
+              <ion-icon *ngIf="task.status === 'done'" name="checkmark"></ion-icon>
+            </div>
+          </div>
+          
+          <ion-label class="task-label">
+            <h2 class="task-title">{{ task.title }}</h2>
+            <div class="task-meta">
+              <ion-badge 
+                *ngIf="task.priority" 
+                class="priority-badge"
+                [class.priority-high]="task.priority === 'high'"
+                [class.priority-medium]="task.priority === 'medium'"
+                [class.priority-low]="task.priority === 'low'"
+                [class.priority-urgent]="task.priority === 'urgent'">
+                {{ task.priority | uppercase }}
+              </ion-badge>
+              
+              <span class="meta-item" *ngIf="task.status !== 'done'">
+                <ion-icon name="time-outline"></ion-icon>
+                <span>{{ task.time || '10:00 AM' }}</span>
+              </span>
+              
+              <span class="meta-item" *ngIf="task.status === 'done'">
+                <ion-icon name="checkmark-circle-outline"></ion-icon>
+                <span>Done</span>
+              </span>
 
-      <ion-item-options side="end">
-        <ion-item-option color="danger" (click)="deleteTask(task)">
-          <ion-icon slot="icon-only" name="trash"></ion-icon>
-        </ion-item-option>
-      </ion-item-options>
-    </ion-item-sliding>
+              <span class="meta-item progress-item">
+                <ion-icon name="stopwatch" color="primary"></ion-icon>
+                <span class="progress-text">{{ task.completed_pomodoros || 0 }}/{{ task.estimated_pomodoros || 4 }}</span>
+              </span>
+            </div>
+          </ion-label>
+        </ion-item>
+
+        <ion-item-options side="end">
+          <ion-item-option color="danger" (click)="deleteTask(task)">
+            <ion-icon slot="icon-only" name="trash"></ion-icon>
+          </ion-item-option>
+        </ion-item-options>
+      </ion-item-sliding>
+      <div class="item-divider"></div>
+    </div>
   </ion-list>
 
-  <div class="ion-text-center ion-padding" *ngIf="tasks.length === 0">
+  <div class="empty-state ion-text-center ion-padding" *ngIf="filteredTasks.length === 0">
+    <ion-icon name="document-text-outline" class="empty-icon"></ion-icon>
     <p>No tasks found.</p>
   </div>
+
+  <ion-fab vertical="bottom" horizontal="end" slot="fixed" class="custom-fab">
+    <ion-fab-button (click)="addTask()">
+      <ion-icon name="add"></ion-icon>
+    </ion-fab-button>
+  </ion-fab>
 </ion-content>

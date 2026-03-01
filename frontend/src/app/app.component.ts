@@ -10,10 +10,11 @@ import { AuthService } from './services/auth';
 })
 export class AppComponent {
   public appPages = [
-    { title: 'Dashboard', url: '/dashboard', icon: 'home' },
-    { title: 'Tasks', url: '/tasks', icon: 'checkbox' },
-    { title: 'Projects', url: '/projects', icon: 'folder' },
+    { title: 'Home', url: '/dashboard', icon: 'home' },
+    { title: 'Task', url: '/tasks', icon: 'checkbox' },
     { title: 'Pomodoro', url: '/pomodoro', icon: 'timer' },
+    { title: 'Project', url: '/projects', icon: 'folder' },
+    { title: 'Profile', url: '/profile', icon: 'person' },
   ];
 
   constructor(

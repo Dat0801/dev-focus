@@ -10,7 +10,10 @@ import { TaskService } from '../../services/task';
 })
 export class TasksPage implements OnInit {
   tasks: any[] = [];
+  filteredTasks: any[] = [];
   filter: string = 'all';
+  searchQuery: string = '';
+  todayDate: string = '';
 
   constructor(
     private taskService: TaskService,
@@ -20,12 +23,23 @@ export class TasksPage implements OnInit {
   ) {}
 
   ngOnInit() {
+    this.setTodayDate();
     this.loadTasks();
+  }
+
+  setTodayDate() {
+    const options: Intl.DateTimeFormatOptions = { 
+      weekday: 'long', 
+      month: 'long', 
+      day: 'numeric' 
+    };
+    this.todayDate = new Date().toLocaleDateString('en-US', options);
   }
 
   async loadTasks() {
     const loading = await this.loadingCtrl.create({
-      message: 'Loading tasks...'
+      message: 'Loading tasks...',
+      spinner: 'crescent'
     });
     await loading.present();
 
@@ -34,6 +48,9 @@ export class TasksPage implements OnInit {
       obs = this.taskService.getTodayTasks();
     } else if (this.filter === 'upcoming') {
       obs = this.taskService.getUpcomingTasks();
+    } else if (this.filter === 'completed') {
+      // Assuming there's a way to filter completed tasks, or we filter locally
+      obs = this.taskService.getTasks();
     } else {
       obs = this.taskService.getTasks();
     }
@@ -41,6 +58,7 @@ export class TasksPage implements OnInit {
     obs.subscribe({
       next: (res: any) => {
         this.tasks = res.data;
+        this.applyFilters();
         loading.dismiss();
       },
       error: (err) => {
@@ -50,25 +68,65 @@ export class TasksPage implements OnInit {
     });
   }
 
+  applyFilters() {
+    let tempTasks = [...this.tasks];
+
+    // Filter by segment
+    if (this.filter === 'completed') {
+      tempTasks = tempTasks.filter(t => t.status === 'done');
+    } else if (this.filter === 'all') {
+      // Show all except maybe we want to show everything
+    }
+
+    // Filter by search query
+    if (this.searchQuery && this.searchQuery.trim() !== '') {
+      const query = this.searchQuery.toLowerCase();
+      tempTasks = tempTasks.filter(t => 
+        t.title.toLowerCase().includes(query) || 
+        (t.description && t.description.toLowerCase().includes(query))
+      );
+    }
+
+    this.filteredTasks = tempTasks;
+  }
+
+  handleSearch(ev: any) {
+    this.searchQuery = ev.detail.value;
+    this.applyFilters();
+  }
+
   async addTask() {
     const alert = await this.alertCtrl.create({
       header: 'New Task',
+      cssClass: 'custom-alert',
       inputs: [
-        { name: 'title', type: 'text', placeholder: 'Task title' },
-        { name: 'description', type: 'textarea', placeholder: 'Description' }
+        { name: 'title', type: 'text', placeholder: 'What needs to be done?' },
+        { name: 'description', type: 'textarea', placeholder: 'Add more details...' },
+        { 
+          name: 'priority', 
+          type: 'text', 
+          placeholder: 'Priority (low, medium, high, urgent)',
+          value: 'medium'
+        }
       ],
       buttons: [
         { text: 'Cancel', role: 'cancel' },
         {
-          text: 'Add',
+          text: 'Create',
           handler: (data) => {
             if (!data.title) return false;
-            this.taskService.createTask(data).subscribe({
+            const taskData = {
+              ...data,
+              status: 'todo',
+              estimated_pomodoros: 4,
+              completed_pomodoros: 0
+            };
+            this.taskService.createTask(taskData).subscribe({
               next: () => {
                 this.loadTasks();
-                this.showToast('Task added');
+                this.showToast('Task created successfully');
               },
-              error: () => this.showToast('Failed to add task')
+              error: () => this.showToast('Failed to create task')
             });
             return true;
           }
@@ -83,8 +141,10 @@ export class TasksPage implements OnInit {
     this.taskService.updateTask(task.id, { status: newStatus }).subscribe({
       next: () => {
         task.status = newStatus;
-        this.showToast('Status updated');
-      }
+        this.applyFilters();
+        this.showToast(newStatus === 'done' ? 'Task completed!' : 'Task reopened');
+      },
+      error: () => this.showToast('Failed to update status')
     });
   }
 

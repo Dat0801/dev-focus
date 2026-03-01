@@ -1,46 +1,98 @@
-<ion-header [translucent]="true">
-  <ion-toolbar>
+<ion-header class="ion-no-border">
+  <ion-toolbar color="background">
     <ion-buttons slot="start">
-      <ion-menu-button></ion-menu-button>
+      <ion-menu-button color="navy"></ion-menu-button>
     </ion-buttons>
-    <ion-title>Pomodoro</ion-title>
+    <ion-title class="ion-text-center">Focus Timer</ion-title>
+    <ion-buttons slot="end">
+      <ion-button color="navy">
+        <ion-icon slot="icon-only" name="settings-sharp"></ion-icon>
+      </ion-button>
+    </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
-<ion-content [fullscreen]="true" class="ion-padding ion-text-center">
-  <div class="timer-container">
-    <div class="mode-badge">
-      <ion-badge [color]="isBreak ? 'success' : 'primary'">
-        {{ isBreak ? 'Break Time' : 'Focus Mode' }}
-      </ion-badge>
+<ion-content class="ion-padding">
+  <div class="main-container">
+    
+    <!-- Task Selector Card -->
+    <div class="task-selector-card" (click)="selectTask()">
+      <div class="task-icon">
+        <ion-icon name="layers-outline"></ion-icon>
+      </div>
+      <div class="task-info">
+        <span class="task-label">{{ selectedTaskId ? selectedTask?.title : 'Design System Update' }}</span>
+      </div>
+      <div class="task-chevron">
+        <ion-icon name="chevron-expand-outline"></ion-icon>
+      </div>
     </div>
 
-    <div class="timer-display">
-      <h1>{{ timeDisplay }}</h1>
+    <!-- Circular Timer -->
+    <div class="timer-section">
+      <div class="circular-timer">
+        <svg viewBox="0 0 100 100">
+          <!-- Background track -->
+          <circle cx="50" cy="50" r="45" class="timer-track" />
+          <!-- Progress bar -->
+          <circle cx="50" cy="50" r="45" class="timer-progress" 
+                  [style.stroke-dashoffset]="circularProgressOffset" />
+        </svg>
+        <div class="timer-text">
+          <h1 class="time-remaining">{{ timeDisplay }}</h1>
+          <div class="mode-label">
+            <span class="dot"></span>
+            {{ isBreak ? 'BREAK MODE' : 'FOCUS MODE' }}
+          </div>
+        </div>
+      </div>
     </div>
 
-    <div class="controls">
-      <ion-button (click)="toggleTimer()" size="large" [color]="isRunning ? 'warning' : 'primary'">
-        <ion-icon slot="start" [name]="isRunning ? 'pause' : 'play'"></ion-icon>
-        {{ isRunning ? 'Pause' : 'Start' }}
-      </ion-button>
+    <!-- Controls -->
+    <div class="controls-section">
+      <button class="control-btn secondary" (click)="resetTimer()">
+        <ion-icon name="refresh-outline"></ion-icon>
+      </button>
       
-      <ion-button (click)="resetTimer()" fill="clear" color="medium">
-        <ion-icon slot="icon-only" name="refresh"></ion-icon>
-      </ion-button>
+      <button class="control-btn primary" (click)="toggleTimer()">
+        <ion-icon [name]="isRunning ? 'pause' : 'play'"></ion-icon>
+      </button>
+
+      <button class="control-btn secondary" (click)="stopTimer()">
+        <ion-icon name="pause"></ion-icon>
+      </button>
     </div>
 
-    <div class="task-selector ion-margin-top" *ngIf="!isBreak">
-      <ion-list>
-        <ion-item>
-          <ion-label>Focus on task:</ion-label>
-          <ion-select placeholder="Select a task" [(ngModel)]="selectedTaskId">
-            <ion-select-option *ngFor="let task of tasks" [value]="task.id">
-              {{ task.title }}
-            </ion-select-option>
-          </ion-select>
-        </ion-item>
-      </ion-list>
+    <!-- Daily Progress Card -->
+    <div class="stats-card">
+      <div class="stats-header">
+        <span class="stats-title">DAILY PROGRESS</span>
+        <span class="stats-goal">Goal: {{ dailyGoalMinutes / 60 }}h</span>
+      </div>
+      
+      <div class="stats-content">
+        <div class="stats-left">
+          <div class="stats-value">
+            <span class="value">{{ focusedMinutesToday / 60 }}</span>
+            <span class="unit">h</span>
+          </div>
+          <span class="stats-subtitle">Total focused today</span>
+        </div>
+        
+        <div class="stats-right">
+          <!-- Simple bar chart visualization -->
+          <div class="bar-chart">
+            <div class="bar" style="height: 30%"></div>
+            <div class="bar" style="height: 50%"></div>
+            <div class="bar" style="height: 70%"></div>
+            <div class="bar active" style="height: 90%"></div>
+            <div class="bar" style="height: 40%"></div>
+            <div class="bar" style="height: 60%"></div>
+            <div class="bar" style="height: 20%"></div>
+          </div>
+        </div>
+      </div>
     </div>
+
   </div>
 </ion-content>

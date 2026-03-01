@@ -1,2 +1,17 @@
-// For information on how to create your own theme, please refer to:
-// https://ionicframework.com/docs/theming/
+:root {
+  --ion-color-primary: #7C4DFF;
+  --ion-color-primary-rgb: 124, 77, 255;
+  --ion-color-primary-contrast: #ffffff;
+  --ion-color-primary-contrast-rgb: 255, 255, 255;
+  --ion-color-primary-shade: #6d44e0;
+  --ion-color-primary-tint: #895fff;
+
+  --ion-background-color: #f8faff;
+  --ion-text-color: #1a1a2e;
+  
+  --focus-timer-bg: #ffffff;
+  --focus-timer-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  --focus-timer-purple: #7C4DFF;
+  --focus-timer-light-purple: rgba(124, 77, 255, 0.1);
+  --focus-timer-navy: #1a1a2e;
+}

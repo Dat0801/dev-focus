@@ -1,10 +1,221 @@
-.color-dot {
-  width: 15px;
-  height: 15px;
-  border-radius: 50%;
-  margin-right: 15px;
+:host {
+  --ion-background-color: #f7f8fc;
 }
 
-ion-progress-bar {
-  height: 4px;
+.header-toolbar {
+  --background: #f7f8fc;
+  --padding-top: 20px;
+  --padding-bottom: 10px;
+  padding-inline: 16px;
+
+  .page-title {
+    font-size: 28px;
+    font-weight: 800;
+    color: #1a1c24;
+    padding: 0;
+  }
+
+  .add-button {
+    --background: #7c4dff;
+    --color: white;
+    --border-radius: 50%;
+    --padding-start: 0;
+    --padding-end: 0;
+    width: 44px;
+    height: 44px;
+    box-shadow: 0 4px 12px rgba(124, 77, 255, 0.3);
+    
+    ion-icon {
+      font-size: 24px;
+    }
+  }
+}
+
+.tabs-container {
+  padding-bottom: 20px;
+  
+  .custom-tabs {
+    display: flex;
+    background: transparent;
+    gap: 10px;
+
+    .tab-item {
+      padding: 10px 20px;
+      border-radius: 25px;
+      font-size: 14px;
+      font-weight: 600;
+      color: #74777f;
+      background: white;
+      transition: all 0.3s ease;
+      cursor: pointer;
+      white-space: nowrap;
+
+      &.active {
+        background: #7c4dff;
+        color: white;
+      }
+    }
+  }
+}
+
+.projects-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding-bottom: 20px;
+}
+
+.project-card {
+  background: white;
+  border-radius: 20px;
+  padding: 20px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
+
+  .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+
+    .category-info {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+
+      .category-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+      }
+
+      .category-name {
+        font-size: 11px;
+        font-weight: 700;
+        color: #adb1b9;
+        letter-spacing: 0.8px;
+        text-transform: uppercase;
+      }
+    }
+
+    .more-options {
+      color: #adb1b9;
+      font-size: 20px;
+
+      .completed-icon {
+        color: #2ecc71;
+        font-size: 24px;
+      }
+    }
+  }
+
+  .project-name {
+    font-size: 18px;
+    font-weight: 700;
+    color: #1a1c24;
+    margin: 0 0 16px 0;
+
+    &.completed {
+      color: #adb1b9;
+      text-decoration: line-through;
+    }
+  }
+
+  .progress-section {
+    margin-bottom: 20px;
+
+    .progress-labels {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+
+      .label-text {
+        font-size: 12px;
+        font-weight: 600;
+        color: #adb1b9;
+      }
+
+      .percentage {
+        font-size: 12px;
+        font-weight: 700;
+        color: #7c4dff;
+
+        &.completed-text {
+          color: #2ecc71;
+        }
+      }
+    }
+
+    .progress-bar-container {
+      height: 8px;
+      background: #f0f2f8;
+      border-radius: 4px;
+      overflow: hidden;
+
+      .progress-bar-fill {
+        height: 100%;
+        background: #7c4dff;
+        border-radius: 4px;
+        transition: width 0.5s ease;
+
+        &.completed-fill {
+          background: #2ecc71;
+        }
+      }
+    }
+  }
+
+  .card-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    .info-items {
+      display: flex;
+      gap: 12px;
+
+      .info-item {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        color: #adb1b9;
+        font-size: 12px;
+        font-weight: 600;
+
+        ion-icon {
+          font-size: 16px;
+        }
+      }
+    }
+
+    .member-avatars {
+      display: flex;
+      align-items: center;
+
+      .avatar {
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        border: 2px white solid;
+        overflow: hidden;
+        margin-left: -8px;
+
+        &:first-child {
+          margin-left: 0;
+        }
+
+        img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+        }
+      }
+    }
+  }
+}
+
+.empty-state {
+  text-align: center;
+  padding: 40px 0;
+  color: #adb1b9;
 }
