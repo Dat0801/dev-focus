@@ -1,0 +1,26 @@
+.welcome {
+  margin-bottom: 20px;
+  h2 {
+    font-weight: 700;
+    margin-bottom: 5px;
+  }
+  p {
+    color: var(--ion-color-medium);
+  }
+}
+
+ion-card {
+  margin: 0;
+  ion-card-title {
+    font-size: 1.8rem;
+    font-weight: 700;
+  }
+}
+
+ion-list-header {
+  margin-top: 20px;
+  padding-left: 0;
+  ion-label {
+    font-weight: 700;
+  }
+}

@@ -1,0 +1,72 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-menu-button></ion-menu-button>
+    </ion-buttons>
+    <ion-title>Dashboard</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="ion-padding">
+  <div class="welcome">
+    <h2>Welcome back!</h2>
+    <p>Here's your productivity overview.</p>
+  </div>
+
+  <ion-grid>
+    <ion-row>
+      <ion-col size="6">
+        <ion-card color="primary">
+          <ion-card-header>
+            <ion-card-subtitle>Tasks Today</ion-card-subtitle>
+            <ion-card-title>{{ metrics.tasks_today }}</ion-card-title>
+          </ion-card-header>
+        </ion-card>
+      </ion-col>
+      <ion-col size="6">
+        <ion-card color="success">
+          <ion-card-header>
+            <ion-card-subtitle>Completed</ion-card-subtitle>
+            <ion-card-title>{{ metrics.completed_today }}</ion-card-title>
+          </ion-card-header>
+        </ion-card>
+      </ion-col>
+    </ion-row>
+
+    <ion-row>
+      <ion-col size="12">
+        <ion-card color="tertiary">
+          <ion-card-header>
+            <ion-card-subtitle>Focus Time Today</ion-card-subtitle>
+            <ion-card-title>{{ metrics.focus_time_today }} mins</ion-card-title>
+          </ion-card-header>
+        </ion-card>
+      </ion-col>
+    </ion-row>
+
+    <ion-row>
+      <ion-col size="12">
+        <ion-card>
+          <ion-card-header>
+            <ion-card-subtitle>Weekly Focus Hours</ion-card-subtitle>
+            <ion-card-title>{{ metrics.weekly_focus_hours }}h</ion-card-title>
+          </ion-card-header>
+        </ion-card>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+
+  <ion-list lines="none">
+    <ion-list-header>
+      <ion-label>Quick Actions</ion-label>
+    </ion-list-header>
+    <ion-item routerLink="/tasks" button>
+      <ion-icon slot="start" name="checkbox-outline" color="primary"></ion-icon>
+      <ion-label>Manage Tasks</ion-label>
+    </ion-item>
+    <ion-item routerLink="/pomodoro" button>
+      <ion-icon slot="start" name="timer-outline" color="secondary"></ion-icon>
+      <ion-label>Start Focus Session</ion-label>
+    </ion-item>
+  </ion-list>
+</ion-content>

@@ -1,0 +1,14 @@
+ion-label {
+  &.completed {
+    h2, p {
+      text-decoration: line-through;
+      color: var(--ion-color-medium);
+    }
+  }
+}
+
+ion-badge {
+  text-transform: capitalize;
+  font-size: 0.7rem;
+  margin-top: 5px;
+}

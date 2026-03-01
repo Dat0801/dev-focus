@@ -1,0 +1,46 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-menu-button></ion-menu-button>
+    </ion-buttons>
+    <ion-title>Pomodoro</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="ion-padding ion-text-center">
+  <div class="timer-container">
+    <div class="mode-badge">
+      <ion-badge [color]="isBreak ? 'success' : 'primary'">
+        {{ isBreak ? 'Break Time' : 'Focus Mode' }}
+      </ion-badge>
+    </div>
+
+    <div class="timer-display">
+      <h1>{{ timeDisplay }}</h1>
+    </div>
+
+    <div class="controls">
+      <ion-button (click)="toggleTimer()" size="large" [color]="isRunning ? 'warning' : 'primary'">
+        <ion-icon slot="start" [name]="isRunning ? 'pause' : 'play'"></ion-icon>
+        {{ isRunning ? 'Pause' : 'Start' }}
+      </ion-button>
+      
+      <ion-button (click)="resetTimer()" fill="clear" color="medium">
+        <ion-icon slot="icon-only" name="refresh"></ion-icon>
+      </ion-button>
+    </div>
+
+    <div class="task-selector ion-margin-top" *ngIf="!isBreak">
+      <ion-list>
+        <ion-item>
+          <ion-label>Focus on task:</ion-label>
+          <ion-select placeholder="Select a task" [(ngModel)]="selectedTaskId">
+            <ion-select-option *ngFor="let task of tasks" [value]="task.id">
+              {{ task.title }}
+            </ion-select-option>
+          </ion-select>
+        </ion-item>
+      </ion-list>
+    </div>
+  </div>
+</ion-content>

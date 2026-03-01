@@ -1,0 +1,30 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-menu-button></ion-menu-button>
+    </ion-buttons>
+    <ion-title>Projects</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="addProject()">
+        <ion-icon slot="icon-only" name="add"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="ion-padding">
+  <ion-list lines="full">
+    <ion-item *ngFor="let project of projects">
+      <div slot="start" class="color-dot" [style.background]="project.color"></div>
+      <ion-label>
+        <h2>{{ project.name }}</h2>
+        <p>Progress: {{ project.progress }}%</p>
+      </ion-label>
+      <ion-progress-bar [value]="project.progress / 100" slot="bottom"></ion-progress-bar>
+    </ion-item>
+  </ion-list>
+
+  <div class="ion-text-center ion-padding" *ngIf="projects.length === 0">
+    <p>No projects yet.</p>
+  </div>
+</ion-content>

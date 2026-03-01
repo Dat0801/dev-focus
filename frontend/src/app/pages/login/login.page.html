@@ -1,0 +1,40 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-title>Login</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="ion-padding">
+  <div class="login-container">
+    <div class="logo">
+      <ion-icon name="flash" color="primary" size="large"></ion-icon>
+      <h1>DevFocus</h1>
+    </div>
+
+    <form [formGroup]="loginForm" (ngSubmit)="onLogin()">
+      <ion-item lines="full" class="ion-margin-bottom">
+        <ion-label position="stacked">Email</ion-label>
+        <ion-input type="email" formControlName="email" placeholder="email@example.com"></ion-input>
+      </ion-item>
+      <div class="error" *ngIf="loginForm.get('email')?.touched && loginForm.get('email')?.invalid">
+        <small class="ion-padding-start" color="danger">Please enter a valid email.</small>
+      </div>
+
+      <ion-item lines="full" class="ion-margin-bottom">
+        <ion-label position="stacked">Password</ion-label>
+        <ion-input type="password" formControlName="password" placeholder="Enter password"></ion-input>
+      </ion-item>
+      <div class="error" *ngIf="loginForm.get('password')?.touched && loginForm.get('password')?.invalid">
+        <small class="ion-padding-start" color="danger">Password must be at least 6 characters.</small>
+      </div>
+
+      <ion-button expand="block" type="submit" [disabled]="loginForm.invalid" class="ion-margin-top">
+        Login
+      </ion-button>
+    </form>
+
+    <div class="ion-text-center ion-margin-top">
+      <p>Don't have an account? <ion-text color="primary" routerLink="/register">Register</ion-text></p>
+    </div>
+  </div>
+</ion-content>
