@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { AlertController, LoadingController, ToastController } from '@ionic/angular';
+import { Router } from '@angular/router';
 import { ProjectService } from '../../services/project';
 
 @Component({
@@ -16,7 +17,8 @@ export class ProjectsPage implements OnInit {
     private projectService: ProjectService,
     private loadingCtrl: LoadingController,
     private alertCtrl: AlertController,
-    private toastCtrl: ToastController
+    private toastCtrl: ToastController,
+    private router: Router
   ) {}
 
   ngOnInit() {
@@ -44,46 +46,8 @@ export class ProjectsPage implements OnInit {
     });
   }
 
-  async addProject() {
-    const alert = await this.alertCtrl.create({
-      header: 'New Project',
-      inputs: [
-        {
-          name: 'name',
-          type: 'text',
-          placeholder: 'Project Name'
-        },
-        {
-          name: 'category',
-          type: 'text',
-          placeholder: 'Category (e.g. DESIGN, DEV)'
-        },
-        {
-          name: 'color',
-          type: 'text',
-          placeholder: 'Color (e.g. #7c4dff)'
-        },
-        {
-          name: 'deadline',
-          type: 'date',
-          placeholder: 'Deadline'
-        }
-      ],
-      buttons: [
-        {
-          text: 'Cancel',
-          role: 'cancel'
-        },
-        {
-          text: 'Create',
-          handler: (data) => {
-            this.createProject(data);
-          }
-        }
-      ]
-    });
-
-    await alert.present();
+  addProject() {
+    this.router.navigate(['/tabs/projects/create-project']);
   }
 
   async createProject(data: any) {
