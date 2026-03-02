@@ -4,6 +4,7 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { IonicModule } from '@ionic/angular';
 import { TasksPageRoutingModule } from './tasks-routing.module';
 import { TasksPage } from './tasks.page';
+import { AddTaskComponent } from './components/add-task/add-task.component';
 
 @NgModule({
   imports: [
@@ -13,6 +14,6 @@ import { TasksPage } from './tasks.page';
     IonicModule,
     TasksPageRoutingModule
   ],
-  declarations: [TasksPage]
+  declarations: [TasksPage, AddTaskComponent]
 })
 export class TasksPageModule {}

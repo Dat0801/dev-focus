@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { AlertController, LoadingController, ModalController, ToastController } from '@ionic/angular';
 import { TaskService } from '../../services/task';
+import { AddTaskComponent } from './components/add-task/add-task.component';
 
 @Component({
   selector: 'app-tasks',
@@ -19,7 +20,8 @@ export class TasksPage implements OnInit {
     private taskService: TaskService,
     private loadingCtrl: LoadingController,
     private toastCtrl: ToastController,
-    private alertCtrl: AlertController
+    private alertCtrl: AlertController,
+    private modalCtrl: ModalController
   ) {}
 
   ngOnInit() {
@@ -96,44 +98,37 @@ export class TasksPage implements OnInit {
   }
 
   async addTask() {
-    const alert = await this.alertCtrl.create({
-      header: 'New Task',
-      cssClass: 'custom-alert',
-      inputs: [
-        { name: 'title', type: 'text', placeholder: 'What needs to be done?' },
-        { name: 'description', type: 'textarea', placeholder: 'Add more details...' },
-        { 
-          name: 'priority', 
-          type: 'text', 
-          placeholder: 'Priority (low, medium, high, urgent)',
-          value: 'medium'
-        }
-      ],
-      buttons: [
-        { text: 'Cancel', role: 'cancel' },
-        {
-          text: 'Create',
-          handler: (data) => {
-            if (!data.title) return false;
-            const taskData = {
-              ...data,
-              status: 'todo',
-              estimated_pomodoros: 4,
-              completed_pomodoros: 0
-            };
-            this.taskService.createTask(taskData).subscribe({
-              next: () => {
-                this.loadTasks();
-                this.showToast('Task created successfully');
-              },
-              error: () => this.showToast('Failed to create task')
-            });
-            return true;
-          }
-        }
-      ]
+    const modal = await this.modalCtrl.create({
+      component: AddTaskComponent,
+      breakpoints: [0, 0.9],
+      initialBreakpoint: 0.9,
+      cssClass: 'add-task-modal-sheet'
     });
-    await alert.present();
+
+    await modal.present();
+
+    const { data } = await modal.onWillDismiss();
+    
+    if (data) {
+      const taskData = {
+        title: data.title,
+        description: data.description,
+        status: 'todo',
+        priority: data.priority,
+        project_id: data.project_id,
+        due_date: data.due_date,
+        estimated_pomodoros: data.estimated_pomodoros,
+        completed_pomodoros: 0
+      };
+
+      this.taskService.createTask(taskData).subscribe({
+        next: () => {
+          this.loadTasks();
+          this.showToast('Task created successfully');
+        },
+        error: () => this.showToast('Failed to create task')
+      });
+    }
   }
 
   toggleStatus(task: any) {

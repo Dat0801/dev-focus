@@ -32,12 +32,17 @@ export class AuthService {
 
   logout(): Observable<any> {
     return this.http.post(`${this.apiUrl}/logout`, {}).pipe(
-      tap(() => {
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
-        this.currentUserSubject.next(null);
+      tap({
+        next: () => this.clearLocalAuth(),
+        error: () => this.clearLocalAuth() // Vẫn xóa local ngay cả khi API lỗi (ví dụ: token đã hết hạn)
       })
     );
+  }
+
+  public clearLocalAuth() {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    this.currentUserSubject.next(null);
   }
 
   private handleAuth(res: any) {

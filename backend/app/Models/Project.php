@@ -15,10 +15,13 @@ class Project extends Model
 
     protected $fillable = [
         'name',
+        'category',
         'color',
         'deadline',
         'user_id',
     ];
+
+    protected $appends = ['progress', 'status', 'tasks_count'];
 
     protected $casts = [
         'deadline' => 'date',
@@ -43,5 +46,19 @@ class Project extends Model
 
         $completedTasks = $this->tasks()->where('status', 'done')->count();
         return round(($completedTasks / $totalTasks) * 100, 2);
+    }
+
+    public function getStatusAttribute(): string
+    {
+        $progress = $this->progress;
+        if ($progress === 100.0) {
+            return 'completed';
+        }
+        return 'in_progress';
+    }
+
+    public function getTasksCountAttribute(): int
+    {
+        return $this->tasks()->count();
     }
 }

@@ -89,6 +89,17 @@ ion-segment-button {
   --background: transparent;
   --padding-start: 0;
   --inner-padding-end: 0;
+  position: relative;
+  
+  .project-indicator {
+    width: 4px;
+    height: 100%;
+    position: absolute;
+    left: 0;
+    top: 0;
+    border-radius: 0 4px 4px 0;
+    z-index: 10;
+  }
   
   &.completed {
     .task-title {

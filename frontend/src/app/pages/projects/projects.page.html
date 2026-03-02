@@ -44,11 +44,16 @@
     <div class="project-card" *ngFor="let project of filteredProjects">
       <div class="card-header">
         <div class="category-info">
-          <div class="category-dot" [style.background]="project.categoryColor"></div>
-          <span class="category-name">{{ project.category }}</span>
+          <div class="category-dot" [style.background]="project.color"></div>
+          <span class="category-name">{{ project.category || 'GENERAL' }}</span>
         </div>
         <div class="more-options">
-          <ion-icon name="ellipsis-horizontal" *ngIf="project.status !== 'completed'"></ion-icon>
+          <ion-button fill="clear" size="small" (click)="editProject(project)">
+            <ion-icon name="create-outline"></ion-icon>
+          </ion-button>
+          <ion-button fill="clear" size="small" color="danger" (click)="deleteProject(project.id)">
+            <ion-icon name="trash-outline"></ion-icon>
+          </ion-button>
           <ion-icon name="checkmark-circle" class="completed-icon" *ngIf="project.status === 'completed'"></ion-icon>
         </div>
       </div>
@@ -71,18 +76,13 @@
 
       <div class="card-footer">
         <div class="info-items">
-          <div class="info-item">
+          <div class="info-item" *ngIf="project.deadline">
             <ion-icon name="calendar-outline"></ion-icon>
-            <span>{{ project.dueDate }}</span>
+            <span>{{ project.deadline | date:'MMM d' }}</span>
           </div>
-          <div class="info-item" *ngIf="project.tasksCount > 0">
+          <div class="info-item" *ngIf="project.tasks_count > 0">
             <ion-icon name="checkmark-circle-outline"></ion-icon>
-            <span>{{ project.tasksCount }} tasks</span>
-          </div>
-        </div>
-        <div class="member-avatars" *ngIf="project.members && project.members.length > 0">
-          <div class="avatar" *ngFor="let member of project.members">
-            <img src="https://i.pravatar.cc/100?u={{member.avatar}}" alt="avatar">
+            <span>{{ project.tasks_count }} tasks</span>
           </div>
         </div>
       </div>

@@ -12,7 +12,7 @@ class TaskRepository implements TaskRepositoryInterface
 {
     public function getAll(array $filters = []): LengthAwarePaginator
     {
-        $query = Task::where('user_id', Auth::id());
+        $query = Task::where('user_id', Auth::id())->with('project');
 
         if (isset($filters['status'])) {
             $query->where('status', $filters['status']);
@@ -31,13 +31,14 @@ class TaskRepository implements TaskRepositoryInterface
 
     public function findById(string $id): ?Task
     {
-        return Task::where('user_id', Auth::id())->find($id);
+        return Task::where('user_id', Auth::id())->with('project')->find($id);
     }
 
     public function create(array $data): Task
     {
         $data['user_id'] = Auth::id();
-        return Task::create($data);
+        $task = Task::create($data);
+        return $task->load('project');
     }
 
     public function update(string $id, array $data): bool
@@ -61,6 +62,7 @@ class TaskRepository implements TaskRepositoryInterface
     public function getTodayTasks(): Collection
     {
         return Task::where('user_id', Auth::id())
+            ->with('project')
             ->whereDate('due_date', now()->toDateString())
             ->get();
     }
@@ -68,6 +70,7 @@ class TaskRepository implements TaskRepositoryInterface
     public function getUpcomingTasks(): Collection
     {
         return Task::where('user_id', Auth::id())
+            ->with('project')
             ->whereDate('due_date', '>', now()->toDateString())
             ->get();
     }

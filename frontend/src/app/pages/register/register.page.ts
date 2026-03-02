@@ -85,7 +85,7 @@ export class RegisterPage implements OnInit {
     this.authService.register(this.registerForm.value).subscribe({
       next: (res) => {
         loading.dismiss();
-        this.router.navigateByUrl('/dashboard');
+        this.router.navigateByUrl('/tabs/dashboard');
       },
       error: async (err) => {
         loading.dismiss();

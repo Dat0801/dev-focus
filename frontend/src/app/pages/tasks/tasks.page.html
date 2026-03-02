@@ -62,6 +62,7 @@
     <div *ngFor="let task of filteredTasks">
       <ion-item-sliding class="task-item-sliding">
         <ion-item class="task-item" [class.completed]="task.status === 'done'">
+          <div class="project-indicator" [style.background-color]="task.project?.color || '#ccc'"></div>
           <div class="checkbox-container" slot="start">
             <div 
               class="custom-checkbox" 

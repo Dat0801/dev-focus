@@ -10,11 +10,11 @@ import { AuthService } from './services/auth';
 })
 export class AppComponent {
   public appPages = [
-    { title: 'Home', url: '/dashboard', icon: 'home' },
-    { title: 'Task', url: '/tasks', icon: 'checkbox' },
-    { title: 'Pomodoro', url: '/pomodoro', icon: 'timer' },
-    { title: 'Project', url: '/projects', icon: 'folder' },
-    { title: 'Profile', url: '/profile', icon: 'person' },
+    { title: 'Home', url: '/tabs/dashboard', icon: 'home' },
+    { title: 'Task', url: '/tabs/tasks', icon: 'checkbox' },
+    { title: 'Pomodoro', url: '/tabs/pomodoro', icon: 'timer' },
+    { title: 'Project', url: '/tabs/projects', icon: 'folder' },
+    { title: 'Profile', url: '/tabs/profile', icon: 'person' },
   ];
 
   constructor(
@@ -23,8 +23,14 @@ export class AppComponent {
   ) {}
 
   logout() {
-    this.authService.logout().subscribe(() => {
-      this.router.navigateByUrl('/login');
+    this.authService.logout().subscribe({
+      complete: () => {
+        this.router.navigateByUrl('/login');
+      },
+      error: () => {
+        // Vẫn chuyển hướng về login ngay cả khi API logout lỗi
+        this.router.navigateByUrl('/login');
+      }
     });
   }
 }
