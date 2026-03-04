@@ -41,17 +41,17 @@
   </div>
 
   <div class="projects-list">
-    <div class="project-card" *ngFor="let project of filteredProjects">
+    <div class="project-card" *ngFor="let project of filteredProjects" (click)="viewProjectDetail(project)">
       <div class="card-header">
         <div class="category-info">
           <div class="category-dot" [style.background]="project.color"></div>
           <span class="category-name">{{ project.category || 'GENERAL' }}</span>
         </div>
         <div class="more-options">
-          <ion-button fill="clear" size="small" (click)="editProject(project)">
+          <ion-button fill="clear" size="small" (click)="editProject(project); $event.stopPropagation()">
             <ion-icon name="create-outline"></ion-icon>
           </ion-button>
-          <ion-button fill="clear" size="small" color="danger" (click)="deleteProject(project.id)">
+          <ion-button fill="clear" size="small" color="danger" (click)="deleteProject(project.id); $event.stopPropagation()">
             <ion-icon name="trash-outline"></ion-icon>
           </ion-button>
           <ion-icon name="checkmark-circle" class="completed-icon" *ngIf="project.status === 'completed'"></ion-icon>

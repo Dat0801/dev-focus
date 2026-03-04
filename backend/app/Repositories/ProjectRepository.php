@@ -16,7 +16,7 @@ class ProjectRepository implements ProjectRepositoryInterface
 
     public function findById(string $id): ?Project
     {
-        return Project::where('user_id', Auth::id())->find($id);
+        return Project::where('user_id', Auth::id())->with('tasks')->find($id);
     }
 
     public function create(array $data): Project

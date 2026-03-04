@@ -1,0 +1,111 @@
+<ion-header class="ion-no-border">
+  <ion-toolbar class="header-toolbar">
+    <div class="header-content ion-padding-horizontal">
+      <div class="header-left">
+        <ion-button fill="clear" (click)="goBack()" class="back-btn">
+          <ion-icon name="arrow-back"></ion-icon>
+        </ion-button>
+        <h1 class="header-title">{{ projectTitle }}</h1>
+      </div>
+      <div class="header-right">
+        <ion-button fill="clear" class="more-btn" (click)="presentActionSheet()">
+          <ion-icon name="ellipsis-horizontal"></ion-icon>
+        </ion-button>
+      </div>
+    </div>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <div class="tags-container ion-padding-horizontal">
+    <div class="tag project-tag" *ngIf="project?.category" [style.background]="project.color + '33'" [style.color]="project.color">
+      {{ project.category | uppercase }}
+    </div>
+    <div class="tag project-tag" *ngIf="project?.status">
+       {{ formatStatus(project.status) }}
+     </div>
+  </div>
+
+  <div class="stats-row">
+    <div class="stat-card" *ngFor="let stat of stats">
+      <div class="stat-value-container">
+        <div class="circular-progress" *ngIf="stat.type === 'progress'" [style.background]="'conic-gradient(var(--primary-purple) ' + stat.value + ', #f0f0f0 0)'">
+          <div class="progress-circle">
+            <span class="percentage">{{ stat.value }}</span>
+          </div>
+        </div>
+        <span class="stat-value" *ngIf="stat.type !== 'progress'">{{ stat.value }}</span>
+      </div>
+      <span class="stat-label">{{ stat.label }}</span>
+    </div>
+  </div>
+
+  <div class="tabs-container">
+    <div class="custom-tabs">
+      <div 
+        class="tab-item" 
+        [class.active]="selectedTab === 'todo'" 
+        (click)="selectTab('todo')">
+        To-do
+      </div>
+      <div 
+        class="tab-item" 
+        [class.active]="selectedTab === 'in-progress'" 
+        (click)="selectTab('in-progress')">
+        In Progress
+      </div>
+      <div 
+        class="tab-item" 
+        [class.active]="selectedTab === 'done'" 
+        (click)="selectTab('done')">
+        Done
+      </div>
+    </div>
+  </div>
+
+  <div class="tasks-list">
+    <div class="task-card" *ngFor="let task of filteredTasks">
+      <div class="task-main">
+        <div class="task-left">
+          <div class="checkbox-container">
+            <div class="custom-checkbox" [class.checked]="task.status === 'done'">
+              <ion-icon *ngIf="task.status === 'done'" name="checkmark"></ion-icon>
+            </div>
+          </div>
+          <div class="task-info">
+            <div class="task-header">
+              <h3 class="task-title">{{ task.title }}</h3>
+              <div class="priority-tag" *ngIf="task.priority" [ngClass]="task.priority.toLowerCase()">{{ task.priority | uppercase }}</div>
+            </div>
+            <p class="task-desc" *ngIf="task.description">{{ task.description }}</p>
+          </div>
+        </div>
+      </div>
+      
+      <div class="task-footer">
+        <div class="sessions-info">
+          <ion-icon name="timer-outline" class="timer-icon"></ion-icon>
+          <span class="sessions-count">{{ task.completed_pomodoros || 0 }}/{{ task.estimated_pomodoros || 4 }} SESSIONS</span>
+        </div>
+        <div class="assignees" *ngIf="task.assignees?.length">
+          <div class="avatar-stack">
+            <div class="avatar-circle" *ngFor="let avatar of task.assignees">
+              <ion-icon name="person-circle"></ion-icon>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="empty-state ion-text-center ion-padding" *ngIf="filteredTasks.length === 0">
+      <ion-icon name="document-text-outline" style="font-size: 48px; color: #adb1b9;"></ion-icon>
+      <p style="color: #adb1b9;">No tasks found in this category.</p>
+    </div>
+  </div>
+
+  <ion-fab vertical="bottom" horizontal="end" slot="fixed">
+    <ion-fab-button class="add-fab">
+      <ion-icon name="add"></ion-icon>
+    </ion-fab-button>
+  </ion-fab>
+</ion-content>

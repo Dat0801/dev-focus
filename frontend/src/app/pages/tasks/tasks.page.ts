@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { AlertController, LoadingController, ModalController, ToastController } from '@ionic/angular';
+import { ActivatedRoute, Router } from '@angular/router';
 import { TaskService } from '../../services/task';
 import { AddTaskComponent } from './components/add-task/add-task.component';
 
@@ -21,12 +22,23 @@ export class TasksPage implements OnInit {
     private loadingCtrl: LoadingController,
     private toastCtrl: ToastController,
     private alertCtrl: AlertController,
-    private modalCtrl: ModalController
+    private modalCtrl: ModalController,
+    private router: Router,
+    private route: ActivatedRoute
   ) {}
 
   ngOnInit() {
     this.setTodayDate();
-    this.loadTasks();
+    this.route.queryParams.subscribe(params => {
+      if (params['filter']) {
+        this.filter = params['filter'];
+      }
+      this.loadTasks();
+    });
+  }
+
+  goToProjects() {
+    this.router.navigate(['/tabs/projects']);
   }
 
   setTodayDate() {

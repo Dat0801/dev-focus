@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { AlertController, LoadingController, ToastController } from '@ionic/angular';
 import { Router } from '@angular/router';
 import { ProjectService } from '../../services/project';
@@ -9,7 +9,7 @@ import { ProjectService } from '../../services/project';
   styleUrls: ['./projects.page.scss'],
   standalone: false,
 })
-export class ProjectsPage implements OnInit {
+export class ProjectsPage {
   projects: any[] = [];
   selectedTab: string = 'all';
 
@@ -21,7 +21,7 @@ export class ProjectsPage implements OnInit {
     private router: Router
   ) {}
 
-  ngOnInit() {
+  ionViewWillEnter() {
     this.loadProjects();
   }
 
@@ -48,6 +48,10 @@ export class ProjectsPage implements OnInit {
 
   addProject() {
     this.router.navigate(['/tabs/projects/create-project']);
+  }
+
+  viewProjectDetail(project: any) {
+    this.router.navigate(['/tabs/projects', project.id]);
   }
 
   async createProject(data: any) {

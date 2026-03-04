@@ -23,6 +23,7 @@ class ProjectResource extends JsonResource
             'progress' => $this->progress,
             'status' => $this->status,
             'tasks_count' => $this->tasks_count,
+            'tasks' => TaskResource::collection($this->whenLoaded('tasks')),
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];

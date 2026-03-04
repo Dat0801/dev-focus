@@ -25,7 +25,7 @@
   </div>
 
   <div class="segment-container ion-padding-horizontal">
-    <ion-segment (ionChange)="segmentChanged($event)" value="all" mode="md" scrollable="true">
+    <ion-segment (ionChange)="segmentChanged($event)" [value]="filter" mode="md" scrollable="true">
       <ion-segment-button value="all">
         <ion-label>All</ion-label>
       </ion-segment-button>
@@ -50,7 +50,7 @@
       <ion-icon slot="start" name="bookmark"></ion-icon>
       <ion-label>Labels</ion-label>
     </ion-button>
-    <ion-button fill="clear" class="filter-btn">
+    <ion-button fill="clear" class="filter-btn" (click)="goToProjects()">
       <ion-icon slot="start" name="folder"></ion-icon>
       <ion-label>Project</ion-label>
     </ion-button>

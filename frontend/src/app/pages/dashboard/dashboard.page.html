@@ -20,7 +20,7 @@
 
   <!-- Stats Grid -->
   <div class="stats-grid">
-    <div class="stat-card purple">
+    <div class="stat-card purple" (click)="viewTasks('today')">
       <div class="stat-header">
         <div class="icon-box">
           <ion-icon name="clipboard-outline"></ion-icon>
@@ -28,18 +28,18 @@
         <div class="badge">+2</div>
       </div>
       <div class="stat-label">Tasks Today</div>
-      <div class="stat-value">{{ metrics.tasks_today || 12 }}</div>
+      <div class="stat-value">{{ metrics.tasks_today }}</div>
     </div>
 
-    <div class="stat-card blue">
+    <div class="stat-card blue" (click)="viewTasks('completed')">
       <div class="stat-header">
         <div class="icon-box">
           <ion-icon name="checkmark-circle-outline"></ion-icon>
         </div>
-        <div class="badge">+5</div>
+        <div class="badge">+{{ metrics.completed_today }}</div>
       </div>
       <div class="stat-label">Completed</div>
-      <div class="stat-value">{{ metrics.completed_today || 8 }}</div>
+      <div class="stat-value">{{ metrics.completed_today }}</div>
     </div>
 
     <div class="stat-card green">
@@ -50,7 +50,7 @@
         <div class="badge">+30m</div>
       </div>
       <div class="stat-label">Focus Time</div>
-      <div class="stat-value">4.5h</div>
+      <div class="stat-value">{{ metrics.focus_time_today }}</div>
     </div>
 
     <div class="stat-card yellow">
@@ -58,10 +58,10 @@
         <div class="icon-box">
           <ion-icon name="flame-outline"></ion-icon>
         </div>
-        <div class="badge">+1</div>
+        <div class="badge">+{{ metrics.productivity_streak > 0 ? 1 : 0 }}</div>
       </div>
       <div class="stat-label">Streak</div>
-      <div class="stat-value">15d</div>
+      <div class="stat-value">{{ metrics.productivity_streak }}d</div>
     </div>
   </div>
 
@@ -74,19 +74,19 @@
           d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
         />
         <path class="circle"
-          stroke-dasharray="70, 100"
+          [attr.stroke-dasharray]="metrics.daily_goal_percentage + ', 100'"
           d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
         />
       </svg>
       <div class="chart-content">
-        <span class="percentage">70%</span>
+        <span class="percentage">{{ metrics.daily_goal_percentage }}%</span>
         <span class="label">OF DAILY GOAL</span>
       </div>
     </div>
 
     <div class="bar-chart">
       <div class="bar-item" *ngFor="let day of ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN']; let i = index">
-        <div class="bar" [style.height.%]="[30, 45, 35, 55, 25, 75, 10][i]"></div>
+        <div class="bar" [style.height.%]="weeklyPerformance[i]"></div>
         <div class="day-label">{{ day }}</div>
       </div>
     </div>
@@ -95,21 +95,23 @@
   <!-- Upcoming Tasks -->
   <div class="section-header">
     <div class="section-title">Upcoming Tasks</div>
-    <div class="view-all">View all</div>
+    <div class="view-all" (click)="viewAllTasks()">View all</div>
   </div>
 
   <div class="task-list">
-    <div class="task-item" *ngFor="let task of upcomingTasks" [class.completed]="task.completed">
+    <div class="task-item" *ngFor="let task of upcomingTasks" [class.completed]="task.status === 'done'">
       <div class="task-check">
-        <ion-icon *ngIf="task.completed" name="checkmark-circle"></ion-icon>
-        <div *ngIf="!task.completed" class="checkbox"></div>
+        <ion-icon *ngIf="task.status === 'done'" name="checkmark-circle"></ion-icon>
+        <div *ngIf="task.status !== 'done'" class="checkbox"></div>
       </div>
       <div class="task-info">
         <h3>{{ task.title }}</h3>
-        <p>{{ task.time }} • {{ task.priority }}</p>
+        <p>{{ task.due_date | date:'shortTime' }} • {{ task.priority }}</p>
       </div>
-      <div *ngIf="task.userInitials && !task.completed" class="task-avatar">{{ task.userInitials }}</div>
-      <div *ngIf="!task.userInitials && !task.completed" class="task-more">
+      <div *ngIf="task.project" class="task-avatar" [style.background-color]="task.project.color" (click)="viewProject(task.project.id)">
+        {{ task.project.name.substring(0, 1) }}
+      </div>
+      <div *ngIf="!task.project && task.status !== 'done'" class="task-more">
         <ion-icon name="ellipsis-vertical"></ion-icon>
       </div>
     </div>

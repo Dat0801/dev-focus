@@ -29,12 +29,33 @@ Route::middleware('auth:sanctum')->group(function () {
         $taskService = app(\App\Services\TaskService::class);
         $pomodoroService = app(\App\Services\PomodoroService::class);
 
+        $todayTasks = $taskService->getTodayTasks();
+        $tasksTodayCount = $todayTasks->count();
+        $completedTodayCount = $todayTasks->where('status', 'done')->count();
+        
+        $dailyGoal = 10; // This could be a user setting
+        $dailyGoalPercentage = $tasksTodayCount > 0 ? round(($completedTodayCount / $dailyGoal) * 100) : 0;
+        if ($dailyGoalPercentage > 100) $dailyGoalPercentage = 100;
+
+        // Calculate weekly performance (last 7 days)
+        $weeklyPerformance = [];
+        for ($i = 6; $i >= 0; $i--) {
+            $date = now()->subDays($i)->toDateString();
+            $count = \App\Models\Task::where('user_id', $user->id)
+                ->where('status', 'done')
+                ->whereDate('updated_at', $date)
+                ->count();
+            $weeklyPerformance[] = $count;
+        }
+
         return response()->json([
-            'tasks_today' => $taskService->getTodayTasks()->count(),
-            'completed_today' => $taskService->getTodayTasks()->where('status', 'done')->count(),
-            'focus_time_today' => $pomodoroService->getTodayFocusTime(),
-            'weekly_focus_hours' => round($pomodoroService->getWeeklyFocusTime() / 60, 2),
-            'productivity_streak' => 0, // Placeholder for streak logic
-        ]);
+             'tasks_today' => $tasksTodayCount,
+             'completed_today' => $completedTodayCount,
+             'focus_time_today' => $pomodoroService->getTodayFocusTime(),
+             'weekly_focus_hours' => round($pomodoroService->getWeeklyFocusTime() / 60, 2),
+             'productivity_streak' => 0, // Placeholder
+             'daily_goal_percentage' => $dailyGoalPercentage,
+             'weekly_performance' => $weeklyPerformance
+         ]);
     });
 });

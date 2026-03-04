@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { Router } from '@angular/router';
 import { environment } from '../../../environments/environment';
 
 @Component({
@@ -10,23 +11,23 @@ import { environment } from '../../../environments/environment';
 })
 export class DashboardPage implements OnInit {
   metrics: any = {
-    tasks_today: 12,
-    completed_today: 8,
-    focus_time_today: '4.5h',
-    weekly_focus_hours: 15.2,
-    productivity_streak: 15,
-    daily_goal_percentage: 70
+    tasks_today: 0,
+    completed_today: 0,
+    focus_time_today: '0h',
+    weekly_focus_hours: 0,
+    productivity_streak: 0,
+    daily_goal_percentage: 0
   };
 
-  upcomingTasks: any[] = [
-    { id: 1, title: 'Finish Dashboard Design', time: '10:00 AM', priority: 'High Priority', userInitials: 'JD', completed: false },
-    { id: 2, title: 'Review Sprint Backlog', time: '09:00 AM', priority: 'Routine', userInitials: '', completed: true },
-    { id: 3, title: 'Team Sync Meeting', time: '02:30 PM', priority: 'Meeting', userInitials: '', completed: false }
-  ];
+  upcomingTasks: any[] = [];
+  weeklyPerformance: number[] = [0, 0, 0, 0, 0, 0, 0];
 
   currentDate: string = '';
 
-  constructor(private http: HttpClient) {
+  constructor(
+    private http: HttpClient,
+    private router: Router
+  ) {
     this.currentDate = new Intl.DateTimeFormat('en-US', {
       weekday: 'long',
       month: 'short',
@@ -35,16 +36,58 @@ export class DashboardPage implements OnInit {
   }
 
   ngOnInit() {
+    this.loadData();
+  }
+
+  viewAllTasks() {
+    this.router.navigate(['/tabs/tasks']);
+  }
+
+  viewTasks(filter: string) {
+    // Navigate to tasks tab with a filter
+    this.router.navigate(['/tabs/tasks'], { queryParams: { filter } });
+  }
+
+  viewProject(projectId: string) {
+    this.router.navigate(['/tabs/projects', projectId]);
+  }
+
+  loadData() {
     this.loadMetrics();
+    this.loadUpcomingTasks();
   }
 
   loadMetrics() {
     this.http.get(`${environment.apiUrl}/dashboard/metrics`).subscribe((res: any) => {
       this.metrics = res;
+      
+      // Format focus time (e.g., from minutes to 4.5h or 30m)
+      if (typeof res.focus_time_today === 'number') {
+        if (res.focus_time_today >= 60) {
+          this.metrics.focus_time_today = (res.focus_time_today / 60).toFixed(1) + 'h';
+        } else {
+          this.metrics.focus_time_today = res.focus_time_today + 'm';
+        }
+      }
+
+      if (res.weekly_performance) {
+        // Map counts to percentages (max 10 tasks for 100% height)
+        this.weeklyPerformance = res.weekly_performance.map((count: number) => {
+          const percentage = (count / 10) * 100;
+          return percentage > 100 ? 100 : percentage;
+        });
+      }
+    });
+  }
+
+  loadUpcomingTasks() {
+    this.http.get(`${environment.apiUrl}/tasks/upcoming`).subscribe((res: any) => {
+      // If the backend returns a wrapped response (e.g., from TaskResource::collection)
+      this.upcomingTasks = res.data || res;
     });
   }
 
   ionViewWillEnter() {
-    this.loadMetrics();
+    this.loadData();
   }
 }

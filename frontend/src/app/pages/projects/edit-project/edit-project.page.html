@@ -1,0 +1,100 @@
+<ion-header class="ion-no-border">
+  <ion-toolbar class="header-toolbar">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/tabs/projects" text=""></ion-back-button>
+    </ion-buttons>
+    <ion-title>Edit Project</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <div class="create-project-container">
+    <ion-card class="form-card">
+      <ion-card-content>
+        <!-- Project Name -->
+        <div class="input-group">
+          <ion-label class="input-label">Project Name</ion-label>
+          <ion-item lines="none" class="custom-input">
+            <ion-input [(ngModel)]="project.name" placeholder="e.g. Website Redesign"></ion-input>
+          </ion-item>
+        </div>
+
+        <!-- Description -->
+        <div class="input-group">
+          <ion-label class="input-label">Description</ion-label>
+          <ion-item lines="none" class="custom-input textarea-input">
+            <ion-textarea [(ngModel)]="project.description" placeholder="Add a description for your project (optional)" rows="4"></ion-textarea>
+          </ion-item>
+        </div>
+
+        <div class="row">
+          <!-- Deadline -->
+          <div class="input-group col">
+            <ion-label class="input-label">Deadline</ion-label>
+            <ion-item lines="none" class="custom-input date-input">
+              <ion-icon name="calendar-outline" slot="start"></ion-icon>
+              <ion-datetime-button datetime="datetime"></ion-datetime-button>
+              <ion-modal [keepContentsMounted]="true">
+                <ng-template>
+                  <ion-datetime id="datetime" presentation="date" [(ngModel)]="project.deadline"></ion-datetime>
+                </ng-template>
+              </ion-modal>
+            </ion-item>
+          </div>
+
+          <!-- Icon -->
+          <div class="input-group col">
+            <ion-label class="input-label">Icon</ion-label>
+            <ion-item lines="none" class="custom-input select-input">
+              <ion-icon [name]="project.icon" slot="start" color="primary"></ion-icon>
+              <ion-select [(ngModel)]="project.icon" placeholder="Default" interface="popover">
+                <ion-select-option value="folder">Default</ion-select-option>
+                <ion-select-option value="briefcase">Work</ion-select-option>
+                <ion-select-option value="person">Personal</ion-select-option>
+                <ion-select-option value="code-slash">Dev</ion-select-option>
+              </ion-select>
+            </ion-item>
+          </div>
+        </div>
+
+        <!-- Project Color -->
+        <div class="input-group">
+          <ion-label class="input-label">Project Color</ion-label>
+          <div class="color-selection">
+            <div 
+              *ngFor="let color of colors" 
+              class="color-option" 
+              [style.background-color]="color"
+              [class.active]="project.color === color"
+              (click)="selectColor(color)">
+            </div>
+            <div class="color-option add-color">
+              <ion-icon name="add"></ion-icon>
+            </div>
+          </div>
+        </div>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Pomodoro Integration -->
+    <ion-card class="integration-card">
+      <ion-item lines="none">
+        <div class="pomodoro-icon-bg" slot="start">
+          <ion-icon name="timer" color="primary"></ion-icon>
+        </div>
+        <ion-label>
+          <h2>Pomodoro Integration</h2>
+          <p>Enable focus sessions for this project</p>
+        </ion-label>
+        <ion-toggle slot="end" [(ngModel)]="project.pomodoro_enabled"></ion-toggle>
+      </ion-item>
+    </ion-card>
+
+    <!-- Update Button -->
+    <div class="button-container">
+      <ion-button expand="block" class="create-btn" (click)="updateProject()">
+        Update Project
+      </ion-button>
+    </div>
+  </div>
+</ion-content>
