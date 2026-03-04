@@ -1,5 +1,5 @@
-import { Component, OnInit } from '@angular/core';
-import { ModalController } from '@ionic/angular';
+import { Component, OnInit, ViewChild } from '@angular/core';
+import { IonModal, ModalController } from '@ionic/angular';
 import { ProjectService } from '../../../../services/project';
 
 @Component({
@@ -9,12 +9,19 @@ import { ProjectService } from '../../../../services/project';
   standalone: false,
 })
 export class AddTaskComponent implements OnInit {
+  @ViewChild('deadlineModal') deadlineModal!: IonModal;
+  @ViewChild('startDateModal') startDateModal!: IonModal;
+  @ViewChild('endDateModal') endDateModal!: IonModal;
+  
   taskName: string = '';
   description: string = '';
   selectedProjectId: string | null = null;
   selectedPriority: string = 'medium';
-  dueDate: string = new Date().toISOString();
-  estimatedPomodoros: number = 1;
+  dueDate: string | null = null;
+  startDate: string | null = null;
+  endDate: string | null = null;
+  workHours: number | null = null;
+  estimatedPomodoros: number | null = null;
 
   projects: any[] = [];
 
@@ -50,6 +57,27 @@ export class AddTaskComponent implements OnInit {
     this.modalCtrl.dismiss();
   }
 
+  openDeadlineModal() {
+    if (!this.dueDate) {
+      this.dueDate = new Date().toISOString();
+    }
+    this.deadlineModal.present();
+  }
+
+  openStartDateModal() {
+    if (!this.startDate) {
+      this.startDate = new Date().toISOString();
+    }
+    this.startDateModal.present();
+  }
+
+  openEndDateModal() {
+    if (!this.endDate) {
+      this.endDate = new Date().toISOString();
+    }
+    this.endDateModal.present();
+  }
+
   selectProject(projectId: string) {
     this.selectedProjectId = projectId;
   }
@@ -59,7 +87,11 @@ export class AddTaskComponent implements OnInit {
   }
 
   selectPomodoro(option: number | string) {
-    this.estimatedPomodoros = option === '4+' ? 4 : (option as number);
+    if (option === '4+') {
+      this.estimatedPomodoros = 4;
+    } else {
+      this.estimatedPomodoros = option as number;
+    }
   }
 
   createTask() {
@@ -69,6 +101,9 @@ export class AddTaskComponent implements OnInit {
       project_id: this.selectedProjectId,
       priority: this.selectedPriority,
       due_date: this.dueDate,
+      start_date: this.startDate,
+      end_date: this.endDate,
+      work_hours: this.workHours,
       estimated_pomodoros: this.estimatedPomodoros
     });
   }

@@ -31,15 +31,25 @@
           <!-- Deadline -->
           <div class="input-group col">
             <ion-label class="input-label">Deadline</ion-label>
-            <ion-item lines="none" class="custom-input date-input">
-              <ion-icon name="calendar-outline" slot="start"></ion-icon>
-              <ion-datetime-button datetime="datetime"></ion-datetime-button>
-              <ion-modal [keepContentsMounted]="true">
-                <ng-template>
-                  <ion-datetime id="datetime" presentation="date" [(ngModel)]="project.deadline"></ion-datetime>
+            <div class="date-chip-wrapper">
+              <div class="date-chip" [class.has-date]="project.deadline">
+                <ion-icon name="calendar-outline"></ion-icon>
+                <ng-container *ngIf="project.deadline; else noDeadline">
+                  <ion-datetime-button datetime="project-deadline-datetime"></ion-datetime-button>
+                </ng-container>
+                <ng-template #noDeadline>
+                  <span class="placeholder-text" (click)="openDeadlineModal()">No deadline</span>
                 </ng-template>
-              </ion-modal>
-            </ion-item>
+                <ion-modal [keepContentsMounted]="true" #deadlineModal>
+                  <ng-template>
+                    <ion-datetime id="project-deadline-datetime" presentation="date" [(ngModel)]="project.deadline"></ion-datetime>
+                  </ng-template>
+                </ion-modal>
+              </div>
+              <ion-button fill="clear" size="small" color="danger" *ngIf="project.deadline" (click)="project.deadline = null">
+                <ion-icon name="close-circle-outline"></ion-icon>
+              </ion-button>
+            </div>
           </div>
 
           <!-- Icon -->

@@ -101,16 +101,7 @@ h1, h2, h3, h4, h5, h6 {
   }
 }
 
-/* Modal Bottom Sheet Style */
-.add-task-modal-sheet {
-  --border-radius: 28px 28px 0 0;
-  --height: 90%;
-  align-items: flex-end;
-  
-  .modal-wrapper {
-    border-radius: 28px 28px 0 0;
-  }
-}
+/* Modal Bottom Sheet Style - Removed as AddTaskComponent is now full-screen */
 
 .header-right {
   display: flex;

@@ -72,49 +72,7 @@ export class ProjectsPage {
   }
 
   async editProject(project: any) {
-    const alert = await this.alertCtrl.create({
-      header: 'Edit Project',
-      inputs: [
-        {
-          name: 'name',
-          type: 'text',
-          value: project.name,
-          placeholder: 'Project Name'
-        },
-        {
-          name: 'category',
-          type: 'text',
-          value: project.category,
-          placeholder: 'Category'
-        },
-        {
-          name: 'color',
-          type: 'text',
-          value: project.color,
-          placeholder: 'Color'
-        },
-        {
-          name: 'deadline',
-          type: 'date',
-          value: project.deadline ? new Date(project.deadline).toISOString().split('T')[0] : '',
-          placeholder: 'Deadline'
-        }
-      ],
-      buttons: [
-        {
-          text: 'Cancel',
-          role: 'cancel'
-        },
-        {
-          text: 'Save',
-          handler: (data) => {
-            this.updateProject(project.id, data);
-          }
-        }
-      ]
-    });
-
-    await alert.present();
+    this.router.navigate(['/tabs/projects/edit-project', project.id]);
   }
 
   async updateProject(id: string, data: any) {

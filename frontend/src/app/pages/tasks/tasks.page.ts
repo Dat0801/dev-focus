@@ -3,6 +3,7 @@ import { AlertController, LoadingController, ModalController, ToastController } 
 import { ActivatedRoute, Router } from '@angular/router';
 import { TaskService } from '../../services/task';
 import { AddTaskComponent } from './components/add-task/add-task.component';
+import { TaskDetailComponent } from './components/task-detail/task-detail.component';
 
 @Component({
   selector: 'app-tasks',
@@ -75,7 +76,7 @@ export class TasksPage implements OnInit {
         this.applyFilters();
         loading.dismiss();
       },
-      error: (err) => {
+      error: () => {
         loading.dismiss();
         this.showToast('Failed to load tasks');
       }
@@ -111,10 +112,7 @@ export class TasksPage implements OnInit {
 
   async addTask() {
     const modal = await this.modalCtrl.create({
-      component: AddTaskComponent,
-      breakpoints: [0, 0.9],
-      initialBreakpoint: 0.9,
-      cssClass: 'add-task-modal-sheet'
+      component: AddTaskComponent
     });
 
     await modal.present();
@@ -129,6 +127,9 @@ export class TasksPage implements OnInit {
         priority: data.priority,
         project_id: data.project_id,
         due_date: data.due_date,
+        start_date: data.start_date,
+        end_date: data.end_date,
+        work_hours: data.work_hours,
         estimated_pomodoros: data.estimated_pomodoros,
         completed_pomodoros: 0
       };
@@ -140,6 +141,29 @@ export class TasksPage implements OnInit {
         },
         error: () => this.showToast('Failed to create task')
       });
+    }
+  }
+
+  async openTaskDetail(task: any) {
+    const modal = await this.modalCtrl.create({
+      component: TaskDetailComponent,
+      componentProps: {
+        task: task
+      }
+    });
+
+    await modal.present();
+
+    const { data } = await modal.onWillDismiss();
+
+    if (data) {
+      if (data.deleted) {
+        this.tasks = this.tasks.filter(t => t.id !== data.id);
+        this.applyFilters();
+      } else {
+        // Task was updated
+        this.loadTasks();
+      }
     }
   }
 

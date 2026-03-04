@@ -70,18 +70,12 @@
       align-items: flex-start;
     }
 
-    &.date-input, &.select-input {
+    &.select-input {
       --min-height: 52px;
       
       ion-icon {
         font-size: 20px;
         margin-right: 8px;
-      }
-      
-      ion-datetime-button {
-        --background: transparent;
-        --color: #74777f;
-        margin-left: -10px;
       }
 
       ion-select {
@@ -89,6 +83,49 @@
         --placeholder-color: #74777f;
         --placeholder-opacity: 1;
         font-size: 15px;
+      }
+    }
+  }
+
+  .date-chip-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    .date-chip {
+      background: #f7f9fc;
+      padding: 8px 16px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      color: #74777f;
+      border: 1px solid transparent;
+      transition: all 0.2s ease;
+      min-height: 52px;
+      flex: 1;
+
+      &.has-date {
+        background: #f0ebff;
+        color: #7c4dff;
+        border-color: #7c4dff;
+      }
+
+      ion-icon {
+        font-size: 20px;
+      }
+
+      ion-datetime-button {
+        --background: transparent;
+        --color: inherit;
+        font-weight: 500;
+        margin-left: -10px;
+      }
+
+      .placeholder-text {
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
       }
     }
   }

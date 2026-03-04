@@ -1,7 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { ActionSheetController, NavController } from '@ionic/angular';
+import { ActionSheetController, ModalController, NavController, ToastController } from '@ionic/angular';
 import { ProjectService } from '../../../services/project';
+import { TaskService } from '../../../services/task';
+import { AddTaskComponent } from '../../tasks/components/add-task/add-task.component';
 
 @Component({
   selector: 'app-project-detail',
@@ -26,7 +28,10 @@ export class ProjectDetailPage implements OnInit {
     private router: Router,
     private navCtrl: NavController,
     private projectService: ProjectService,
-    private actionSheetCtrl: ActionSheetController
+    private taskService: TaskService,
+    private actionSheetCtrl: ActionSheetController,
+    private modalCtrl: ModalController,
+    private toastCtrl: ToastController
   ) { }
 
   get filteredTasks() {
@@ -84,6 +89,49 @@ export class ProjectDetailPage implements OnInit {
 
   selectTab(tab: string) {
     this.selectedTab = tab;
+  }
+
+  async addTask() {
+    const modal = await this.modalCtrl.create({
+      component: AddTaskComponent
+    });
+
+    await modal.present();
+
+    const { data } = await modal.onWillDismiss();
+    
+    if (data) {
+      const taskData = {
+        title: data.title,
+        description: data.description,
+        status: 'todo',
+        priority: data.priority,
+        project_id: data.project_id || this.projectId,
+        due_date: data.due_date,
+        start_date: data.start_date,
+        end_date: data.end_date,
+        work_hours: data.work_hours,
+        estimated_pomodoros: data.estimated_pomodoros,
+        completed_pomodoros: 0
+      };
+
+      this.taskService.createTask(taskData).subscribe({
+        next: () => {
+          this.loadProjectDetails();
+          this.showToast('Task created successfully');
+        },
+        error: () => this.showToast('Failed to create task')
+      });
+    }
+  }
+
+  private async showToast(message: string) {
+    const toast = await this.toastCtrl.create({
+      message,
+      duration: 2000,
+      color: 'dark'
+    });
+    toast.present();
   }
 
   async presentActionSheet() {

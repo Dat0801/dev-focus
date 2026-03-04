@@ -18,6 +18,11 @@ class Task extends Model
         'title',
         'description',
         'due_date',
+        'start_date',
+        'end_date',
+        'work_hours',
+        'estimated_pomodoros',
+        'completed_pomodoros',
         'priority',
         'status',
         'project_id',
@@ -26,6 +31,9 @@ class Task extends Model
 
     protected $casts = [
         'due_date' => 'datetime',
+        'start_date' => 'datetime',
+        'end_date' => 'datetime',
+        'work_hours' => 'decimal:2',
     ];
 
     public function user(): BelongsTo

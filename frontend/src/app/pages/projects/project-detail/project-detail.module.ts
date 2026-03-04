@@ -1,9 +1,10 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { IonicModule } from '@ionic/angular';
 import { ProjectDetailPage } from './project-detail.page';
 import { RouterModule, Routes } from '@angular/router';
+import { TasksComponentsModule } from '../../tasks/components/tasks-components.module';
 
 const routes: Routes = [
   {
@@ -16,8 +17,10 @@ const routes: Routes = [
   imports: [
     CommonModule,
     FormsModule,
+    ReactiveFormsModule,
     IonicModule,
-    RouterModule.forChild(routes)
+    RouterModule.forChild(routes),
+    TasksComponentsModule
   ],
   declarations: [ProjectDetailPage]
 })

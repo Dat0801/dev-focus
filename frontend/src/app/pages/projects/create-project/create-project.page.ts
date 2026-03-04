@@ -1,6 +1,6 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
-import { LoadingController, ToastController } from '@ionic/angular';
+import { IonModal, LoadingController, ToastController } from '@ionic/angular';
 import { ProjectService } from '../../../services/project';
 
 @Component({
@@ -10,10 +10,12 @@ import { ProjectService } from '../../../services/project';
   standalone: false
 })
 export class CreateProjectPage implements OnInit {
-  project = {
+  @ViewChild('deadlineModal') deadlineModal!: IonModal;
+  
+  project: any = {
     name: '',
     description: '',
-    deadline: new Date().toISOString(),
+    deadline: null,
     icon: 'folder',
     color: '#ffdce0',
     pomodoro_enabled: true
@@ -39,6 +41,13 @@ export class CreateProjectPage implements OnInit {
 
   selectColor(color: string) {
     this.project.color = color;
+  }
+
+  openDeadlineModal() {
+    if (!this.project.deadline) {
+      this.project.deadline = new Date().toISOString();
+    }
+    this.deadlineModal.present();
   }
 
   async createProject() {

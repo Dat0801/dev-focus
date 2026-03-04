@@ -72,7 +72,7 @@
             </div>
           </div>
           
-          <ion-label class="task-label">
+          <ion-label class="task-label" (click)="openTaskDetail(task)">
             <h2 class="task-title">{{ task.title }}</h2>
             <div class="task-meta">
               <ion-badge 

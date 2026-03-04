@@ -1,96 +1,187 @@
-<div class="add-task-container">
-  <div class="header">
-    <div class="title">Add New Task</div>
-    <div class="close-btn" (click)="dismiss()">
-      <ion-icon name="close-outline"></ion-icon>
+<ion-header class="ion-no-border">
+  <ion-toolbar>
+    <ion-title>Add New Task</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="dismiss()" class="close-btn">
+        <ion-icon name="close-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <div class="add-task-container">
+    <div class="input-group">
+      <ion-input
+        [(ngModel)]="taskName"
+        placeholder="Task name"
+        class="task-name-input"
+        autofocus="true"
+      ></ion-input>
+      <ion-textarea
+        [(ngModel)]="description"
+        placeholder="Description"
+        class="description-input"
+        auto-grow="true"
+        rows="1"
+      ></ion-textarea>
     </div>
-  </div>
 
-  <div class="input-group">
-    <ion-input
-      [(ngModel)]="taskName"
-      placeholder="Task name"
-      class="task-name-input"
-      autofocus="true"
-    ></ion-input>
-    <ion-textarea
-      [(ngModel)]="description"
-      placeholder="Description"
-      class="description-input"
-      auto-grow="true"
-      rows="1"
-    ></ion-textarea>
-  </div>
-
-  <div class="section">
-    <div class="label">PROJECT</div>
-    <div class="chip-row">
-      <div
-        *ngFor="let p of projects"
-        class="chip project-chip"
-        [class.selected]="selectedProjectId === p.id"
-        (click)="selectProject(p.id)"
-      >
-        <span class="dot" [style.background]="p.color"></span>
-        {{ p.name }}
-      </div>
-    </div>
-  </div>
-
-  <div class="row">
-    <div class="section half">
-      <div class="label">PRIORITY</div>
-      <div class="chip-row small-gap">
+    <div class="section">
+      <div class="label">PROJECT</div>
+      <div class="chip-row">
         <div
-          *ngFor="let pr of priorities"
-          class="chip priority-chip"
-          [class]="'p-' + pr.label.toLowerCase()"
-          [class.selected]="selectedPriority === pr.value"
-          (click)="selectPriority(pr.value)"
+          *ngFor="let p of projects"
+          class="chip project-chip"
+          [class.selected]="selectedProjectId === p.id"
+          (click)="selectProject(p.id)"
         >
-          {{ pr.label }}
+          <span class="dot" [style.background]="p.color"></span>
+          {{ p.name }}
         </div>
       </div>
     </div>
 
-    <div class="section half">
-      <div class="label">DUE DATE</div>
-      <div class="date-chip">
-        <ion-icon name="calendar-outline"></ion-icon>
-        <ion-datetime-button datetime="datetime"></ion-datetime-button>
-        <ion-modal [keepContentsMounted]="true">
-          <ng-template>
-            <ion-datetime id="datetime" presentation="date" [(ngModel)]="dueDate"></ion-datetime>
-          </ng-template>
-        </ion-modal>
+    <div class="row">
+      <div class="section half">
+        <div class="label">PRIORITY</div>
+        <div class="chip-row small-gap">
+          <div
+            *ngFor="let pr of priorities"
+            class="chip priority-chip"
+            [class]="'p-' + pr.label.toLowerCase()"
+            [class.selected]="selectedPriority === pr.value"
+            (click)="selectPriority(pr.value)"
+          >
+            {{ pr.label }}
+          </div>
+        </div>
+      </div>
+
+      <div class="section half">
+        <div class="label">DEADLINE</div>
+        <div class="date-chip-wrapper">
+          <div class="date-chip" [class.has-date]="dueDate">
+            <ion-icon name="calendar-outline"></ion-icon>
+            <ng-container *ngIf="dueDate; else noDeadline">
+              <ion-datetime-button datetime="deadline-datetime"></ion-datetime-button>
+            </ng-container>
+            <ng-template #noDeadline>
+              <span class="placeholder-text" (click)="openDeadlineModal()">No deadline</span>
+            </ng-template>
+            <ion-modal [keepContentsMounted]="true" #deadlineModal>
+              <ng-template>
+                <ion-datetime id="deadline-datetime" presentation="date" [(ngModel)]="dueDate"></ion-datetime>
+              </ng-template>
+            </ion-modal>
+          </div>
+          <ion-button fill="clear" size="small" color="danger" *ngIf="dueDate" (click)="dueDate = null">
+            <ion-icon name="close-circle-outline"></ion-icon>
+          </ion-button>
+        </div>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="section half">
+        <div class="label">START DATE</div>
+        <div class="date-chip-wrapper">
+          <div class="date-chip" [class.has-date]="startDate">
+            <ion-icon name="calendar-outline"></ion-icon>
+            <ng-container *ngIf="startDate; else noStartDate">
+              <ion-datetime-button datetime="start-datetime"></ion-datetime-button>
+            </ng-container>
+            <ng-template #noStartDate>
+              <span class="placeholder-text" (click)="openStartDateModal()">No start date</span>
+            </ng-template>
+            <ion-modal [keepContentsMounted]="true" #startDateModal>
+              <ng-template>
+                <ion-datetime id="start-datetime" presentation="date" [(ngModel)]="startDate"></ion-datetime>
+              </ng-template>
+            </ion-modal>
+          </div>
+          <ion-button fill="clear" size="small" color="danger" *ngIf="startDate" (click)="startDate = null">
+            <ion-icon name="close-circle-outline"></ion-icon>
+          </ion-button>
+        </div>
+      </div>
+
+      <div class="section half">
+        <div class="label">END DATE</div>
+        <div class="date-chip-wrapper">
+          <div class="date-chip" [class.has-date]="endDate">
+            <ion-icon name="calendar-outline"></ion-icon>
+            <ng-container *ngIf="endDate; else noEndDate">
+              <ion-datetime-button datetime="end-datetime"></ion-datetime-button>
+            </ng-container>
+            <ng-template #noEndDate>
+              <span class="placeholder-text" (click)="openEndDateModal()">No end date</span>
+            </ng-template>
+            <ion-modal [keepContentsMounted]="true" #endDateModal>
+              <ng-template>
+                <ion-datetime id="end-datetime" presentation="date" [(ngModel)]="endDate"></ion-datetime>
+              </ng-template>
+            </ion-modal>
+          </div>
+          <ion-button fill="clear" size="small" color="danger" *ngIf="endDate" (click)="endDate = null">
+            <ion-icon name="close-circle-outline"></ion-icon>
+          </ion-button>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="label">WORK HOURS</div>
+      <div class="input-hours-group">
+        <ion-icon name="time-outline"></ion-icon>
+        <ion-input
+          type="number"
+          [(ngModel)]="workHours"
+          placeholder="Enter hours worked"
+          class="hours-input"
+        ></ion-input>
+        <span class="hours-suffix">hrs</span>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="pomodoro-header">
+        <div class="label">ESTIMATED POMODOROS</div>
+        <div class="pomodoro-info" *ngIf="estimatedPomodoros !== null">
+          <ion-icon name="timer"></ion-icon>
+          <span>{{ estimatedPomodoros }}{{ estimatedPomodoros === 4 ? '+' : '' }} Pomodoro{{ estimatedPomodoros > 1 ? 's' : '' }}</span>
+        </div>
+        <div class="pomodoro-info" *ngIf="estimatedPomodoros === null">
+          <ion-icon name="timer-outline"></ion-icon>
+          <span>Optional</span>
+        </div>
+      </div>
+      <div class="chip-row full-width">
+        <div
+          *ngFor="let opt of pomodoroOptions"
+          class="chip pomodoro-chip"
+          [class.selected]="estimatedPomodoros !== null && ((opt === '4+' && estimatedPomodoros === 4) || estimatedPomodoros === opt)"
+          (click)="selectPomodoro(opt)"
+        >
+          {{ opt }}
+        </div>
+        <div 
+          class="chip pomodoro-chip" 
+          [class.selected]="estimatedPomodoros === null"
+          (click)="estimatedPomodoros = null"
+        >
+          None
+        </div>
       </div>
     </div>
   </div>
+</ion-content>
 
-  <div class="section">
-    <div class="pomodoro-header">
-      <div class="label">ESTIMATED POMODOROS</div>
-      <div class="pomodoro-info">
-        <ion-icon name="timer"></ion-icon>
-        <span>{{ estimatedPomodoros }}{{ estimatedPomodoros === 4 ? '+' : '' }} Pomodoro{{ estimatedPomodoros > 1 ? 's' : '' }}</span>
-      </div>
-    </div>
-    <div class="chip-row full-width">
-      <div
-        *ngFor="let opt of pomodoroOptions"
-        class="chip pomodoro-chip"
-        [class.selected]="(opt === '4+' && estimatedPomodoros === 4) || estimatedPomodoros === opt"
-        (click)="selectPomodoro(opt)"
-      >
-        {{ opt }}
-      </div>
-    </div>
-  </div>
-
-  <div class="footer">
+<ion-footer class="ion-no-border">
+  <div class="footer-container">
     <ion-button expand="block" class="create-button" (click)="createTask()" [disabled]="!taskName">
       <ion-icon name="checkmark-circle-outline" slot="start"></ion-icon>
       Create Task
     </ion-button>
   </div>
-</div>
+</ion-footer>

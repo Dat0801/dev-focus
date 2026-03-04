@@ -1,6 +1,6 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { LoadingController, NavController, ToastController } from '@ionic/angular';
+import { IonModal, LoadingController, NavController, ToastController } from '@ionic/angular';
 import { ProjectService } from '../../../services/project';
 
 @Component({
@@ -10,11 +10,13 @@ import { ProjectService } from '../../../services/project';
   standalone: false
 })
 export class EditProjectPage implements OnInit {
+  @ViewChild('deadlineModal') deadlineModal!: IonModal;
+  
   projectId: string | null = null;
-  project = {
+  project: any = {
     name: '',
     description: '',
-    deadline: new Date().toISOString(),
+    deadline: null,
     icon: 'folder',
     color: '#ffdce0',
     pomodoro_enabled: true
@@ -54,7 +56,12 @@ export class EditProjectPage implements OnInit {
 
     this.projectService.getProject(this.projectId!).subscribe({
       next: (res: any) => {
-        this.project = { ...this.project, ...res.data };
+        const data = res.data;
+        this.project = { 
+          ...this.project, 
+          ...data,
+          deadline: data.deadline ? new Date(data.deadline).toISOString() : null
+        };
         loading.dismiss();
       },
       error: (err) => {
@@ -67,6 +74,13 @@ export class EditProjectPage implements OnInit {
 
   selectColor(color: string) {
     this.project.color = color;
+  }
+
+  openDeadlineModal() {
+    if (!this.project.deadline) {
+      this.project.deadline = new Date().toISOString();
+    }
+    this.deadlineModal.present();
   }
 
   async updateProject() {

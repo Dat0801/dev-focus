@@ -1,0 +1,135 @@
+<ion-header class="ion-no-border">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-button (click)="dismiss()" class="close-btn">
+        <ion-icon slot="icon-only" name="close-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>Task Details</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="updateTask()" color="primary" fill="clear">
+        Save
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <div class="task-detail-container">
+    <div class="status-header ion-padding-bottom">
+      <div 
+        class="custom-checkbox" 
+        [class.checked]="editedTask.status === 'done'"
+        (click)="toggleStatus()">
+        <ion-icon *ngIf="editedTask.status === 'done'" name="checkmark"></ion-icon>
+      </div>
+      <span class="status-text">{{ editedTask.status === 'done' ? 'Completed' : 'To Do' }}</span>
+    </div>
+
+    <div class="input-group">
+      <ion-input 
+        class="task-name-input"
+        placeholder="What's on your mind?" 
+        [(ngModel)]="editedTask.title">
+      </ion-input>
+      
+      <ion-textarea 
+        class="description-input"
+        placeholder="Add some details..." 
+        [autoGrow]="true"
+        [(ngModel)]="editedTask.description">
+      </ion-textarea>
+    </div>
+
+    <div class="section">
+      <div class="label">PROJECT</div>
+      <div class="chip-row">
+        <div 
+          *ngFor="let project of projects" 
+          class="chip project-chip"
+          [class.selected]="editedTask.project_id === project.id"
+          (click)="selectProject(project.id)">
+          <div class="dot" [style.background-color]="project.color || '#ccc'"></div>
+          <span>{{ project.name }}</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="section half">
+        <div class="label">PRIORITY</div>
+        <div class="chip-row small-gap">
+          <div 
+            *ngFor="let p of priorities" 
+            class="chip priority-chip"
+            [class.selected]="editedTask.priority === p.value"
+            [class]="'p-' + p.label.toLowerCase()"
+            (click)="selectPriority(p.value)">
+            {{ p.label }}
+          </div>
+        </div>
+      </div>
+
+      <div class="section half">
+        <div class="label">DEADLINE</div>
+        <div class="date-chip-wrapper">
+          <div 
+            class="date-chip" 
+            [class.has-date]="editedTask.due_date"
+            (click)="deadlineModal.present()">
+            <ion-icon name="calendar-outline"></ion-icon>
+            <span class="placeholder-text">{{ editedTask.due_date ? (editedTask.due_date | date:'MMM d') : 'Set Date' }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="pomodoro-header">
+        <div class="label">POMODORO PROGRESS</div>
+        <div class="pomodoro-info">
+          <ion-icon name="stopwatch"></ion-icon>
+          <span>{{ editedTask.completed_pomodoros || 0 }} / {{ editedTask.estimated_pomodoros || 1 }}</span>
+        </div>
+      </div>
+      
+      <div class="pomodoro-control">
+        <ion-button fill="outline" class="control-btn" (click)="decrementPomodoro()" [disabled]="(editedTask.completed_pomodoros || 0) <= 0">
+          <ion-icon slot="icon-only" name="remove-outline"></ion-icon>
+        </ion-button>
+        <div class="progress-bar-container">
+          <div class="progress-bar" [style.width.%]="((editedTask.completed_pomodoros || 0) / (editedTask.estimated_pomodoros || 1)) * 100"></div>
+        </div>
+        <ion-button fill="outline" class="control-btn" (click)="incrementPomodoro()" [disabled]="(editedTask.completed_pomodoros || 0) >= (editedTask.estimated_pomodoros || 1)">
+          <ion-icon slot="icon-only" name="add-outline"></ion-icon>
+        </ion-button>
+      </div>
+    </div>
+
+    <div class="danger-zone">
+      <ion-button fill="clear" color="danger" (click)="deleteTask()" class="delete-btn">
+        <ion-icon slot="start" name="trash-outline"></ion-icon>
+        Delete Task
+      </ion-button>
+    </div>
+  </div>
+
+  <ion-modal #deadlineModal [initialBreakpoint]="0.5" [breakpoints]="[0, 0.5, 0.75]">
+    <ng-template>
+      <ion-header>
+        <ion-toolbar>
+          <ion-title>Select Deadline</ion-title>
+          <ion-buttons slot="end">
+            <ion-button (click)="deadlineModal.dismiss()">Done</ion-button>
+          </ion-buttons>
+        </ion-toolbar>
+      </ion-header>
+      <ion-content>
+        <ion-datetime 
+          presentation="date" 
+          [(ngModel)]="editedTask.due_date">
+        </ion-datetime>
+      </ion-content>
+    </ng-template>
+  </ion-modal>
+</ion-content>
