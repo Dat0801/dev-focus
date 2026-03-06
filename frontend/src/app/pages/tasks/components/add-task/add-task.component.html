@@ -1,11 +1,13 @@
 <ion-header class="ion-no-border">
   <ion-toolbar>
-    <ion-title>Add New Task</ion-title>
-    <ion-buttons slot="end">
-      <ion-button (click)="dismiss()" class="close-btn">
-        <ion-icon name="close-outline"></ion-icon>
-      </ion-button>
-    </ion-buttons>
+    <div class="toolbar-container">
+      <ion-title>Add New Task</ion-title>
+      <ion-buttons slot="end">
+        <ion-button (click)="dismiss()" class="close-btn">
+          <ion-icon name="close-outline"></ion-icon>
+        </ion-button>
+      </ion-buttons>
+    </div>
   </ion-toolbar>
 </ion-header>
 
@@ -71,7 +73,7 @@
             </ng-template>
             <ion-modal [keepContentsMounted]="true" #deadlineModal>
               <ng-template>
-                <ion-datetime id="deadline-datetime" presentation="date" [(ngModel)]="dueDate"></ion-datetime>
+                <ion-datetime id="deadline-datetime" presentation="date" [(ngModel)]="dueDate" (ionChange)="onDateChange('deadline')"></ion-datetime>
               </ng-template>
             </ion-modal>
           </div>
@@ -96,7 +98,7 @@
             </ng-template>
             <ion-modal [keepContentsMounted]="true" #startDateModal>
               <ng-template>
-                <ion-datetime id="start-datetime" presentation="date" [(ngModel)]="startDate"></ion-datetime>
+                <ion-datetime id="start-datetime" presentation="date" [(ngModel)]="startDate" (ionChange)="onDateChange('start')"></ion-datetime>
               </ng-template>
             </ion-modal>
           </div>
@@ -119,7 +121,7 @@
             </ng-template>
             <ion-modal [keepContentsMounted]="true" #endDateModal>
               <ng-template>
-                <ion-datetime id="end-datetime" presentation="date" [(ngModel)]="endDate"></ion-datetime>
+                <ion-datetime id="end-datetime" presentation="date" [(ngModel)]="endDate" (ionChange)="onDateChange('end')"></ion-datetime>
               </ng-template>
             </ion-modal>
           </div>
@@ -147,30 +149,19 @@
     <div class="section">
       <div class="pomodoro-header">
         <div class="label">ESTIMATED POMODOROS</div>
-        <div class="pomodoro-info" *ngIf="estimatedPomodoros !== null">
+        <div class="pomodoro-info">
           <ion-icon name="timer"></ion-icon>
           <span>{{ estimatedPomodoros }}{{ estimatedPomodoros === 4 ? '+' : '' }} Pomodoro{{ estimatedPomodoros > 1 ? 's' : '' }}</span>
-        </div>
-        <div class="pomodoro-info" *ngIf="estimatedPomodoros === null">
-          <ion-icon name="timer-outline"></ion-icon>
-          <span>Optional</span>
         </div>
       </div>
       <div class="chip-row full-width">
         <div
           *ngFor="let opt of pomodoroOptions"
           class="chip pomodoro-chip"
-          [class.selected]="estimatedPomodoros !== null && ((opt === '4+' && estimatedPomodoros === 4) || estimatedPomodoros === opt)"
+          [class.selected]="(opt === '4+' && estimatedPomodoros === 4) || estimatedPomodoros === opt"
           (click)="selectPomodoro(opt)"
         >
           {{ opt }}
-        </div>
-        <div 
-          class="chip pomodoro-chip" 
-          [class.selected]="estimatedPomodoros === null"
-          (click)="estimatedPomodoros = null"
-        >
-          None
         </div>
       </div>
     </div>

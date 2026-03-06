@@ -41,13 +41,13 @@ class TaskService
         return $this->taskRepository->delete($id);
     }
 
-    public function getTodayTasks(): Collection
+    public function getTodayTasks(?string $date = null): Collection
     {
-        return $this->taskRepository->getTodayTasks();
+        return $this->taskRepository->getTodayTasks($date);
     }
 
-    public function getUpcomingTasks(): Collection
+    public function getUpcomingTasks(?string $date = null): Collection
     {
-        return $this->taskRepository->getUpcomingTasks();
+        return $this->taskRepository->getUpcomingTasks($date);
     }
 }

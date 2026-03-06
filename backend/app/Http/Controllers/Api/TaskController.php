@@ -76,13 +76,13 @@ class TaskController extends Controller
         return response()->json(['message' => 'Task deleted successfully']);
     }
 
-    public function today(): AnonymousResourceCollection
+    public function today(Request $request): AnonymousResourceCollection
     {
-        return TaskResource::collection($this->taskService->getTodayTasks());
+        return TaskResource::collection($this->taskService->getTodayTasks($request->query('date')));
     }
 
-    public function upcoming(): AnonymousResourceCollection
+    public function upcoming(Request $request): AnonymousResourceCollection
     {
-        return TaskResource::collection($this->taskService->getUpcomingTasks());
+        return TaskResource::collection($this->taskService->getUpcomingTasks($request->query('date')));
     }
 }

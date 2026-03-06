@@ -64,42 +64,60 @@
   </div>
 
   <div class="tasks-list">
-    <div class="task-card" *ngFor="let task of filteredTasks">
-      <div class="task-main">
-        <div class="task-left">
-          <div class="checkbox-container">
-            <div class="custom-checkbox" [class.checked]="task.status === 'done'">
+    <div *ngFor="let task of filteredTasks" class="task-item-wrapper">
+      <ion-item-sliding class="task-item-sliding">
+        <ion-item class="task-item" [class.completed]="task.status === 'done'" lines="none">
+          <div class="checkbox-wrapper" slot="start">
+            <div 
+              class="custom-checkbox" 
+              [class.checked]="task.status === 'done'"
+              (click)="toggleStatus(task); $event.stopPropagation()">
               <ion-icon *ngIf="task.status === 'done'" name="checkmark"></ion-icon>
             </div>
           </div>
-          <div class="task-info">
-            <div class="task-header">
-              <h3 class="task-title">{{ task.title }}</h3>
-              <div class="priority-tag" *ngIf="task.priority" [ngClass]="task.priority.toLowerCase()">{{ task.priority | uppercase }}</div>
+          
+          <ion-label class="task-label" (click)="openTaskDetail(task)">
+            <h2 class="task-title">{{ task.title }}</h2>
+            <div class="task-meta">
+              <span 
+                *ngIf="task.priority" 
+                class="priority-tag"
+                [class]="'p-' + task.priority">
+                {{ task.priority === 'urgent' ? 'P1' : task.priority === 'high' ? 'P2' : task.priority === 'medium' ? 'P3' : 'P4' }}
+              </span>
+              
+              <span class="meta-item deadline" *ngIf="task.due_date && task.status !== 'done'">
+                <ion-icon name="calendar-outline"></ion-icon>
+                {{ task.due_date | date:'MMM d' }}
+              </span>
+              
+              <span class="meta-item status-done" *ngIf="task.status === 'done'">
+                <ion-icon name="checkmark-circle-outline"></ion-icon>
+                Done
+              </span>
+
+              <span class="meta-item progress-info">
+                <ion-icon name="timer-outline"></ion-icon>
+                {{ task.completed_pomodoros || 0 }}/{{ task.estimated_pomodoros || 1 }}
+              </span>
             </div>
-            <p class="task-desc" *ngIf="task.description">{{ task.description }}</p>
-          </div>
-        </div>
-      </div>
-      
-      <div class="task-footer">
-        <div class="sessions-info">
-          <ion-icon name="timer-outline" class="timer-icon"></ion-icon>
-          <span class="sessions-count">{{ task.completed_pomodoros || 0 }}/{{ task.estimated_pomodoros || 4 }} SESSIONS</span>
-        </div>
-        <div class="assignees" *ngIf="task.assignees?.length">
-          <div class="avatar-stack">
-            <div class="avatar-circle" *ngFor="let avatar of task.assignees">
-              <ion-icon name="person-circle"></ion-icon>
-            </div>
-          </div>
-        </div>
-      </div>
+          </ion-label>
+        </ion-item>
+
+        <ion-item-options side="end">
+          <ion-item-option color="danger" (click)="deleteTask(task)" class="delete-option">
+            <ion-icon slot="icon-only" name="trash-outline"></ion-icon>
+          </ion-item-option>
+        </ion-item-options>
+      </ion-item-sliding>
     </div>
 
     <div class="empty-state ion-text-center ion-padding" *ngIf="filteredTasks.length === 0">
-      <ion-icon name="document-text-outline" style="font-size: 48px; color: #adb1b9;"></ion-icon>
-      <p style="color: #adb1b9;">No tasks found in this category.</p>
+      <div class="empty-illustration">
+        <ion-icon name="document-text-outline"></ion-icon>
+      </div>
+      <h3>No tasks found</h3>
+      <p>Try adjusting your filters.</p>
     </div>
   </div>
 

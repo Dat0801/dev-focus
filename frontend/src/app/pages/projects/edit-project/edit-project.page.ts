@@ -83,6 +83,10 @@ export class EditProjectPage implements OnInit {
     this.deadlineModal.present();
   }
 
+  onDateChange() {
+    this.deadlineModal.dismiss();
+  }
+
   async updateProject() {
     if (!this.project.name) {
       this.showToast('Please enter a project name');

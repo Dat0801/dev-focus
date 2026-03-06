@@ -60,9 +60,11 @@ export class TasksPage implements OnInit {
 
     let obs;
     if (this.filter === 'today') {
-      obs = this.taskService.getTodayTasks();
+      const localDate = new Date().toISOString().split('T')[0];
+      obs = this.taskService.getTodayTasks(localDate);
     } else if (this.filter === 'upcoming') {
-      obs = this.taskService.getUpcomingTasks();
+      const localDate = new Date().toISOString().split('T')[0];
+      obs = this.taskService.getUpcomingTasks(localDate);
     } else if (this.filter === 'completed') {
       // Assuming there's a way to filter completed tasks, or we filter locally
       obs = this.taskService.getTasks();
@@ -112,7 +114,8 @@ export class TasksPage implements OnInit {
 
   async addTask() {
     const modal = await this.modalCtrl.create({
-      component: AddTaskComponent
+      component: AddTaskComponent,
+      cssClass: 'full-screen-modal'
     });
 
     await modal.present();
@@ -149,7 +152,8 @@ export class TasksPage implements OnInit {
       component: TaskDetailComponent,
       componentProps: {
         task: task
-      }
+      },
+      cssClass: 'full-screen-modal'
     });
 
     await modal.present();

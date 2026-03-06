@@ -12,6 +12,8 @@ import { TaskService } from '../../../../services/task';
 export class TaskDetailComponent implements OnInit {
   @Input() task: any;
   @ViewChild('deadlineModal') deadlineModal!: IonModal;
+  @ViewChild('startDateModal') startDateModal!: IonModal;
+  @ViewChild('endDateModal') endDateModal!: IonModal;
   
   editedTask: any;
   projects: any[] = [];
@@ -22,6 +24,7 @@ export class TaskDetailComponent implements OnInit {
     { label: 'P3', value: 'medium' },
     { label: 'P4', value: 'low' }
   ];
+  pomodoroOptions = [1, 2, 3, '4+'];
 
   constructor(
     private modalCtrl: ModalController,
@@ -33,6 +36,21 @@ export class TaskDetailComponent implements OnInit {
 
   ngOnInit() {
     this.editedTask = { ...this.task };
+    
+    // Format dates for ion-datetime (it expects ISO string or similar)
+    if (this.editedTask.due_date) {
+      this.editedTask.due_date = new Date(this.editedTask.due_date).toISOString();
+    }
+    if (this.editedTask.start_date) {
+      this.editedTask.start_date = new Date(this.editedTask.start_date).toISOString();
+    }
+    if (this.editedTask.end_date) {
+      this.editedTask.end_date = new Date(this.editedTask.end_date).toISOString();
+    }
+
+    if (this.editedTask.estimated_pomodoros === null) {
+      this.editedTask.estimated_pomodoros = 1;
+    }
     this.loadProjects();
   }
 
@@ -66,6 +84,9 @@ export class TaskDetailComponent implements OnInit {
       priority: this.editedTask.priority,
       project_id: this.editedTask.project_id,
       due_date: this.editedTask.due_date,
+      start_date: this.editedTask.start_date,
+      end_date: this.editedTask.end_date,
+      work_hours: this.editedTask.work_hours,
       estimated_pomodoros: this.editedTask.estimated_pomodoros
     };
 
@@ -107,6 +128,36 @@ export class TaskDetailComponent implements OnInit {
 
   selectPriority(priority: string) {
     this.editedTask.priority = priority;
+  }
+
+  openDeadlineModal() {
+    this.deadlineModal.present();
+  }
+
+  openStartDateModal() {
+    this.startDateModal.present();
+  }
+
+  openEndDateModal() {
+    this.endDateModal.present();
+  }
+
+  onDateChange(type: 'deadline' | 'start' | 'end') {
+    if (type === 'deadline') {
+      this.deadlineModal.dismiss();
+    } else if (type === 'start') {
+      this.startDateModal.dismiss();
+    } else if (type === 'end') {
+      this.endDateModal.dismiss();
+    }
+  }
+
+  selectPomodoro(option: number | string) {
+    if (option === '4+') {
+      this.editedTask.estimated_pomodoros = 4;
+    } else {
+      this.editedTask.estimated_pomodoros = option as number;
+    }
   }
 
   incrementPomodoro() {

@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, Input, OnInit, ViewChild } from '@angular/core';
 import { IonModal, ModalController } from '@ionic/angular';
 import { ProjectService } from '../../../../services/project';
 
@@ -13,15 +13,16 @@ export class AddTaskComponent implements OnInit {
   @ViewChild('startDateModal') startDateModal!: IonModal;
   @ViewChild('endDateModal') endDateModal!: IonModal;
   
+  @Input() selectedProjectId: string | null = null;
+  
   taskName: string = '';
   description: string = '';
-  selectedProjectId: string | null = null;
   selectedPriority: string = 'medium';
   dueDate: string | null = null;
   startDate: string | null = null;
   endDate: string | null = null;
   workHours: number | null = null;
-  estimatedPomodoros: number | null = null;
+  estimatedPomodoros: number = 1;
 
   projects: any[] = [];
 
@@ -46,7 +47,7 @@ export class AddTaskComponent implements OnInit {
     this.projectService.getProjects().subscribe({
       next: (res: any) => {
         this.projects = res.data;
-        if (this.projects.length > 0) {
+        if (this.projects.length > 0 && !this.selectedProjectId) {
           this.selectedProjectId = this.projects[0].id;
         }
       }
@@ -76,6 +77,16 @@ export class AddTaskComponent implements OnInit {
       this.endDate = new Date().toISOString();
     }
     this.endDateModal.present();
+  }
+
+  onDateChange(type: 'deadline' | 'start' | 'end') {
+    if (type === 'deadline') {
+      this.deadlineModal.dismiss();
+    } else if (type === 'start') {
+      this.startDateModal.dismiss();
+    } else if (type === 'end') {
+      this.endDateModal.dismiss();
+    }
   }
 
   selectProject(projectId: string) {

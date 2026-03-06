@@ -13,6 +13,6 @@ interface TaskRepositoryInterface
     public function create(array $data): Task;
     public function update(string $id, array $data): bool;
     public function delete(string $id): bool;
-    public function getTodayTasks(): Collection;
-    public function getUpcomingTasks(): Collection;
+    public function getTodayTasks(?string $date = null): Collection;
+    public function getUpcomingTasks(?string $date = null): Collection;
 }

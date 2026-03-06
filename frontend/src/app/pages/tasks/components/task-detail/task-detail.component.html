@@ -1,22 +1,19 @@
 <ion-header class="ion-no-border">
   <ion-toolbar>
-    <ion-buttons slot="start">
-      <ion-button (click)="dismiss()" class="close-btn">
-        <ion-icon slot="icon-only" name="close-outline"></ion-icon>
-      </ion-button>
-    </ion-buttons>
-    <ion-title>Task Details</ion-title>
-    <ion-buttons slot="end">
-      <ion-button (click)="updateTask()" color="primary" fill="clear">
-        Save
-      </ion-button>
-    </ion-buttons>
+    <div class="toolbar-container">
+      <ion-title>Task Details</ion-title>
+      <ion-buttons slot="end">
+        <ion-button (click)="dismiss()" class="close-btn">
+          <ion-icon name="close-outline"></ion-icon>
+        </ion-button>
+      </ion-buttons>
+    </div>
   </ion-toolbar>
 </ion-header>
 
 <ion-content>
   <div class="task-detail-container">
-    <div class="status-header ion-padding-bottom">
+    <div class="status-header">
       <div 
         class="custom-checkbox" 
         [class.checked]="editedTask.status === 'done'"
@@ -37,6 +34,7 @@
         class="description-input"
         placeholder="Add some details..." 
         [autoGrow]="true"
+        rows="1"
         [(ngModel)]="editedTask.description">
       </ion-textarea>
     </div>
@@ -49,8 +47,8 @@
           class="chip project-chip"
           [class.selected]="editedTask.project_id === project.id"
           (click)="selectProject(project.id)">
-          <div class="dot" [style.background-color]="project.color || '#ccc'"></div>
-          <span>{{ project.name }}</span>
+          <span class="dot" [style.background]="project.color || '#ccc'"></span>
+          {{ project.name }}
         </div>
       </div>
     </div>
@@ -62,8 +60,8 @@
           <div 
             *ngFor="let p of priorities" 
             class="chip priority-chip"
-            [class.selected]="editedTask.priority === p.value"
             [class]="'p-' + p.label.toLowerCase()"
+            [class.selected]="editedTask.priority === p.value"
             (click)="selectPriority(p.value)">
             {{ p.label }}
           </div>
@@ -73,13 +71,105 @@
       <div class="section half">
         <div class="label">DEADLINE</div>
         <div class="date-chip-wrapper">
-          <div 
-            class="date-chip" 
-            [class.has-date]="editedTask.due_date"
-            (click)="deadlineModal.present()">
+          <div class="date-chip" [class.has-date]="editedTask.due_date">
             <ion-icon name="calendar-outline"></ion-icon>
-            <span class="placeholder-text">{{ editedTask.due_date ? (editedTask.due_date | date:'MMM d') : 'Set Date' }}</span>
+            <ng-container *ngIf="editedTask.due_date; else noDeadline">
+              <ion-datetime-button datetime="deadline-datetime-detail"></ion-datetime-button>
+            </ng-container>
+            <ng-template #noDeadline>
+              <span class="placeholder-text" (click)="openDeadlineModal()">No deadline</span>
+            </ng-template>
+            <ion-modal [keepContentsMounted]="true" #deadlineModal>
+              <ng-template>
+                <ion-datetime id="deadline-datetime-detail" presentation="date" [(ngModel)]="editedTask.due_date" (ionChange)="onDateChange('deadline')"></ion-datetime>
+              </ng-template>
+            </ion-modal>
           </div>
+          <ion-button fill="clear" size="small" color="danger" *ngIf="editedTask.due_date" (click)="editedTask.due_date = null">
+            <ion-icon name="close-circle-outline"></ion-icon>
+          </ion-button>
+        </div>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="section half">
+        <div class="label">START DATE</div>
+        <div class="date-chip-wrapper">
+          <div class="date-chip" [class.has-date]="editedTask.start_date">
+            <ion-icon name="calendar-outline"></ion-icon>
+            <ng-container *ngIf="editedTask.start_date; else noStartDate">
+              <ion-datetime-button datetime="start-datetime-detail"></ion-datetime-button>
+            </ng-container>
+            <ng-template #noStartDate>
+              <span class="placeholder-text" (click)="openStartDateModal()">No start date</span>
+            </ng-template>
+            <ion-modal [keepContentsMounted]="true" #startDateModal>
+              <ng-template>
+                <ion-datetime id="start-datetime-detail" presentation="date" [(ngModel)]="editedTask.start_date" (ionChange)="onDateChange('start')"></ion-datetime>
+              </ng-template>
+            </ion-modal>
+          </div>
+          <ion-button fill="clear" size="small" color="danger" *ngIf="editedTask.start_date" (click)="editedTask.start_date = null">
+            <ion-icon name="close-circle-outline"></ion-icon>
+          </ion-button>
+        </div>
+      </div>
+
+      <div class="section half">
+        <div class="label">END DATE</div>
+        <div class="date-chip-wrapper">
+          <div class="date-chip" [class.has-date]="editedTask.end_date">
+            <ion-icon name="calendar-outline"></ion-icon>
+            <ng-container *ngIf="editedTask.end_date; else noEndDate">
+              <ion-datetime-button datetime="end-datetime-detail"></ion-datetime-button>
+            </ng-container>
+            <ng-template #noEndDate>
+              <span class="placeholder-text" (click)="openEndDateModal()">No end date</span>
+            </ng-template>
+            <ion-modal [keepContentsMounted]="true" #endDateModal>
+              <ng-template>
+                <ion-datetime id="end-datetime-detail" presentation="date" [(ngModel)]="editedTask.end_date" (ionChange)="onDateChange('end')"></ion-datetime>
+              </ng-template>
+            </ion-modal>
+          </div>
+          <ion-button fill="clear" size="small" color="danger" *ngIf="editedTask.end_date" (click)="editedTask.end_date = null">
+            <ion-icon name="close-circle-outline"></ion-icon>
+          </ion-button>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="label">WORK HOURS</div>
+      <div class="input-hours-group">
+        <ion-icon name="time-outline"></ion-icon>
+        <ion-input
+          type="number"
+          [(ngModel)]="editedTask.work_hours"
+          placeholder="Enter hours worked"
+          class="hours-input"
+        ></ion-input>
+        <span class="hours-suffix">hrs</span>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="pomodoro-header">
+        <div class="label">ESTIMATED POMODOROS</div>
+        <div class="pomodoro-info">
+          <ion-icon name="timer"></ion-icon>
+          <span>{{ editedTask.estimated_pomodoros || 1 }}{{ editedTask.estimated_pomodoros === 4 ? '+' : '' }} Pomodoro{{ (editedTask.estimated_pomodoros || 1) > 1 ? 's' : '' }}</span>
+        </div>
+      </div>
+      <div class="chip-row full-width">
+        <div
+          *ngFor="let opt of pomodoroOptions"
+          class="chip pomodoro-chip"
+          [class.selected]="(opt === '4+' && editedTask.estimated_pomodoros === 4) || editedTask.estimated_pomodoros === opt"
+          (click)="selectPomodoro(opt)"
+        >
+          {{ opt }}
         </div>
       </div>
     </div>
@@ -88,8 +178,8 @@
       <div class="pomodoro-header">
         <div class="label">POMODORO PROGRESS</div>
         <div class="pomodoro-info">
-          <ion-icon name="stopwatch"></ion-icon>
-          <span>{{ editedTask.completed_pomodoros || 0 }} / {{ editedTask.estimated_pomodoros || 1 }}</span>
+          <ion-icon name="timer"></ion-icon>
+          <span>{{ editedTask.completed_pomodoros || 0 }} / {{ editedTask.estimated_pomodoros || 1 }} Sessions</span>
         </div>
       </div>
       
@@ -113,23 +203,13 @@
       </ion-button>
     </div>
   </div>
-
-  <ion-modal #deadlineModal [initialBreakpoint]="0.5" [breakpoints]="[0, 0.5, 0.75]">
-    <ng-template>
-      <ion-header>
-        <ion-toolbar>
-          <ion-title>Select Deadline</ion-title>
-          <ion-buttons slot="end">
-            <ion-button (click)="deadlineModal.dismiss()">Done</ion-button>
-          </ion-buttons>
-        </ion-toolbar>
-      </ion-header>
-      <ion-content>
-        <ion-datetime 
-          presentation="date" 
-          [(ngModel)]="editedTask.due_date">
-        </ion-datetime>
-      </ion-content>
-    </ng-template>
-  </ion-modal>
 </ion-content>
+
+<ion-footer class="ion-no-border">
+  <div class="footer-container">
+    <ion-button expand="block" class="save-button" (click)="updateTask()" [disabled]="!editedTask.title">
+      <ion-icon name="checkmark-circle-outline" slot="start"></ion-icon>
+      Save Changes
+    </ion-button>
+  </div>
+</ion-footer>

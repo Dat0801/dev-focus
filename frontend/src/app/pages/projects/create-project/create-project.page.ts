@@ -50,6 +50,10 @@ export class CreateProjectPage implements OnInit {
     this.deadlineModal.present();
   }
 
+  onDateChange() {
+    this.deadlineModal.dismiss();
+  }
+
   async createProject() {
     if (!this.project.name) {
       this.showToast('Please enter a project name');

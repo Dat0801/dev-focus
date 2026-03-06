@@ -59,19 +59,40 @@ class TaskRepository implements TaskRepositoryInterface
         return $task->delete();
     }
 
-    public function getTodayTasks(): Collection
+    public function getTodayTasks(?string $date = null): Collection
     {
+        $today = $date ?: now()->toDateString();
         return Task::where('user_id', Auth::id())
             ->with('project')
-            ->whereDate('due_date', now()->toDateString())
+            ->where(function ($query) use ($today) {
+                // Task is due today
+                $query->whereDate('due_date', $today)
+                    // Or task starts today
+                    ->orWhereDate('start_date', $today)
+                    // Or today is within the task's date range
+                    ->orWhere(function($q) use ($today) {
+                        $q->whereDate('start_date', '<=', $today)
+                          ->whereDate('due_date', '>=', $today);
+                    })
+                    // Or task is overdue and not completed
+                    ->orWhere(function($q) use ($today) {
+                        $q->whereDate('due_date', '<', $today)
+                          ->where('status', '!=', 'done');
+                    });
+            })
+            ->orderBy('due_date', 'asc')
             ->get();
     }
 
-    public function getUpcomingTasks(): Collection
+    public function getUpcomingTasks(?string $date = null): Collection
     {
+        $today = $date ?: now()->toDateString();
         return Task::where('user_id', Auth::id())
             ->with('project')
-            ->whereDate('due_date', '>', now()->toDateString())
+            ->where(function ($query) use ($today) {
+                $query->whereDate('due_date', '>', $today)
+                    ->orWhereDate('start_date', '>', $today);
+            })
             ->get();
     }
 }

@@ -42,7 +42,7 @@
                 </ng-template>
                 <ion-modal [keepContentsMounted]="true" #deadlineModal>
                   <ng-template>
-                    <ion-datetime id="edit-project-deadline-datetime" presentation="date" [(ngModel)]="project.deadline"></ion-datetime>
+                    <ion-datetime id="edit-project-deadline-datetime" presentation="date" [(ngModel)]="project.deadline" (ionChange)="onDateChange()"></ion-datetime>
                   </ng-template>
                 </ion-modal>
               </div>

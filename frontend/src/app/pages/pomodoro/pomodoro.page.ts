@@ -50,6 +50,7 @@ export class PomodoroPage implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.loadTasks();
+    this.loadTodaySummary();
   }
 
   ngOnDestroy() {
@@ -57,8 +58,14 @@ export class PomodoroPage implements OnInit, OnDestroy {
   }
 
   loadTasks() {
-    this.taskService.getTasks({ status: 'todo' }).subscribe((res: any) => {
+    this.taskService.getTodayTasks().subscribe((res: any) => {
       this.tasks = res.data;
+    });
+  }
+
+  loadTodaySummary() {
+    this.http.get(`${environment.apiUrl}/pomodoro/today`).subscribe((res: any) => {
+      this.focusedMinutesToday = res.focus_time_minutes;
     });
   }
 
@@ -126,15 +133,20 @@ export class PomodoroPage implements OnInit, OnDestroy {
     this.stopTimer();
     
     if (!this.isBreak) {
+      const durationMinutes = Math.floor(this.totalTime / 60);
       const data = {
         task_id: this.selectedTaskId,
-        start_time: new Date(Date.now() - 25 * 60 * 1000).toISOString(),
+        start_time: new Date(Date.now() - this.totalTime * 1000).toISOString(),
         end_time: new Date().toISOString(),
-        duration_minutes: 25
+        duration_minutes: durationMinutes
       };
 
       this.http.post(`${environment.apiUrl}/pomodoro`, data).subscribe({
-        next: () => this.showToast('Focus session completed!'),
+        next: () => {
+          this.showToast('Focus session completed!');
+          this.loadTasks(); // Refresh tasks to get updated work_hours/completed_pomodoros
+          this.loadTodaySummary(); // Refresh daily stats
+        },
         error: () => this.showToast('Failed to save session')
       });
     } else {

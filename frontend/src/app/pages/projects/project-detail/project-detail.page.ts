@@ -1,9 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { ActionSheetController, ModalController, NavController, ToastController } from '@ionic/angular';
+import { ActionSheetController, AlertController, ModalController, NavController, ToastController } from '@ionic/angular';
 import { ProjectService } from '../../../services/project';
 import { TaskService } from '../../../services/task';
 import { AddTaskComponent } from '../../tasks/components/add-task/add-task.component';
+import { TaskDetailComponent } from '../../tasks/components/task-detail/task-detail.component';
 
 @Component({
   selector: 'app-project-detail',
@@ -31,7 +32,8 @@ export class ProjectDetailPage implements OnInit {
     private taskService: TaskService,
     private actionSheetCtrl: ActionSheetController,
     private modalCtrl: ModalController,
-    private toastCtrl: ToastController
+    private toastCtrl: ToastController,
+    private alertCtrl: AlertController
   ) { }
 
   get filteredTasks() {
@@ -93,7 +95,11 @@ export class ProjectDetailPage implements OnInit {
 
   async addTask() {
     const modal = await this.modalCtrl.create({
-      component: AddTaskComponent
+      component: AddTaskComponent,
+      componentProps: {
+        selectedProjectId: this.projectId
+      },
+      cssClass: 'full-screen-modal'
     });
 
     await modal.present();
@@ -123,6 +129,62 @@ export class ProjectDetailPage implements OnInit {
         error: () => this.showToast('Failed to create task')
       });
     }
+  }
+
+  async openTaskDetail(task: any) {
+    const modal = await this.modalCtrl.create({
+      component: TaskDetailComponent,
+      componentProps: {
+        task: task
+      },
+      cssClass: 'full-screen-modal'
+    });
+
+    await modal.present();
+
+    const { data } = await modal.onWillDismiss();
+
+    if (data) {
+      if (data.deleted) {
+        this.project.tasks = this.project.tasks.filter((t: any) => t.id !== data.id);
+      } else {
+        this.loadProjectDetails();
+      }
+    }
+  }
+
+  toggleStatus(task: any) {
+    const newStatus = task.status === 'done' ? 'todo' : 'done';
+    this.taskService.updateTask(task.id, { status: newStatus }).subscribe({
+      next: () => {
+        task.status = newStatus;
+        this.showToast(newStatus === 'done' ? 'Task completed!' : 'Task reopened');
+      },
+      error: () => this.showToast('Failed to update status')
+    });
+  }
+
+  async deleteTask(task: any) {
+    const alert = await this.alertCtrl.create({
+      header: 'Delete Task',
+      message: 'Are you sure you want to delete this task?',
+      buttons: [
+        { text: 'Cancel', role: 'cancel' },
+        {
+          text: 'Delete',
+          role: 'destructive',
+          handler: () => {
+            this.taskService.deleteTask(task.id).subscribe({
+              next: () => {
+                this.project.tasks = this.project.tasks.filter((t: any) => t.id !== task.id);
+                this.showToast('Task deleted');
+              }
+            });
+          }
+        }
+      ]
+    });
+    await alert.present();
   }
 
   private async showToast(message: string) {

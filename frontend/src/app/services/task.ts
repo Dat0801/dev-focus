@@ -37,11 +37,19 @@ export class TaskService {
     return this.http.delete(`${this.apiUrl}/${id}`);
   }
 
-  getTodayTasks(): Observable<any> {
-    return this.http.get(`${this.apiUrl}/today`);
+  getTodayTasks(date?: string): Observable<any> {
+    let params = new HttpParams();
+    if (date) {
+      params = params.set('date', date);
+    }
+    return this.http.get(`${this.apiUrl}/today`, { params });
   }
 
-  getUpcomingTasks(): Observable<any> {
-    return this.http.get(`${this.apiUrl}/upcoming`);
+  getUpcomingTasks(date?: string): Observable<any> {
+    let params = new HttpParams();
+    if (date) {
+      params = params.set('date', date);
+    }
+    return this.http.get(`${this.apiUrl}/upcoming`, { params });
   }
 }

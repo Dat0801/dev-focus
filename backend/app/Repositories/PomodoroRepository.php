@@ -26,7 +26,19 @@ class PomodoroRepository implements PomodoroRepositoryInterface
     public function create(array $data): PomodoroSession
     {
         $data['user_id'] = Auth::id();
-        return PomodoroSession::create($data);
+        $session = PomodoroSession::create($data);
+
+        // Update associated task progress
+        if ($session->task_id && $session->duration_minutes) {
+            $task = $session->task;
+            if ($task) {
+                $task->completed_pomodoros += 1;
+                $task->work_hours = (float)$task->work_hours + ($session->duration_minutes / 60);
+                $task->save();
+            }
+        }
+
+        return $session;
     }
 
     public function update(string $id, array $data): bool
