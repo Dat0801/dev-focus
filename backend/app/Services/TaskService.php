@@ -50,4 +50,9 @@ class TaskService
     {
         return $this->taskRepository->getUpcomingTasks($date);
     }
+
+    public function getTasksByMonth(string $month): Collection
+    {
+        return $this->taskRepository->getTasksByMonth($month);
+    }
 }

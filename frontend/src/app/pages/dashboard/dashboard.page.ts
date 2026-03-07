@@ -2,6 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { environment } from '../../../environments/environment';
+import { ReportService } from '../../services/report';
+import { LoadingController, ToastController } from '@ionic/angular';
 
 @Component({
   selector: 'app-dashboard',
@@ -26,7 +28,10 @@ export class DashboardPage implements OnInit {
 
   constructor(
     private http: HttpClient,
-    private router: Router
+    private router: Router,
+    private reportService: ReportService,
+    private loadingCtrl: LoadingController,
+    private toastCtrl: ToastController
   ) {
     this.currentDate = new Intl.DateTimeFormat('en-US', {
       weekday: 'long',
@@ -85,6 +90,37 @@ export class DashboardPage implements OnInit {
       // If the backend returns a wrapped response (e.g., from TaskResource::collection)
       this.upcomingTasks = res.data || res;
     });
+  }
+
+  async exportReport() {
+    const loading = await this.loadingCtrl.create({
+      message: 'Exporting report...',
+      spinner: 'crescent'
+    });
+    await loading.present();
+
+    const currentMonth = new Date().toISOString().substring(0, 7); // YYYY-MM
+    
+    try {
+      await this.reportService.exportTasksToExcel(currentMonth);
+      const toast = await this.toastCtrl.create({
+        message: 'Report exported successfully!',
+        duration: 2000,
+        color: 'success',
+        position: 'bottom'
+      });
+      await toast.present();
+    } catch (error) {
+      const toast = await this.toastCtrl.create({
+        message: 'Failed to export report.',
+        duration: 2000,
+        color: 'danger',
+        position: 'bottom'
+      });
+      await toast.present();
+    } finally {
+      await loading.dismiss();
+    }
   }
 
   ionViewWillEnter() {

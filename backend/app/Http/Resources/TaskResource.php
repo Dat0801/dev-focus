@@ -29,6 +29,7 @@ class TaskResource extends JsonResource
             'project_id' => $this->project_id,
             'project' => new ProjectResource($this->whenLoaded('project')),
             'tags' => TagResource::collection($this->whenLoaded('tags')),
+            'pomodoro_sessions' => PomodoroSessionResource::collection($this->whenLoaded('pomodoroSessions')),
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];

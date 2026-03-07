@@ -95,4 +95,35 @@ class TaskRepository implements TaskRepositoryInterface
             })
             ->get();
     }
+
+    public function getTasksByMonth(string $month): Collection
+    {
+        // Extract year and month from string (format: YYYY-MM)
+        [$year, $m] = explode('-', $month);
+
+        return Task::where('user_id', Auth::id())
+            ->whereIn('status', ['todo', 'in_progress', 'done'])
+            ->with(['project', 'pomodoroSessions' => function ($query) use ($year, $m) {
+                $query->whereYear('start_time', $year)
+                      ->whereMonth('start_time', $m);
+            }])
+            ->where(function ($query) use ($year, $m) {
+                // Task starts in this month
+                $query->where(function($q) use ($year, $m) {
+                    $q->whereYear('start_date', $year)
+                      ->whereMonth('start_date', $m);
+                })
+                // Or task is due in this month
+                ->orWhere(function($q) use ($year, $m) {
+                    $q->whereYear('due_date', $year)
+                      ->whereMonth('due_date', $m);
+                })
+                // Or has pomodoro sessions in this month
+                ->orWhereHas('pomodoroSessions', function ($q) use ($year, $m) {
+                    $q->whereYear('start_time', $year)
+                      ->whereMonth('start_time', $m);
+                });
+            })
+            ->get();
+    }
 }

@@ -15,4 +15,5 @@ interface TaskRepositoryInterface
     public function delete(string $id): bool;
     public function getTodayTasks(?string $date = null): Collection;
     public function getUpcomingTasks(?string $date = null): Collection;
+    public function getTasksByMonth(string $month): Collection;
 }

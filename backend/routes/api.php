@@ -4,6 +4,7 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\TaskController;
 use App\Http\Controllers\Api\ProjectController;
 use App\Http\Controllers\Api\PomodoroController;
+use App\Http\Controllers\Api\ReportController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -16,6 +17,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::get('/tasks/today', [TaskController::class, 'today']);
     Route::get('/tasks/upcoming', [TaskController::class, 'upcoming']);
+    Route::get('/reports/tasks-by-month', [ReportController::class, 'tasksByMonth']);
     Route::apiResource('tasks', TaskController::class);
 
     Route::apiResource('projects', ProjectController::class);
