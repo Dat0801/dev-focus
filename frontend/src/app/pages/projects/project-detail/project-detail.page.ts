@@ -164,6 +164,16 @@ export class ProjectDetailPage implements OnInit {
     });
   }
 
+  startTask(task: any) {
+    this.taskService.updateTask(task.id, { status: 'in_progress' }).subscribe({
+      next: () => {
+        task.status = 'in_progress';
+        this.showToast('Task started!');
+      },
+      error: () => this.showToast('Failed to start task')
+    });
+  }
+
   async deleteTask(task: any) {
     const alert = await this.alertCtrl.create({
       header: 'Delete Task',

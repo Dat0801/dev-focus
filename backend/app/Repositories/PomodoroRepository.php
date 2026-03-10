@@ -32,7 +32,10 @@ class PomodoroRepository implements PomodoroRepositoryInterface
         if ($session->task_id && $session->duration_minutes) {
             $task = $session->task;
             if ($task) {
-                $task->completed_pomodoros += 1;
+                // Only increment completed_pomodoros if the duration is at least 25 minutes
+                if ($session->duration_minutes >= 25) {
+                    $task->completed_pomodoros += 1;
+                }
                 $task->work_hours = (float)$task->work_hours + ($session->duration_minutes / 60);
                 $task->save();
             }

@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, HostListener } from '@angular/core';
 import { ToastController, AlertController } from '@ionic/angular';
 import { TaskService } from '../../services/task';
 import { HttpClient } from '@angular/common/http';
@@ -18,6 +18,10 @@ export class PomodoroPage implements OnInit, OnDestroy {
   isRunning: boolean = false;
   isBreak: boolean = false;
   
+  // Track elapsed time in current run to save on stop/refresh
+  private sessionSeconds: number = 0;
+  private sessionStartTime: number | null = null;
+
   tasks: any[] = [];
   selectedTaskId: string | null = null;
   selectedTaskName: string = 'Select a task';
@@ -26,6 +30,13 @@ export class PomodoroPage implements OnInit, OnDestroy {
   dailyGoalMinutes: number = 360; // 6h
   focusedMinutesToday: number = 270; // 4.5h
   
+  @HostListener('window:beforeunload', ['$event'])
+  beforeUnloadHandler(event: any) {
+    if (this.isRunning && !this.isBreak && this.selectedTaskId) {
+      this.saveSessionSync();
+    }
+  }
+
   get progressPercentage(): number {
     return (1 - (this.timeLeft / this.totalTime)) * 100;
   }
@@ -58,8 +69,14 @@ export class PomodoroPage implements OnInit, OnDestroy {
   }
 
   loadTasks() {
-    this.taskService.getTodayTasks().subscribe((res: any) => {
-      this.tasks = res.data;
+    const localDate = new Date().toISOString().split('T')[0];
+    this.taskService.getTodayTasks(localDate).subscribe({
+      next: (res: any) => {
+        this.tasks = res.data;
+      },
+      error: () => {
+        this.showToast('Failed to load tasks');
+      }
     });
   }
 
@@ -70,6 +87,17 @@ export class PomodoroPage implements OnInit, OnDestroy {
   }
 
   async selectTask() {
+    if (this.tasks.length === 0) {
+      const toast = await this.toastCtrl.create({
+        message: 'No tasks found for today. Create or schedule a task first!',
+        duration: 3000,
+        position: 'bottom',
+        color: 'warning'
+      });
+      await toast.present();
+      return;
+    }
+
     const alert = await this.alertCtrl.create({
       header: 'Select Task',
       inputs: this.tasks.map(task => ({
@@ -101,9 +129,12 @@ export class PomodoroPage implements OnInit, OnDestroy {
 
   startTimer() {
     this.isRunning = true;
+    this.sessionSeconds = 0;
+    this.sessionStartTime = Date.now();
     this.timer = setInterval(() => {
       if (this.timeLeft > 0) {
         this.timeLeft--;
+        this.sessionSeconds++;
         this.updateDisplay();
       } else {
         this.completeSession();
@@ -112,8 +143,77 @@ export class PomodoroPage implements OnInit, OnDestroy {
   }
 
   stopTimer() {
-    this.isRunning = false;
-    clearInterval(this.timer);
+    if (this.isRunning) {
+      this.isRunning = false;
+      clearInterval(this.timer);
+      
+      // Save session if we were in focus mode and some time elapsed
+      if (!this.isBreak && this.sessionSeconds > 0) {
+        this.saveSession(this.sessionSeconds);
+      }
+      this.sessionSeconds = 0;
+      this.sessionStartTime = null;
+    }
+  }
+
+  private saveSession(seconds: number) {
+    if (!this.selectedTaskId) return;
+
+    const durationMinutes = seconds / 60;
+    // Don't save sessions shorter than 10 seconds unless it's a completion
+    if (seconds < 10 && this.timeLeft > 0) return;
+
+    const startTime = this.sessionStartTime 
+      ? new Date(this.sessionStartTime).toISOString() 
+      : new Date(Date.now() - seconds * 1000).toISOString();
+
+    const data = {
+      task_id: this.selectedTaskId,
+      start_time: startTime,
+      end_time: new Date().toISOString(),
+      duration_minutes: durationMinutes
+    };
+
+    this.http.post(`${environment.apiUrl}/pomodoro`, data).subscribe({
+      next: () => {
+        this.loadTasks();
+        this.loadTodaySummary();
+      },
+      error: () => console.error('Failed to save session')
+    });
+  }
+
+  /**
+   * Used for beforeunload to ensure request is sent even if browser closes
+   */
+  private saveSessionSync() {
+    if (!this.selectedTaskId || this.sessionSeconds < 10) return;
+
+    const durationMinutes = this.sessionSeconds / 60;
+    const startTime = this.sessionStartTime 
+      ? new Date(this.sessionStartTime).toISOString() 
+      : new Date(Date.now() - this.sessionSeconds * 1000).toISOString();
+
+    const data = {
+      task_id: this.selectedTaskId,
+      start_time: startTime,
+      end_time: new Date().toISOString(),
+      duration_minutes: durationMinutes
+    };
+
+    const token = localStorage.getItem('token');
+    if (!token) return;
+
+    // Use fetch with keepalive for more reliable delivery on close with custom headers
+    fetch(`${environment.apiUrl}/pomodoro`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify(data),
+      keepalive: true
+    });
   }
 
   resetTimer() {
@@ -130,27 +230,14 @@ export class PomodoroPage implements OnInit, OnDestroy {
   }
 
   async completeSession() {
-    this.stopTimer();
+    // When completed, we want to save the session and toggle break
+    const secondsToSave = this.sessionSeconds;
+    this.stopTimer(); // This will call saveSession if sessionSeconds > 0
     
-    if (!this.isBreak) {
-      const durationMinutes = Math.floor(this.totalTime / 60);
-      const data = {
-        task_id: this.selectedTaskId,
-        start_time: new Date(Date.now() - this.totalTime * 1000).toISOString(),
-        end_time: new Date().toISOString(),
-        duration_minutes: durationMinutes
-      };
-
-      this.http.post(`${environment.apiUrl}/pomodoro`, data).subscribe({
-        next: () => {
-          this.showToast('Focus session completed!');
-          this.loadTasks(); // Refresh tasks to get updated work_hours/completed_pomodoros
-          this.loadTodaySummary(); // Refresh daily stats
-        },
-        error: () => this.showToast('Failed to save session')
-      });
-    } else {
+    if (this.isBreak) {
       this.showToast('Break over! Time to focus.');
+    } else {
+      this.showToast('Focus session completed!');
     }
 
     this.isBreak = !this.isBreak;

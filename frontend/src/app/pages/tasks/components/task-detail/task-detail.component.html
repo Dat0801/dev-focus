@@ -13,14 +13,19 @@
 
 <ion-content>
   <div class="task-detail-container">
-    <div class="status-header">
-      <div 
-        class="custom-checkbox" 
-        [class.checked]="editedTask.status === 'done'"
-        (click)="toggleStatus()">
-        <ion-icon *ngIf="editedTask.status === 'done'" name="checkmark"></ion-icon>
+    <div class="section status-section">
+      <div class="label">STATUS</div>
+      <div class="chip-row">
+        <div 
+          *ngFor="let s of statuses" 
+          class="chip status-chip"
+          [class.selected]="editedTask.status === s.value"
+          [class]="'status-' + s.value"
+          (click)="selectStatus(s.value)">
+          <ion-icon [name]="s.value === 'done' ? 'checkmark-circle' : s.value === 'in_progress' ? 'play-circle' : 'ellipse-outline'"></ion-icon>
+          {{ s.label }}
+        </div>
       </div>
-      <span class="status-text">{{ editedTask.status === 'done' ? 'Completed' : 'To Do' }}</span>
     </div>
 
     <div class="input-group">
@@ -142,15 +147,20 @@
 
     <div class="section">
       <div class="label">WORK HOURS</div>
-      <div class="input-hours-group">
+      <div class="input-hours-group" (click)="isEditingWorkHours = true">
         <ion-icon name="time-outline"></ion-icon>
+        <ng-container *ngIf="!isEditingWorkHours">
+          <span class="work-hours-display">{{ editedTask.work_hours | formatWorkHours }}</span>
+        </ng-container>
         <ion-input
+          *ngIf="isEditingWorkHours"
           type="number"
           [(ngModel)]="editedTask.work_hours"
-          placeholder="Enter hours worked"
+          (ionBlur)="isEditingWorkHours = false"
+          placeholder="Enter hours"
           class="hours-input"
         ></ion-input>
-        <span class="hours-suffix">hrs</span>
+        <span class="hours-suffix" *ngIf="isEditingWorkHours">hrs</span>
       </div>
     </div>
 

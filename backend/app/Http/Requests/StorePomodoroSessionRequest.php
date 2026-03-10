@@ -17,7 +17,7 @@ class StorePomodoroSessionRequest extends FormRequest
             'task_id' => 'nullable|exists:tasks,id',
             'start_time' => 'required|date',
             'end_time' => 'nullable|date|after_or_equal:start_time',
-            'duration_minutes' => 'nullable|integer|min:1',
+            'duration_minutes' => 'nullable|numeric|min:0.1',
         ];
     }
 }

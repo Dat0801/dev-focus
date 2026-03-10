@@ -78,6 +78,14 @@ class TaskRepository implements TaskRepositoryInterface
                     ->orWhere(function($q) use ($today) {
                         $q->whereDate('due_date', '<', $today)
                           ->where('status', '!=', 'done');
+                    })
+                    // Or task is in progress
+                    ->orWhere('status', 'in_progress')
+                    // Or task has no date and is not done
+                    ->orWhere(function($q) {
+                        $q->whereNull('due_date')
+                          ->whereNull('start_date')
+                          ->where('status', '!=', 'done');
                     });
             })
             ->orderBy('due_date', 'asc')

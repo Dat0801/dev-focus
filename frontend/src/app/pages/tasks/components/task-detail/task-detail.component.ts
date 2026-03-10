@@ -2,12 +2,14 @@ import { Component, Input, OnInit, ViewChild } from '@angular/core';
 import { IonModal, ModalController, AlertController, ToastController } from '@ionic/angular';
 import { ProjectService } from '../../../../services/project';
 import { TaskService } from '../../../../services/task';
+import { FormatWorkHoursPipe } from '../../../../pipes/format-work-hours.pipe';
 
 @Component({
   selector: 'app-task-detail',
   templateUrl: './task-detail.component.html',
   styleUrls: ['./task-detail.component.scss'],
   standalone: false,
+  providers: [FormatWorkHoursPipe]
 })
 export class TaskDetailComponent implements OnInit {
   @Input() task: any;
@@ -17,6 +19,7 @@ export class TaskDetailComponent implements OnInit {
   
   editedTask: any;
   projects: any[] = [];
+  isEditingWorkHours: boolean = false;
   
   priorities = [
     { label: 'P1', value: 'urgent' },
@@ -25,6 +28,12 @@ export class TaskDetailComponent implements OnInit {
     { label: 'P4', value: 'low' }
   ];
   pomodoroOptions = [1, 2, 3, '4+'];
+
+  statuses = [
+    { label: 'To Do', value: 'todo' },
+    { label: 'In Progress', value: 'in_progress' },
+    { label: 'Done', value: 'done' }
+  ];
 
   constructor(
     private modalCtrl: ModalController,
@@ -82,6 +91,7 @@ export class TaskDetailComponent implements OnInit {
       title: this.editedTask.title,
       description: this.editedTask.description,
       priority: this.editedTask.priority,
+      status: this.editedTask.status,
       project_id: this.editedTask.project_id,
       due_date: this.editedTask.due_date,
       start_date: this.editedTask.start_date,
@@ -128,6 +138,10 @@ export class TaskDetailComponent implements OnInit {
 
   selectPriority(priority: string) {
     this.editedTask.priority = priority;
+  }
+
+  selectStatus(status: string) {
+    this.editedTask.status = status;
   }
 
   openDeadlineModal() {

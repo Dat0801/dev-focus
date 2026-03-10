@@ -183,6 +183,17 @@ export class TasksPage implements OnInit {
     });
   }
 
+  startTask(task: any) {
+    this.taskService.updateTask(task.id, { status: 'in_progress' }).subscribe({
+      next: () => {
+        task.status = 'in_progress';
+        this.applyFilters();
+        this.showToast('Task started!');
+      },
+      error: () => this.showToast('Failed to start task')
+    });
+  }
+
   async deleteTask(task: any) {
     const alert = await this.alertCtrl.create({
       header: 'Delete Task',
