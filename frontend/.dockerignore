@@ -1,0 +1,13 @@
+node_modules
+dist
+www
+.git
+.gitignore
+Dockerfile
+.dockerignore
+.vscode
+.browserslistrc
+.editorconfig
+.eslintrc.json
+karma.conf.js
+# Keep angular.json, tsconfig.json, package.json etc. as they are needed for the build.

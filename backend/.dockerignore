@@ -1,0 +1,17 @@
+/node_modules
+/vendor
+.env
+.git
+.gitignore
+docker-compose.yml
+Dockerfile
+.dockerignore
+storage/*.key
+/storage/framework/cache/data/*
+/storage/framework/sessions/*
+/storage/framework/testing/*
+/storage/framework/views/*
+/bootstrap/cache/*
+phpunit.xml
+.editorconfig
+.gitattributes

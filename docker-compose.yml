@@ -1,0 +1,53 @@
+services:
+  db:
+    image: mysql:8.0
+    container_name: dev_focus_db
+    restart: always
+    environment:
+      MYSQL_DATABASE: dev_focus
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_PASSWORD: password
+      MYSQL_USER: user
+    ports:
+      - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: dev_focus_backend
+    restart: always
+    depends_on:
+      - db
+    environment:
+      APP_NAME: "Dev Focus"
+      APP_ENV: local
+      APP_KEY: base64:tBDu8/vB0o6lOQzK5S8T9Wf/fO2V1+H4Xy5M4S9rX6g= # You should change this
+      APP_DEBUG: "true"
+      APP_URL: http://localhost:8000
+      DB_CONNECTION: mysql
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_DATABASE: dev_focus
+      DB_USERNAME: user
+      DB_PASSWORD: password
+    ports:
+      - "8000:80"
+    volumes:
+      - ./backend/storage:/var/www/storage
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: dev_focus_frontend
+    restart: always
+    ports:
+      - "8100:80"
+    depends_on:
+      - backend
+
+volumes:
+  db_data:
