@@ -19,7 +19,7 @@ return [
 
     'allowed_methods' => ['*'],
 
-    'allowed_origins' => ['http://localhost:8100'],
+    'allowed_origins' => array_map('trim', explode(',', env('ALLOWED_ORIGINS', 'http://localhost:8100,https://dev-focus.onrender.com'))),
 
     'allowed_origins_patterns' => [],
 
