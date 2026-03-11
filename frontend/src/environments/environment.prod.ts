@@ -1,4 +1,4 @@
 export const environment = {
   production: true,
-  apiUrl: 'https://api.devfocus.com/api' // Placeholder for production
+  apiUrl: 'https://api-dev-focus.onrender.com/api'
 };
