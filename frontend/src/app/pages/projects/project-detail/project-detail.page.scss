@@ -307,7 +307,25 @@ ion-content {
     }
 
     &.status-done {
-      color: #4caf50;
+      color: #2e7d32;
+      background: #e8f5e9;
+      padding: 2px 6px;
+      border-radius: 6px;
+
+      ion-icon {
+        color: #2e7d32;
+      }
+    }
+
+    &.sub-tasks-info {
+      color: #7c4dff;
+      background: #f0ebff;
+      padding: 2px 6px;
+      border-radius: 6px;
+
+      ion-icon {
+        color: #7c4dff;
+      }
     }
 
     &.progress-info {

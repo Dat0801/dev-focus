@@ -28,10 +28,12 @@ class TaskResource extends JsonResource
             'priority' => $this->priority,
             'status' => $this->status,
             'project_id' => $this->project_id,
+            'parent_id' => $this->parent_id,
             'project' => new ProjectResource($this->whenLoaded('project')),
             'tags' => TagResource::collection($this->whenLoaded('tags')),
             'work_logs' => WorkLogResource::collection($this->whenLoaded('workLogs')),
             'pomodoro_sessions' => PomodoroSessionResource::collection($this->whenLoaded('pomodoroSessions')),
+            'sub_tasks' => TaskResource::collection($this->whenLoaded('subTasks')),
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];

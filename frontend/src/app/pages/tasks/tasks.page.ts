@@ -42,6 +42,11 @@ export class TasksPage implements OnInit {
     this.router.navigate(['/tabs/projects']);
   }
 
+  getCompletedSubTasksCount(task: any): number {
+    if (!task.sub_tasks) return 0;
+    return task.sub_tasks.filter((sub: any) => sub.status === 'done').length;
+  }
+
   setTodayDate() {
     const options: Intl.DateTimeFormatOptions = { 
       weekday: 'long', 

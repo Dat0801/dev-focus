@@ -96,6 +96,11 @@
                 Done
               </span>
 
+              <span class="meta-item sub-tasks-info" *ngIf="task.sub_tasks?.length > 0">
+                <ion-icon name="git-branch-outline"></ion-icon>
+                {{ getCompletedSubTasksCount(task) }}/{{ task.sub_tasks.length }}
+              </span>
+
               <span class="meta-item progress-info">
                 <ion-icon name="timer-outline"></ion-icon>
                 {{ task.completed_pomodoros || 0 }}/{{ task.estimated_pomodoros || 1 }}

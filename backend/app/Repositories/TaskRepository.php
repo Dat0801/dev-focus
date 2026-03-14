@@ -12,7 +12,9 @@ class TaskRepository implements TaskRepositoryInterface
 {
     public function getAll(array $filters = []): LengthAwarePaginator
     {
-        $query = Task::where('user_id', Auth::id())->with(['project', 'workLogs']);
+        $query = Task::where('user_id', Auth::id())
+            ->whereNull('parent_id') // Only top-level tasks for main list
+            ->with(['project', 'workLogs', 'subTasks.workLogs']);
 
         if (isset($filters['status'])) {
             $query->where('status', $filters['status']);
@@ -31,7 +33,9 @@ class TaskRepository implements TaskRepositoryInterface
 
     public function findById(string $id): ?Task
     {
-        return Task::where('user_id', Auth::id())->with(['project', 'workLogs'])->find($id);
+        return Task::where('user_id', Auth::id())
+            ->with(['project', 'workLogs', 'subTasks.workLogs'])
+            ->find($id);
     }
 
     public function create(array $data): Task
@@ -39,6 +43,9 @@ class TaskRepository implements TaskRepositoryInterface
         $data['user_id'] = Auth::id();
         $workLogs = $data['work_logs'] ?? [];
         unset($data['work_logs']);
+
+        $subTasks = $data['sub_tasks'] ?? [];
+        unset($data['sub_tasks']);
         
         $task = Task::create($data);
         
@@ -47,8 +54,17 @@ class TaskRepository implements TaskRepositoryInterface
                 $task->workLogs()->create($log);
             }
         }
+
+        if (!empty($subTasks)) {
+            foreach ($subTasks as $subTaskData) {
+                $subTaskData['parent_id'] = $task->id;
+                $subTaskData['user_id'] = $task->user_id;
+                $subTaskData['project_id'] = $task->project_id;
+                Task::create($subTaskData);
+            }
+        }
         
-        return $task->load(['project', 'workLogs']);
+        return $task->load(['project', 'workLogs', 'subTasks.workLogs']);
     }
 
     public function update(string $id, array $data): bool
@@ -60,6 +76,9 @@ class TaskRepository implements TaskRepositoryInterface
 
         $workLogs = $data['work_logs'] ?? null;
         unset($data['work_logs']);
+
+        $subTasks = $data['sub_tasks'] ?? null;
+        unset($data['sub_tasks']);
 
         // Only update fields that are in fillable
         $updated = $task->update($data);
@@ -73,7 +92,27 @@ class TaskRepository implements TaskRepositoryInterface
             }
         }
 
-        return true; // Return true as we've processed the update
+        if ($subTasks !== null) {
+            // For sub-tasks, we might want to be more careful. 
+            // If they have an ID, update them. If not, create them.
+            // Tasks not in the list should be deleted? 
+            // For simplicity, let's just update/create.
+            foreach ($subTasks as $subTaskData) {
+                if (isset($subTaskData['id'])) {
+                    $subTask = Task::find($subTaskData['id']);
+                    if ($subTask) {
+                        $subTask->update($subTaskData);
+                    }
+                } else {
+                    $subTaskData['parent_id'] = $task->id;
+                    $subTaskData['user_id'] = $task->user_id;
+                    $subTaskData['project_id'] = $task->project_id;
+                    Task::create($subTaskData);
+                }
+            }
+        }
+
+        return true;
     }
 
     public function delete(string $id): bool
@@ -89,7 +128,7 @@ class TaskRepository implements TaskRepositoryInterface
     {
         $today = $date ?: now()->toDateString();
         return Task::where('user_id', Auth::id())
-            ->with(['project', 'workLogs'])
+            ->with(['project', 'workLogs', 'subTasks.workLogs'])
             ->where(function ($query) use ($today) {
                 // Task is due today
                 $query->whereDate('due_date', $today)
@@ -99,22 +138,10 @@ class TaskRepository implements TaskRepositoryInterface
                     ->orWhere(function($q) use ($today) {
                         $q->whereDate('start_date', '<=', $today)
                           ->whereDate('due_date', '>=', $today);
-                    })
-                    // Or task is overdue and not completed
-                    ->orWhere(function($q) use ($today) {
-                        $q->whereDate('due_date', '<', $today)
-                          ->where('status', '!=', 'done');
-                    })
-                    // Or task is in progress
-                    ->orWhere('status', 'in_progress')
-                    // Or task has no date and is not done
-                    ->orWhere(function($q) {
-                        $q->whereNull('due_date')
-                          ->whereNull('start_date')
-                          ->where('status', '!=', 'done');
                     });
             })
-            ->orderBy('due_date', 'asc')
+            ->whereNull('parent_id') // Only show top-level tasks in "Today" list
+            ->orderBy('priority', 'desc')
             ->get();
     }
 
@@ -122,42 +149,19 @@ class TaskRepository implements TaskRepositoryInterface
     {
         $today = $date ?: now()->toDateString();
         return Task::where('user_id', Auth::id())
-            ->with(['project', 'workLogs'])
-            ->where(function ($query) use ($today) {
-                $query->whereDate('due_date', '>', $today)
-                    ->orWhereDate('start_date', '>', $today);
-            })
+            ->with(['project', 'workLogs', 'subTasks.workLogs'])
+            ->whereDate('due_date', '>', $today)
+            ->whereNull('parent_id') // Only show top-level tasks
+            ->orderBy('due_date', 'asc')
             ->get();
     }
 
     public function getTasksByMonth(string $month): Collection
     {
-        // Extract year and month from string (format: YYYY-MM)
-        [$year, $m] = explode('-', $month);
-
         return Task::where('user_id', Auth::id())
-            ->whereIn('status', ['todo', 'in_progress', 'done'])
-            ->with(['project', 'pomodoroSessions' => function ($query) use ($year, $m) {
-                $query->whereYear('start_time', $year)
-                      ->whereMonth('start_time', $m);
-            }])
-            ->where(function ($query) use ($year, $m) {
-                // Task starts in this month
-                $query->where(function($q) use ($year, $m) {
-                    $q->whereYear('start_date', $year)
-                      ->whereMonth('start_date', $m);
-                })
-                // Or task is due in this month
-                ->orWhere(function($q) use ($year, $m) {
-                    $q->whereYear('due_date', $year)
-                      ->whereMonth('due_date', $m);
-                })
-                // Or has pomodoro sessions in this month
-                ->orWhereHas('pomodoroSessions', function ($q) use ($year, $m) {
-                    $q->whereYear('start_time', $year)
-                      ->whereMonth('start_time', $m);
-                });
-            })
+            ->with(['project', 'workLogs', 'subTasks.workLogs'])
+            ->where('due_date', 'like', "$month%")
+            ->whereNull('parent_id') // Only show top-level tasks
             ->get();
     }
 }

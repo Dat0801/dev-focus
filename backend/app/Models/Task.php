@@ -27,6 +27,7 @@ class Task extends Model
         'priority',
         'status',
         'project_id',
+        'parent_id',
         'user_id',
     ];
 
@@ -45,6 +46,16 @@ class Task extends Model
     public function project(): BelongsTo
     {
         return $this->belongsTo(Project::class);
+    }
+
+    public function parent(): BelongsTo
+    {
+        return $this->belongsTo(Task::class, 'parent_id');
+    }
+
+    public function subTasks(): HasMany
+    {
+        return $this->hasMany(Task::class, 'parent_id')->orderBy('created_at', 'asc');
     }
 
     public function tags(): BelongsToMany

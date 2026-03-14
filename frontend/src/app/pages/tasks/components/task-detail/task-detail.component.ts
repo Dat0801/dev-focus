@@ -50,6 +50,10 @@ export class TaskDetailComponent implements OnInit {
     if (!this.editedTask.work_logs) {
       this.editedTask.work_logs = [];
     }
+
+    if (!this.editedTask.sub_tasks) {
+      this.editedTask.sub_tasks = [];
+    }
     
     // Format dates for inputs
     this.editedTask.work_logs = this.editedTask.work_logs.map((log: any) => ({
@@ -57,6 +61,12 @@ export class TaskDetailComponent implements OnInit {
       log_date: log.log_date ? new Date(log.log_date).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
       // Add a property to help with UI editing if needed
       duration_hours: (log.duration_minutes / 60).toFixed(2)
+    }));
+
+    // Format sub-tasks
+    this.editedTask.sub_tasks = this.editedTask.sub_tasks.map((sub: any) => ({
+      ...sub,
+      due_date: sub.due_date ? new Date(sub.due_date).toISOString() : null,
     }));
 
     // Format dates for ion-datetime (it expects ISO string or similar)
@@ -110,7 +120,7 @@ export class TaskDetailComponent implements OnInit {
 
   removeWorkLog(index: number) {
     this.editedTask.work_logs.splice(index, 1);
-    this.calculateTotalHours();
+    this.onWorkLogItemChange();
   }
 
   onWorkLogItemChange() {
@@ -128,31 +138,76 @@ export class TaskDetailComponent implements OnInit {
     this.editedTask.work_hours = parseFloat((totalMinutes / 60).toFixed(2));
   }
 
+  addSubTask() {
+    this.editedTask.sub_tasks.push({
+      title: '',
+      status: 'todo',
+      priority: 'medium',
+      parent_id: this.editedTask.id,
+      project_id: this.editedTask.project_id,
+      user_id: this.editedTask.user_id
+    });
+  }
+
+  removeSubTask(index: number) {
+    const subTask = this.editedTask.sub_tasks[index];
+    if (subTask.id) {
+      this.taskService.deleteTask(subTask.id).subscribe({
+        next: () => {
+          this.editedTask.sub_tasks.splice(index, 1);
+          this.showToast('Sub-task deleted');
+        },
+        error: () => this.showToast('Failed to delete sub-task')
+      });
+    } else {
+      this.editedTask.sub_tasks.splice(index, 1);
+    }
+  }
+
+  toggleSubTaskStatus(index: number) {
+    const subTask = this.editedTask.sub_tasks[index];
+    const newStatus = subTask.status === 'done' ? 'todo' : 'done';
+    
+    if (subTask.id) {
+      this.taskService.updateTask(subTask.id, { status: newStatus }).subscribe({
+        next: () => {
+          subTask.status = newStatus;
+        },
+        error: () => this.showToast('Failed to update sub-task status')
+      });
+    } else {
+      subTask.status = newStatus;
+    }
+  }
+
   updateTask() {
     // Recalculate just in case
     this.calculateTotalHours();
 
+    // Prepare work logs for saving
+    const work_logs = this.editedTask.work_logs.map((log: any) => ({
+      log_date: log.log_date,
+      description: log.description,
+      duration_minutes: log.duration_hours * 60
+    }));
+
+    // Prepare sub tasks for saving
+    const sub_tasks = this.editedTask.sub_tasks.map((sub: any) => ({
+      id: sub.id,
+      title: sub.title,
+      status: sub.status,
+      priority: sub.priority,
+      due_date: sub.due_date
+    }));
+
     const updateData = {
-      title: this.editedTask.title,
-      description: this.editedTask.description,
-      priority: this.editedTask.priority,
-      status: this.editedTask.status,
-      project_id: this.editedTask.project_id,
-      due_date: this.editedTask.due_date,
-      start_date: this.editedTask.start_date,
-      end_date: this.editedTask.end_date,
-      work_hours: this.editedTask.work_hours,
-      work_logs: this.editedTask.work_logs.map((log: any) => ({
-        log_date: log.log_date,
-        description: log.description,
-        duration_minutes: log.duration_minutes
-      })),
-      estimated_pomodoros: this.editedTask.estimated_pomodoros
+      ...this.editedTask,
+      work_logs,
+      sub_tasks
     };
 
     this.taskService.updateTask(this.editedTask.id, updateData).subscribe({
       next: (res: any) => {
-        this.showToast('Task updated');
         this.dismiss(res.data);
       },
       error: () => this.showToast('Failed to update task')

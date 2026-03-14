@@ -18,6 +18,11 @@ export class ProjectDetailPage implements OnInit {
   selectedTab: string = 'todo';
   project: any;
 
+  getCompletedSubTasksCount(task: any): number {
+    if (!task.sub_tasks) return 0;
+    return task.sub_tasks.filter((sub: any) => sub.status === 'done').length;
+  }
+
   stats = [
     { label: 'PROGRESS', value: '0%', type: 'progress' },
     { label: 'TOTAL TASKS', value: '0', type: 'tasks' },
