@@ -21,6 +21,7 @@ class Task extends Model
         'start_date',
         'end_date',
         'work_hours',
+        'work_log',
         'estimated_pomodoros',
         'completed_pomodoros',
         'priority',
@@ -54,5 +55,10 @@ class Task extends Model
     public function pomodoroSessions(): HasMany
     {
         return $this->hasMany(PomodoroSession::class);
+    }
+
+    public function workLogs(): HasMany
+    {
+        return $this->hasMany(WorkLog::class)->orderBy('log_date', 'desc');
     }
 }

@@ -46,6 +46,19 @@ export class TaskDetailComponent implements OnInit {
   ngOnInit() {
     this.editedTask = { ...this.task };
     
+    // Ensure work_logs is an array
+    if (!this.editedTask.work_logs) {
+      this.editedTask.work_logs = [];
+    }
+    
+    // Format dates for inputs
+    this.editedTask.work_logs = this.editedTask.work_logs.map((log: any) => ({
+      ...log,
+      log_date: log.log_date ? new Date(log.log_date).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
+      // Add a property to help with UI editing if needed
+      duration_hours: (log.duration_minutes / 60).toFixed(2)
+    }));
+
     // Format dates for ion-datetime (it expects ISO string or similar)
     if (this.editedTask.due_date) {
       this.editedTask.due_date = new Date(this.editedTask.due_date).toISOString();
@@ -86,7 +99,39 @@ export class TaskDetailComponent implements OnInit {
     });
   }
 
+  addWorkLog() {
+    this.editedTask.work_logs.unshift({
+      log_date: new Date().toISOString().split('T')[0],
+      description: '',
+      duration_hours: '0.00',
+      duration_minutes: 0
+    });
+  }
+
+  removeWorkLog(index: number) {
+    this.editedTask.work_logs.splice(index, 1);
+    this.calculateTotalHours();
+  }
+
+  onWorkLogItemChange() {
+    this.calculateTotalHours();
+  }
+
+  calculateTotalHours() {
+    let totalMinutes = 0;
+    this.editedTask.work_logs.forEach((log: any) => {
+      // If duration_hours was edited, update duration_minutes
+      const mins = parseFloat(log.duration_hours) * 60;
+      log.duration_minutes = isNaN(mins) ? 0 : mins;
+      totalMinutes += log.duration_minutes;
+    });
+    this.editedTask.work_hours = parseFloat((totalMinutes / 60).toFixed(2));
+  }
+
   updateTask() {
+    // Recalculate just in case
+    this.calculateTotalHours();
+
     const updateData = {
       title: this.editedTask.title,
       description: this.editedTask.description,
@@ -97,6 +142,11 @@ export class TaskDetailComponent implements OnInit {
       start_date: this.editedTask.start_date,
       end_date: this.editedTask.end_date,
       work_hours: this.editedTask.work_hours,
+      work_logs: this.editedTask.work_logs.map((log: any) => ({
+        log_date: log.log_date,
+        description: log.description,
+        duration_minutes: log.duration_minutes
+      })),
       estimated_pomodoros: this.editedTask.estimated_pomodoros
     };
 

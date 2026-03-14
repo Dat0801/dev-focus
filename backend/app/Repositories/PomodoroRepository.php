@@ -36,7 +36,17 @@ class PomodoroRepository implements PomodoroRepositoryInterface
                 if ($session->duration_minutes >= 25) {
                     $task->completed_pomodoros += 1;
                 }
-                $task->work_hours = (float)$task->work_hours + ($session->duration_minutes / 60);
+                
+                $duration = $session->duration_minutes;
+                $task->work_hours = (float)$task->work_hours + ($duration / 60);
+                
+                // Create structured work_log entry
+                $task->workLogs()->create([
+                    'log_date' => now()->toDateString(),
+                    'description' => 'Focus session',
+                    'duration_minutes' => $duration,
+                ]);
+                
                 $task->save();
             }
         }

@@ -12,7 +12,7 @@ class TaskRepository implements TaskRepositoryInterface
 {
     public function getAll(array $filters = []): LengthAwarePaginator
     {
-        $query = Task::where('user_id', Auth::id())->with('project');
+        $query = Task::where('user_id', Auth::id())->with(['project', 'workLogs']);
 
         if (isset($filters['status'])) {
             $query->where('status', $filters['status']);
@@ -31,14 +31,24 @@ class TaskRepository implements TaskRepositoryInterface
 
     public function findById(string $id): ?Task
     {
-        return Task::where('user_id', Auth::id())->with('project')->find($id);
+        return Task::where('user_id', Auth::id())->with(['project', 'workLogs'])->find($id);
     }
 
     public function create(array $data): Task
     {
         $data['user_id'] = Auth::id();
+        $workLogs = $data['work_logs'] ?? [];
+        unset($data['work_logs']);
+        
         $task = Task::create($data);
-        return $task->load('project');
+        
+        if (!empty($workLogs)) {
+            foreach ($workLogs as $log) {
+                $task->workLogs()->create($log);
+            }
+        }
+        
+        return $task->load(['project', 'workLogs']);
     }
 
     public function update(string $id, array $data): bool
@@ -47,7 +57,23 @@ class TaskRepository implements TaskRepositoryInterface
         if (!$task) {
             return false;
         }
-        return $task->update($data);
+
+        $workLogs = $data['work_logs'] ?? null;
+        unset($data['work_logs']);
+
+        // Only update fields that are in fillable
+        $updated = $task->update($data);
+
+        if ($workLogs !== null) {
+            // Simple sync: delete existing and recreate
+            $task->workLogs()->delete();
+            foreach ($workLogs as $log) {
+                unset($log['id']); // Remove ID to create new
+                $task->workLogs()->create($log);
+            }
+        }
+
+        return true; // Return true as we've processed the update
     }
 
     public function delete(string $id): bool
@@ -63,7 +89,7 @@ class TaskRepository implements TaskRepositoryInterface
     {
         $today = $date ?: now()->toDateString();
         return Task::where('user_id', Auth::id())
-            ->with('project')
+            ->with(['project', 'workLogs'])
             ->where(function ($query) use ($today) {
                 // Task is due today
                 $query->whereDate('due_date', $today)
@@ -96,7 +122,7 @@ class TaskRepository implements TaskRepositoryInterface
     {
         $today = $date ?: now()->toDateString();
         return Task::where('user_id', Auth::id())
-            ->with('project')
+            ->with(['project', 'workLogs'])
             ->where(function ($query) use ($today) {
                 $query->whereDate('due_date', '>', $today)
                     ->orWhereDate('start_date', '>', $today);

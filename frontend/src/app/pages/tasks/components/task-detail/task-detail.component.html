@@ -145,22 +145,47 @@
       </div>
     </div>
 
-    <div class="section">
-      <div class="label">WORK HOURS</div>
-      <div class="input-hours-group" (click)="isEditingWorkHours = true">
+    <div class="section work-logs-section">
+      <div class="work-logs-header">
+        <div class="label">WORK LOGS</div>
+        <ion-button fill="clear" color="primary" size="small" (click)="addWorkLog()" class="add-log-btn">
+          <ion-icon name="add-circle-outline" slot="start"></ion-icon>
+          Add Log
+        </ion-button>
+      </div>
+      
+      <div class="work-logs-list">
+        <div *ngFor="let log of editedTask.work_logs; let i = index" class="work-log-item">
+          <div class="log-row">
+            <ion-input
+              type="date"
+              [(ngModel)]="log.log_date"
+              class="log-date"
+            ></ion-input>
+            <ion-input
+              type="text"
+              [(ngModel)]="log.description"
+              placeholder="What did you do?"
+              class="log-description"
+            ></ion-input>
+            <ion-input
+              type="number"
+              step="0.25"
+              [(ngModel)]="log.duration_hours"
+              (ionChange)="onWorkLogItemChange()"
+              class="log-duration"
+            ></ion-input>
+            <span class="hours-suffix">h</span>
+          </div>
+          <div class="remove-log-btn" (click)="removeWorkLog(i)">
+            <ion-icon name="close-outline"></ion-icon>
+          </div>
+        </div>
+      </div>
+
+      <div class="work-log-total">
         <ion-icon name="time-outline"></ion-icon>
-        <ng-container *ngIf="!isEditingWorkHours">
-          <span class="work-hours-display">{{ editedTask.work_hours | formatWorkHours }}</span>
-        </ng-container>
-        <ion-input
-          *ngIf="isEditingWorkHours"
-          type="number"
-          [(ngModel)]="editedTask.work_hours"
-          (ionBlur)="isEditingWorkHours = false"
-          placeholder="Enter hours"
-          class="hours-input"
-        ></ion-input>
-        <span class="hours-suffix" *ngIf="isEditingWorkHours">hrs</span>
+        <span>Total: {{ editedTask.work_hours | formatWorkHours }}</span>
       </div>
     </div>
 

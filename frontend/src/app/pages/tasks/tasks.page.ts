@@ -133,6 +133,7 @@ export class TasksPage implements OnInit {
         start_date: data.start_date,
         end_date: data.end_date,
         work_hours: data.work_hours,
+        work_logs: data.work_logs,
         estimated_pomodoros: data.estimated_pomodoros,
         completed_pomodoros: 0
       };

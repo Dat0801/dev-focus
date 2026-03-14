@@ -5,8 +5,8 @@
         <h1 class="header-title">Projects</h1>
       </div>
       <div class="header-right">
-        <ion-button class="header-icon-btn" fill="clear" (click)="addProject()">
-          <ion-icon name="add"></ion-icon>
+        <ion-button class="header-icon-btn" fill="clear">
+          <ion-icon name="notifications-outline"></ion-icon>
         </ion-button>
         <div class="profile-avatar">
           <ion-icon name="person-circle-outline"></ion-icon>
@@ -92,4 +92,10 @@
   <div class="empty-state" *ngIf="filteredProjects.length === 0">
     <p>No projects in this category.</p>
   </div>
+
+  <ion-fab vertical="bottom" horizontal="end" slot="fixed" class="custom-fab">
+    <ion-fab-button (click)="addProject()">
+      <ion-icon name="add"></ion-icon>
+    </ion-fab-button>
+  </ion-fab>
 </ion-content>

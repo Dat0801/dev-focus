@@ -190,3 +190,18 @@
   padding: 40px 0;
   color: #adb1b9;
 }
+
+.custom-fab {
+  margin-bottom: 16px;
+  margin-right: 8px;
+
+  ion-fab-button {
+    --background: #7c4dff;
+    --background-activated: #673ab7;
+    --box-shadow: 0 8px 20px rgba(124, 77, 255, 0.4);
+    
+    ion-icon {
+      font-size: 28px;
+    }
+  }
+}

@@ -22,6 +22,7 @@ export class AddTaskComponent implements OnInit {
   startDate: string | null = null;
   endDate: string | null = null;
   workHours: number | null = null;
+  workLogs: any[] = [];
   estimatedPomodoros: number = 1;
 
   projects: any[] = [];
@@ -41,6 +42,7 @@ export class AddTaskComponent implements OnInit {
 
   ngOnInit() {
     this.loadProjects();
+    this.addWorkLog(); // Start with one empty log
   }
 
   loadProjects() {
@@ -52,6 +54,34 @@ export class AddTaskComponent implements OnInit {
         }
       }
     });
+  }
+
+  addWorkLog() {
+    this.workLogs.unshift({
+      log_date: new Date().toISOString().split('T')[0],
+      description: '',
+      duration_hours: '0.00',
+      duration_minutes: 0
+    });
+  }
+
+  removeWorkLog(index: number) {
+    this.workLogs.splice(index, 1);
+    this.calculateTotalHours();
+  }
+
+  onWorkLogItemChange() {
+    this.calculateTotalHours();
+  }
+
+  calculateTotalHours() {
+    let totalMinutes = 0;
+    this.workLogs.forEach((log: any) => {
+      const mins = parseFloat(log.duration_hours) * 60;
+      log.duration_minutes = isNaN(mins) ? 0 : mins;
+      totalMinutes += log.duration_minutes;
+    });
+    this.workHours = parseFloat((totalMinutes / 60).toFixed(2));
   }
 
   dismiss() {
@@ -106,6 +136,7 @@ export class AddTaskComponent implements OnInit {
   }
 
   createTask() {
+    this.calculateTotalHours();
     this.modalCtrl.dismiss({
       title: this.taskName,
       description: this.description,
@@ -115,6 +146,11 @@ export class AddTaskComponent implements OnInit {
       start_date: this.startDate,
       end_date: this.endDate,
       work_hours: this.workHours,
+      work_logs: this.workLogs.map((log: any) => ({
+        log_date: log.log_date,
+        description: log.description,
+        duration_minutes: log.duration_minutes
+      })),
       estimated_pomodoros: this.estimatedPomodoros
     });
   }
