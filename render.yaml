@@ -1,13 +1,13 @@
 services:
-  # 1. Redis Service (Internal Key-Value Store)
+  # 1. Redis Service (Internal Key-Value Store) - NEW
   - type: keyvalue
     name: dev-focus-redis
     ipAllowList: [] 
     plan: free
 
-  # 2. Backend API Service (Laravel)
+  # 2. Backend API Service (Existing)
   - type: web
-    name: dev-focus-api
+    name: api-dev-focus # Matched with your existing service name
     runtime: docker
     region: singapore
     plan: free
@@ -26,8 +26,19 @@ services:
           property: connectionString
       - key: DB_CONNECTION
         value: pgsql
+      # Supabase and other sensitive variables (Render will prompt for these or keep existing)
+      - key: APP_KEY
+        sync: false
+      - key: DB_HOST
+        sync: false
+      - key: DB_PASSWORD
+        sync: false
+      - key: DB_DATABASE
+        sync: false
+      - key: DB_USERNAME
+        sync: false
 
-  # 3. Background Worker (Queue Processing)
+  # 3. Background Worker (NEW for Queue Processing)
   - type: worker
     name: dev-focus-worker
     runtime: docker
@@ -36,7 +47,6 @@ services:
     rootDir: backend
     dockerfilePath: Dockerfile
     dockerContext: .
-    # Override the default entrypoint to run the queue worker
     dockerCommand: php artisan queue:work --tries=3 --timeout=90
     envVars:
       - key: APP_ENV
@@ -50,10 +60,20 @@ services:
           property: connectionString
       - key: DB_CONNECTION
         value: pgsql
+      - key: APP_KEY
+        sync: false
+      - key: DB_HOST
+        sync: false
+      - key: DB_PASSWORD
+        sync: false
+      - key: DB_DATABASE
+        sync: false
+      - key: DB_USERNAME
+        sync: false
 
-  # 4. Frontend (Ionic/Angular Static Site)
+  # 4. Frontend Service (Existing)
   - type: web
-    name: dev-focus-frontend
+    name: dev-focus # Matched with your existing service name
     runtime: static
     rootDir: frontend
     buildCommand: npm install && npm run build
@@ -62,5 +82,5 @@ services:
       - key: API_BASE_URL
         fromService:
           type: web
-          name: dev-focus-api
+          name: api-dev-focus
           property: host
