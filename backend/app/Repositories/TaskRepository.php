@@ -17,7 +17,13 @@ class TaskRepository implements TaskRepositoryInterface
     {
         $query = Task::where('user_id', Auth::id())
             ->whereNull('parent_id') // Only top-level tasks for main list
-            ->with(['project', 'workLogs', 'subTasks.workLogs']);
+            ->with(['project' => function($q) {
+                $q->withCount(['tasks' => function($tq) {
+                    $tq->whereNull('parent_id');
+                }, 'tasks as completed_tasks_count' => function($tq) {
+                    $tq->whereNull('parent_id')->where('status', 'done');
+                }]);
+            }, 'workLogs', 'subTasks.workLogs']);
 
         if (isset($filters['status'])) {
             $query->where('status', $filters['status']);
@@ -166,7 +172,13 @@ class TaskRepository implements TaskRepositoryInterface
     {
         $today = $date ?: now()->toDateString();
         return Task::where('user_id', Auth::id())
-            ->with(['project', 'workLogs', 'subTasks.workLogs'])
+            ->with(['project' => function($q) {
+                $q->withCount(['tasks' => function($tq) {
+                    $tq->whereNull('parent_id');
+                }, 'tasks as completed_tasks_count' => function($tq) {
+                    $tq->whereNull('parent_id')->where('status', 'done');
+                }]);
+            }, 'workLogs', 'subTasks.workLogs'])
             ->where(function ($query) use ($today) {
                 // Task is due today
                 $query->whereDate('due_date', $today)
@@ -187,7 +199,13 @@ class TaskRepository implements TaskRepositoryInterface
     {
         $today = $date ?: now()->toDateString();
         return Task::where('user_id', Auth::id())
-            ->with(['project', 'workLogs', 'subTasks.workLogs'])
+            ->with(['project' => function($q) {
+                $q->withCount(['tasks' => function($tq) {
+                    $tq->whereNull('parent_id');
+                }, 'tasks as completed_tasks_count' => function($tq) {
+                    $tq->whereNull('parent_id')->where('status', 'done');
+                }]);
+            }, 'workLogs', 'subTasks.workLogs'])
             ->whereDate('due_date', '>', $today)
             ->whereNull('parent_id') // Only show top-level tasks
             ->orderBy('due_date', 'asc')
@@ -196,12 +214,24 @@ class TaskRepository implements TaskRepositoryInterface
 
     public function getTasksByMonth(string $month): Collection
     {
-        return Task::where('user_id', Auth::id())
+        $query = Task::where('user_id', Auth::id())
             ->where('status', 'done')
-            ->with(['project', 'workLogs', 'subTasks.workLogs'])
-            ->where('end_date', 'like', "$month%")
-            ->whereNull('parent_id') // Only show top-level tasks
-            ->get();
+            ->with(['project' => function($q) {
+                $q->withCount(['tasks' => function($tq) {
+                    $tq->whereNull('parent_id');
+                }, 'tasks as completed_tasks_count' => function($tq) {
+                    $tq->whereNull('parent_id')->where('status', 'done');
+                }]);
+            }, 'workLogs', 'subTasks.workLogs'])
+            ->whereNull('parent_id');
+
+        if (config('database.default') === 'pgsql') {
+            $query->whereRaw("TO_CHAR(end_date, 'YYYY-MM') = ?", [$month]);
+        } else {
+            $query->where('end_date', 'like', "$month%");
+        }
+
+        return $query->get();
     }
 
     public function getMonthsWithData(): Collection
@@ -228,22 +258,46 @@ class TaskRepository implements TaskRepositoryInterface
     {
         // We want all projects that have completed tasks in this month
         return \App\Models\Project::where('user_id', Auth::id())
+            ->withCount(['tasks' => function($tq) {
+                $tq->whereNull('parent_id');
+            }, 'tasks as completed_tasks_count' => function($tq) {
+                $tq->whereNull('parent_id')->where('status', 'done');
+            }])
             ->with(['tasks' => function($query) use ($month) {
                 $query->whereNull('parent_id')
-                    ->where('status', 'done')
-                    ->where('end_date', 'like', "$month%")
-                    ->with(['workLogs' => function($q) use ($month) {
+                    ->where('status', 'done');
+
+                if (config('database.default') === 'pgsql') {
+                    $query->whereRaw("TO_CHAR(end_date, 'YYYY-MM') = ?", [$month]);
+                } else {
+                    $query->where('end_date', 'like', "$month%");
+                }
+
+                $query->with(['workLogs' => function($q) use ($month) {
+                    if (config('database.default') === 'pgsql') {
+                        $q->whereRaw("TO_CHAR(log_date, 'YYYY-MM') = ?", [$month]);
+                    } else {
                         $q->where('log_date', 'like', "$month%");
-                    }, 'subTasks' => function($q) use ($month) {
-                        $q->with(['workLogs' => function($ql) use ($month) {
+                    }
+                }, 'subTasks' => function($q) use ($month) {
+                    $q->with(['workLogs' => function($ql) use ($month) {
+                        if (config('database.default') === 'pgsql') {
+                            $ql->whereRaw("TO_CHAR(log_date, 'YYYY-MM') = ?", [$month]);
+                        } else {
                             $ql->where('log_date', 'like', "$month%");
-                        }]);
+                        }
                     }]);
+                }]);
             }])
             ->whereHas('tasks', function($query) use ($month) {
                 $query->whereNull('parent_id')
-                    ->where('status', 'done')
-                    ->where('end_date', 'like', "$month%");
+                    ->where('status', 'done');
+                
+                if (config('database.default') === 'pgsql') {
+                    $query->whereRaw("TO_CHAR(end_date, 'YYYY-MM') = ?", [$month]);
+                } else {
+                    $query->where('end_date', 'like', "$month%");
+                }
             })
             ->get();
     }

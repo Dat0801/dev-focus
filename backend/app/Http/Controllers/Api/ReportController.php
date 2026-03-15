@@ -70,11 +70,11 @@ class ReportController extends Controller
 
             if (config('database.default') === 'pgsql') {
                 $performanceData = $performanceQuery->selectRaw('updated_at::date as date, count(*) as count')
-                    ->groupBy('date')
+                    ->groupByRaw('updated_at::date')
                     ->pluck('count', 'date');
             } else {
                 $performanceData = $performanceQuery->selectRaw('DATE(updated_at) as date, count(*) as count')
-                    ->groupBy('date')
+                    ->groupByRaw('DATE(updated_at)')
                     ->pluck('count', 'date');
             }
 

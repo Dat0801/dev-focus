@@ -29,15 +29,16 @@ class PomodoroRepository implements PomodoroRepositoryInterface
         $session = PomodoroSession::create($data);
 
         // Update associated task progress
-        if ($session->task_id && $session->duration_minutes) {
+        if ($session->task_id && $session->duration_minutes > 0) {
             $task = $session->task;
             if ($task) {
+                $duration = (float) $session->duration_minutes;
+                
                 // Only increment completed_pomodoros if the duration is at least 25 minutes
-                if ($session->duration_minutes >= 25) {
+                if ($duration >= 25) {
                     $task->completed_pomodoros += 1;
                 }
                 
-                $duration = $session->duration_minutes;
                 $task->work_hours = (float)$task->work_hours + ($duration / 60);
                 
                 // Create structured work_log entry

@@ -59,11 +59,31 @@ class PomodoroController extends Controller
         return response()->json(['message' => 'Session deleted successfully']);
     }
 
-    public function todaySummary(): JsonResponse
+    public function todaySummary(Request $request): JsonResponse
     {
-        return response()->json([
-            'focus_time_minutes' => $this->pomodoroService->getTodayFocusTime(),
-            'sessions_count' => $this->pomodoroService->getTodaySessions()->count()
-        ]);
+        try {
+            $user = $request->user();
+            if (!$user) {
+                return response()->json(['error' => 'Unauthenticated'], 401);
+            }
+
+            $sessions = \App\Models\PomodoroSession::where('user_id', $user->id)
+                ->whereDate('created_at', now()->toDateString())
+                ->get();
+
+            return response()->json([
+                'focus_time_minutes' => (int) $sessions->sum('duration_minutes'),
+                'sessions_count' => (int) $sessions->count()
+            ]);
+        } catch (\Throwable $e) {
+            \Log::error('Pomodoro today summary error: ' . $e->getMessage(), [
+                'exception' => $e,
+                'user_id' => $request->user()?->id
+            ]);
+            return response()->json([
+                'error' => 'Internal Server Error',
+                'message' => $e->getMessage()
+            ], 500);
+        }
     }
 }
