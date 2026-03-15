@@ -1,26 +1,22 @@
 services:
-  # 1. Redis Service (For Queue and Cache)
+  # 1. Redis Service (Internal Key-Value Store)
   - type: keyvalue
     name: dev-focus-redis
-    ipAllowList: [] # Only allow internal service access
+    ipAllowList: [] 
     plan: free
 
-  # 2. Backend API Service
+  # 2. Backend API Service (Laravel)
   - type: web
     name: dev-focus-api
-    env: php
+    runtime: docker
     region: singapore
     plan: free
     rootDir: backend
-    buildCommand: |
-      composer install --no-dev --optimize-autoloader
-      php artisan migrate --force
-    startCommand: php artisan serve --host=0.0.0.0 --port=$PORT
+    dockerfilePath: Dockerfile
+    dockerContext: .
     envVars:
       - key: APP_ENV
         value: production
-      - key: APP_DEBUG
-        value: false
       - key: QUEUE_CONNECTION
         value: redis
       - key: REDIS_URL
@@ -34,12 +30,14 @@ services:
   # 3. Background Worker (Queue Processing)
   - type: worker
     name: dev-focus-worker
-    env: php
+    runtime: docker
     region: singapore
     plan: free
     rootDir: backend
-    buildCommand: composer install --no-dev --optimize-autoloader
-    startCommand: php artisan queue:work --tries=3 --timeout=90
+    dockerfilePath: Dockerfile
+    dockerContext: .
+    # Override the default entrypoint to run the queue worker
+    dockerCommand: php artisan queue:work --tries=3 --timeout=90
     envVars:
       - key: APP_ENV
         value: production
@@ -57,7 +55,6 @@ services:
   - type: web
     name: dev-focus-frontend
     runtime: static
-    region: singapore
     plan: free
     rootDir: frontend
     buildCommand: npm install && npm run build

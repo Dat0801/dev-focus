@@ -6,13 +6,19 @@ if [ -z "$APP_KEY" ]; then
     php artisan key:generate --show --no-interaction
 fi
 
-# Replace the port in Nginx config with Render's PORT if provided
-PORT=${PORT:-80}
-sed -i "s/listen 80;/listen $PORT;/g" /etc/nginx/http.d/default.conf
-
 # Run migrations
 echo "Running migrations..."
 php artisan migrate --force --no-interaction
+
+# If arguments are passed, run them instead of starting Nginx/PHP-FPM
+if [ $# -gt 0 ]; then
+    echo "Running command: $@"
+    exec "$@"
+fi
+
+# Replace the port in Nginx config with Render's PORT if provided
+PORT=${PORT:-80}
+sed -i "s/listen 80;/listen $PORT;/g" /etc/nginx/http.d/default.conf
 
 # Start php-fpm in the background and ensure it logs to stdout
 echo "Starting PHP-FPM..."
