@@ -26,7 +26,7 @@ class TaskController extends Controller
      */
     public function index(Request $request): AnonymousResourceCollection
     {
-        $filters = $request->only(['status', 'priority', 'project_id']);
+        $filters = $request->only(['status', 'priority', 'project_id', 'include_subtasks', 'per_page']);
         $tasks = $this->taskService->getAllTasks($filters);
         return TaskResource::collection($tasks);
     }

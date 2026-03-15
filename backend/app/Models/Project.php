@@ -40,9 +40,12 @@ class Project extends Model
     public function getProgressAttribute(): float
     {
         // Try to use loaded tasks count if available via withCount
-        if ($this->tasks_count !== null && $this->completed_tasks_count !== null) {
-            if ($this->tasks_count === 0) return 0;
-            return round(($this->completed_tasks_count / $this->tasks_count) * 100, 2);
+        $tasksCount = $this->attributes['tasks_count'] ?? null;
+        $completedTasksCount = $this->attributes['completed_tasks_count'] ?? null;
+
+        if ($tasksCount !== null && $completedTasksCount !== null) {
+            if ($tasksCount == 0) return 0;
+            return round(($completedTasksCount / $tasksCount) * 100, 2);
         }
 
         // Use relationLoaded to avoid N+1 if tasks are already loaded
@@ -71,7 +74,7 @@ class Project extends Model
     public function getStatusAttribute(): string
     {
         $progress = $this->progress;
-        if ($progress === 100.0) {
+        if ($progress >= 100.0) {
             return 'completed';
         }
         return 'in_progress';
@@ -79,8 +82,9 @@ class Project extends Model
 
     public function getTasksCountAttribute(): int
     {
-        if ($this->tasks_count !== null) {
-            return $this->tasks_count;
+        $tasksCount = $this->attributes['tasks_count'] ?? null;
+        if ($tasksCount !== null) {
+            return (int) $tasksCount;
         }
 
         if ($this->relationLoaded('tasks')) {

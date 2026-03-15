@@ -16,14 +16,17 @@ class TaskRepository implements TaskRepositoryInterface
     public function getAll(array $filters = []): LengthAwarePaginator
     {
         $query = Task::where('user_id', Auth::id())
-            ->whereNull('parent_id') // Only top-level tasks for main list
             ->with(['project' => function($q) {
                 $q->withCount(['tasks' => function($tq) {
                     $tq->whereNull('parent_id');
                 }, 'tasks as completed_tasks_count' => function($tq) {
                     $tq->whereNull('parent_id')->where('status', 'done');
                 }]);
-            }, 'workLogs', 'subTasks.workLogs']);
+            }, 'workLogs', 'subTasks.workLogs', 'parent']);
+
+        if (!isset($filters['include_subtasks']) || !$filters['include_subtasks']) {
+            $query->whereNull('parent_id');
+        }
 
         if (isset($filters['status'])) {
             $query->where('status', $filters['status']);
@@ -37,7 +40,14 @@ class TaskRepository implements TaskRepositoryInterface
             $query->where('project_id', $filters['project_id']);
         }
 
-        return $query->paginate(15);
+        $perPage = $filters['per_page'] ?? 15;
+        if ($perPage === 'all') {
+            // Convert to a LengthAwarePaginator to match return type
+            $tasks = $query->get();
+            return new LengthAwarePaginator($tasks, $tasks->count(), $tasks->count() ?: 1, 1);
+        }
+
+        return $query->paginate($perPage);
     }
 
     public function findById(string $id): ?Task

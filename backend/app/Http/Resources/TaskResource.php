@@ -30,6 +30,7 @@ class TaskResource extends JsonResource
             'project_id' => $this->project_id,
             'parent_id' => $this->parent_id,
             'project' => new ProjectResource($this->whenLoaded('project')),
+            'parent' => new TaskResource($this->whenLoaded('parent')),
             'tags' => TagResource::collection($this->whenLoaded('tags')),
             'work_logs' => WorkLogResource::collection($this->whenLoaded('workLogs')),
             'pomodoro_sessions' => PomodoroSessionResource::collection($this->whenLoaded('pomodoroSessions')),

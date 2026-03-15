@@ -64,17 +64,30 @@ export class PomodoroPage implements OnInit, OnDestroy {
     this.loadTodaySummary();
   }
 
+  ionViewWillEnter() {
+    this.loadTasks();
+    this.loadTodaySummary();
+  }
+
   ngOnDestroy() {
     this.stopTimer();
   }
 
   loadTasks() {
-    this.taskService.getTasks().subscribe({
+    this.taskService.getTasks({ include_subtasks: true, per_page: 'all' }).subscribe({
       next: (res: any) => {
-        // Filter tasks that are NOT done
-        this.tasks = (res.data || res).filter((t: any) => t.status !== 'done');
+        const tasksArray = Array.isArray(res) ? res : (res.data || []);
+        // Filter tasks that are NOT done and DON'T have sub-tasks
+        // (We only want the leaf tasks or sub-tasks for focus timer)
+        this.tasks = tasksArray.filter((t: any) => {
+          const isNotDone = t.status !== 'done';
+          const hasSubTasks = t.sub_tasks && t.sub_tasks.length > 0;
+          return isNotDone && !hasSubTasks;
+        });
+        console.log('Loaded tasks for pomodoro:', this.tasks);
       },
-      error: () => {
+      error: (err) => {
+        console.error('Error loading tasks for pomodoro:', err);
         this.showToast('Failed to load tasks');
       }
     });
@@ -100,12 +113,18 @@ export class PomodoroPage implements OnInit, OnDestroy {
 
     const alert = await this.alertCtrl.create({
       header: 'Select Task',
-      inputs: this.tasks.map(task => ({
-        type: 'radio',
-        label: task.title,
-        value: task.id,
-        checked: this.selectedTaskId === task.id
-      })),
+      inputs: this.tasks.map(task => {
+        let label = task.title;
+        if (task.parent_id && task.parent) {
+          label = `${task.parent.title} > ${task.title}`;
+        }
+        return {
+          type: 'radio',
+          label: label,
+          value: task.id,
+          checked: this.selectedTaskId === task.id
+        };
+      }),
       buttons: [
         { text: 'Cancel', role: 'cancel' },
         { 
