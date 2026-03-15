@@ -37,6 +37,8 @@ services:
         sync: false
       - key: DB_USERNAME
         sync: false
+      - key: ALLOWED_ORIGINS
+        value: "https://dev-focus.onrender.com,http://localhost:8100,http://localhost:4200"
 
   # 3. Background Worker (NEW for Queue Processing)
   - type: worker
@@ -70,6 +72,8 @@ services:
         sync: false
       - key: DB_USERNAME
         sync: false
+      - key: ALLOWED_ORIGINS
+        value: "https://dev-focus.onrender.com,http://localhost:8100,http://localhost:4200"
 
   # 4. Frontend Service (Existing)
   - type: web

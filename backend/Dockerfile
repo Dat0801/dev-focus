@@ -14,7 +14,11 @@ RUN apk add --no-cache \
     postgresql-client
 
 # Install PHP extensions
-RUN docker-php-ext-install \
+RUN apk add --no-cache --virtual .build-deps $PHPIZE_DEPS \
+    && pecl install redis \
+    && docker-php-ext-enable redis \
+    && apk del .build-deps \
+    && docker-php-ext-install \
     pdo_mysql \
     pdo_pgsql \
     zip \

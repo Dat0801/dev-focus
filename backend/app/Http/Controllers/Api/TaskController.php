@@ -91,7 +91,6 @@ class TaskController extends Controller
     {
         $request->validate([
             'tasks' => 'required|array',
-            'tasks.*.title' => 'required|string',
         ]);
 
         try {
@@ -101,11 +100,15 @@ class TaskController extends Controller
                 'import_log_id' => $importLogId,
                 'success' => true
             ]);
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('Import error: ' . $e->getMessage(), [
+                'exception' => $e,
+                'request' => $request->all()
+            ]);
             return response()->json([
                 'message' => $e->getMessage(),
                 'success' => false
-            ], 400);
+            ], 500);
         }
     }
     public function importStatus(string $id): JsonResponse

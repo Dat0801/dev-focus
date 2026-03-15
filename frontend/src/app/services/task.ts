@@ -57,12 +57,43 @@ export class TaskService {
 
   importTasks(file: File): Observable<any> {
     return from(this.parseExcelFile(file)).pipe(
-      // Once parsed, send to backend
+      // Once parsed, send to backend in chunks to avoid timeout
       switchMap((tasks: any[]) => {
-        return this.http.post(`${environment.apiUrl}/tasks/import`, { tasks });
-      })
-    );
-  }
+        const CHUNK_SIZE = 200; // Increased chunk size for better performance while still safe
+         if (tasks.length <= CHUNK_SIZE) {
+           return this.http.post(`${environment.apiUrl}/tasks/import`, { tasks });
+         }
+         
+         const chunks = [];
+         for (let i = 0; i < tasks.length; i += CHUNK_SIZE) {
+           chunks.push(tasks.slice(i, i + CHUNK_SIZE));
+         }
+         
+         // Send chunks sequentially or with small concurrency to avoid overwhelming the server
+         // For now, parallel is fine but we'll use a slightly safer approach
+         const observables = chunks.map(chunk => 
+           this.http.post(`${environment.apiUrl}/tasks/import`, { tasks: chunk })
+         );
+         
+         // Use concat to send chunks one by one if preferred, but Promise.all is faster
+         // and each request is small enough now.
+         return from(Promise.all(observables.map(o => o.toPromise().catch(err => {
+           console.error('Chunk import error:', err);
+           return { success: false, message: 'Một phần của dữ liệu gặp lỗi khi import', error: err };
+         })))).pipe(
+           switchMap((responses: any[]) => {
+             const failures = responses.filter(r => r.success === false);
+             if (failures.length > 0) {
+               console.warn(`${failures.length} chunks failed to import`);
+             }
+             // Return the first successful response or the first failure
+             const result = responses.find(r => r.success !== false) || responses[0];
+             return from([result]);
+           })
+         );
+       })
+     );
+   }
 
   getImportLogs(): Observable<any> {
     return this.http.get(`${environment.apiUrl}/tasks/import/logs`);

@@ -130,25 +130,18 @@ class ImportTasksJob implements ShouldQueue
         if (isset($taskData['project_name'])) {
             $projectName = trim($taskData['project_name']);
             if (!empty($projectName)) {
-                // Try case-insensitive matching
-                $project = Project::where('user_id', $this->userId)
-                    ->whereRaw('LOWER(name) = ?', [strtolower($projectName)])
-                    ->first();
-                
-                if (!$project) {
-                    // Create project if it doesn't exist
-                    $colors = ['#7c4dff', '#ff5252', '#4caf50', '#2196f3', '#ff9800', '#9c27b0', '#00bcd4'];
-                    try {
-                        $project = Project::create([
-                            'name' => $projectName,
-                            'user_id' => $this->userId,
+                // Use firstOrCreate to avoid race conditions and duplicates
+                $colors = ['#7c4dff', '#ff5252', '#4caf50', '#2196f3', '#ff9800', '#9c27b0', '#00bcd4'];
+                try {
+                    $project = Project::firstOrCreate(
+                        ['user_id' => $this->userId, 'name' => $projectName],
+                        [
                             'color' => $colors[array_rand($colors)],
                             'category' => 'General'
-                        ]);
-                        Log::info("Created project: $projectName (ID: {$project->id}) for user: $this->userId");
-                    } catch (\Exception $e) {
-                        Log::error("Failed to create project: $projectName. Error: " . $e->getMessage());
-                    }
+                        ]
+                    );
+                } catch (\Exception $e) {
+                    Log::error("Failed to lookup/create project: $projectName. Error: " . $e->getMessage());
                 }
                 
                 if ($project) {
