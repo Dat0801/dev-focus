@@ -56,9 +56,8 @@ services:
         value: pgsql
 
   # 4. Frontend (Ionic/Angular)
-  - type: static
+  - type: static_site
     name: dev-focus-frontend
-    env: static
     region: singapore
     plan: free
     rootDir: frontend
