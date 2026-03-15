@@ -11,21 +11,26 @@ use Carbon\Carbon;
 
 class PomodoroRepository implements PomodoroRepositoryInterface
 {
+    protected function getUserId()
+    {
+        return Auth::id() ?? auth('sanctum')->id();
+    }
+
     public function getAll(): LengthAwarePaginator
     {
-        return PomodoroSession::where('user_id', Auth::id())
+        return PomodoroSession::where('user_id', $this->getUserId())
             ->orderBy('created_at', 'desc')
             ->paginate(15);
     }
 
     public function findById(string $id): ?PomodoroSession
     {
-        return PomodoroSession::where('user_id', Auth::id())->find($id);
+        return PomodoroSession::where('user_id', $this->getUserId())->find($id);
     }
 
     public function create(array $data): PomodoroSession
     {
-        $data['user_id'] = Auth::id();
+        $data['user_id'] = $this->getUserId();
         $session = PomodoroSession::create($data);
 
         // Update associated task progress
@@ -41,12 +46,20 @@ class PomodoroRepository implements PomodoroRepositoryInterface
                 
                 $task->work_hours = (float)$task->work_hours + ($duration / 60);
                 
-                // Create structured work_log entry
-                $task->workLogs()->create([
-                    'log_date' => now()->toDateString(),
-                    'description' => 'Focus session',
-                    'duration_minutes' => $duration,
-                ]);
+                // Aggregate work_log entry for the same task and day
+                $logDate = now()->toDateString();
+                $workLog = $task->workLogs()->where('log_date', $logDate)->first();
+
+                if ($workLog) {
+                    $workLog->duration_minutes = (float)$workLog->duration_minutes + $duration;
+                    $workLog->save();
+                } else {
+                    $task->workLogs()->create([
+                        'log_date' => $logDate,
+                        'description' => 'Focus session',
+                        'duration_minutes' => $duration,
+                    ]);
+                }
                 
                 $task->save();
             }
@@ -75,14 +88,19 @@ class PomodoroRepository implements PomodoroRepositoryInterface
 
     public function getTodaySessions(): Collection
     {
-        return PomodoroSession::where('user_id', Auth::id())
+        $userId = $this->getUserId();
+        if (!$userId) {
+            return collect();
+        }
+
+        return PomodoroSession::where('user_id', $userId)
             ->whereDate('created_at', Carbon::today()->toDateString())
             ->get();
     }
 
     public function getWeeklySessions(): Collection
     {
-        return PomodoroSession::where('user_id', Auth::id())
+        return PomodoroSession::where('user_id', $this->getUserId())
             ->whereBetween('created_at', [
                 Carbon::now()->startOfWeek()->toDateTimeString(),
                 Carbon::now()->endOfWeek()->toDateTimeString()

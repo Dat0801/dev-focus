@@ -67,22 +67,24 @@ class PomodoroController extends Controller
                 return response()->json(['error' => 'Unauthenticated'], 401);
             }
 
-            $sessions = \App\Models\PomodoroSession::where('user_id', $user->id)
-                ->whereDate('created_at', now()->toDateString())
-                ->get();
+            $sessions = $this->pomodoroService->getTodaySessions();
+            $sessionsCount = $sessions->count();
+            $focusTimeMinutes = $sessions->sum('duration_minutes');
 
             return response()->json([
-                'focus_time_minutes' => (int) $sessions->sum('duration_minutes'),
-                'sessions_count' => (int) $sessions->count()
+                'focus_time_minutes' => (int) $focusTimeMinutes,
+                'sessions_count' => (int) $sessionsCount
             ]);
         } catch (\Throwable $e) {
             \Log::error('Pomodoro today summary error: ' . $e->getMessage(), [
                 'exception' => $e,
-                'user_id' => $request->user()?->id
+                'user_id' => $request->user()?->id,
+                'trace' => $e->getTraceAsString()
             ]);
+            
             return response()->json([
                 'error' => 'Internal Server Error',
-                'message' => $e->getMessage()
+                'message' => config('app.debug') ? $e->getMessage() : 'An error occurred while fetching today summary'
             ], 500);
         }
     }

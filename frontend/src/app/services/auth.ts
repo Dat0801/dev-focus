@@ -58,4 +58,18 @@ export class AuthService {
   isLoggedIn() {
     return !!this.getToken();
   }
+
+  updatePomodoroSettings(focus: number, breakTime: number): Observable<any> {
+    return this.http.put(`${this.apiUrl}/profile/pomodoro-settings`, {
+      pomodoro_focus_duration: focus,
+      pomodoro_break_duration: breakTime
+    }).pipe(
+      tap((res: any) => {
+        if (res.user) {
+          localStorage.setItem('user', JSON.stringify(res.user));
+          this.currentUserSubject.next(res.user);
+        }
+      })
+    );
+  }
 }

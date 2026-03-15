@@ -24,6 +24,8 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'pomodoro_focus_duration',
+        'pomodoro_break_duration',
     ];
 
     /**

@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\TaskController;
 use App\Http\Controllers\Api\ProjectController;
 use App\Http\Controllers\Api\PomodoroController;
 use App\Http\Controllers\Api\ReportController;
+use App\Http\Controllers\Api\ProfileController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -14,6 +15,7 @@ Route::post('/login', [AuthController::class, 'login']);
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/me', [AuthController::class, 'me']);
+    Route::put('/profile/pomodoro-settings', [ProfileController::class, 'updatePomodoroSettings']);
 
     Route::get('/tasks/today', [TaskController::class, 'today']);
     Route::get('/tasks/upcoming', [TaskController::class, 'upcoming']);

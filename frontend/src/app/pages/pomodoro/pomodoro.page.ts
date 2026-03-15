@@ -1,8 +1,10 @@
 import { Component, OnInit, OnDestroy, HostListener } from '@angular/core';
+import { Title } from '@angular/platform-browser';
 import { ToastController, AlertController } from '@ionic/angular';
 import { TaskService } from '../../services/task';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
+import { AuthService } from '../../services/auth';
 
 @Component({
   selector: 'app-pomodoro',
@@ -11,13 +13,18 @@ import { environment } from '../../../environments/environment';
   standalone: false,
 })
 export class PomodoroPage implements OnInit, OnDestroy {
+  focusMinutes: number = 25;
+  breakMinutes: number = 5;
+
   timeDisplay: string = '25:00';
   timer: any;
   timeLeft: number = 25 * 60;
   totalTime: number = 25 * 60;
   isRunning: boolean = false;
   isBreak: boolean = false;
-  
+
+  private originalTitle: string = 'Dev Focus';
+
   // Track elapsed time in current run to save on stop/refresh
   private sessionSeconds: number = 0;
   private sessionStartTime: number | null = null;
@@ -56,21 +63,62 @@ export class PomodoroPage implements OnInit, OnDestroy {
     private taskService: TaskService,
     private toastCtrl: ToastController,
     private alertCtrl: AlertController,
-    private http: HttpClient
+    private http: HttpClient,
+    private titleService: Title,
+    private authService: AuthService
   ) {}
 
   ngOnInit() {
+    this.originalTitle = this.titleService.getTitle();
+    this.loadUserSettings();
     this.loadTasks();
     this.loadTodaySummary();
+    this.requestNotificationPermission();
+  }
+
+  private loadUserSettings() {
+    this.authService.currentUser$.subscribe(user => {
+      if (user) {
+        this.focusMinutes = user.pomodoro_focus_duration || 25;
+        this.breakMinutes = user.pomodoro_break_duration || 5;
+        
+        if (!this.isRunning) {
+          this.resetTimer();
+        }
+      }
+    });
+  }
+
+  private async requestNotificationPermission() {
+    if ('Notification' in window) {
+      if (Notification.permission !== 'granted' && Notification.permission !== 'denied') {
+        await Notification.requestPermission();
+      }
+    }
+  }
+
+  private sendNotification(title: string, body: string) {
+    if ('Notification' in window && Notification.permission === 'granted') {
+      new Notification(title, {
+        body: body,
+        icon: 'assets/icon/favicon.png' // Adjust icon path if needed
+      });
+    }
   }
 
   ionViewWillEnter() {
+    this.originalTitle = this.titleService.getTitle();
     this.loadTasks();
     this.loadTodaySummary();
   }
 
   ngOnDestroy() {
     this.stopTimer();
+    this.titleService.setTitle(this.originalTitle);
+  }
+
+  ionViewWillLeave() {
+    this.titleService.setTitle(this.originalTitle);
   }
 
   loadTasks() {
@@ -94,8 +142,15 @@ export class PomodoroPage implements OnInit, OnDestroy {
   }
 
   loadTodaySummary() {
-    this.http.get(`${environment.apiUrl}/pomodoro/today`).subscribe((res: any) => {
-      this.focusedMinutesToday = res.focus_time_minutes;
+    this.http.get(`${environment.apiUrl}/pomodoro/today`).subscribe({
+      next: (res: any) => {
+        this.focusedMinutesToday = res.focus_time_minutes || 0;
+      },
+      error: (err) => {
+        console.error('Error loading today summary:', err);
+        // Default to 0 or cached value on error to avoid breaking the UI
+        this.focusedMinutesToday = 0;
+      }
     });
   }
 
@@ -237,7 +292,7 @@ export class PomodoroPage implements OnInit, OnDestroy {
 
   resetTimer() {
     this.stopTimer();
-    this.timeLeft = this.isBreak ? 5 * 60 : 25 * 60;
+    this.timeLeft = this.isBreak ? this.breakMinutes * 60 : this.focusMinutes * 60;
     this.totalTime = this.timeLeft;
     this.updateDisplay();
   }
@@ -246,21 +301,112 @@ export class PomodoroPage implements OnInit, OnDestroy {
     const mins = Math.floor(this.timeLeft / 60);
     const secs = this.timeLeft % 60;
     this.timeDisplay = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    
+    // Update browser title
+    if (this.isRunning) {
+      this.titleService.setTitle(`${this.timeDisplay} - ${this.isBreak ? 'Break' : 'Focus'}`);
+    } else {
+      this.titleService.setTitle(this.originalTitle);
+    }
   }
 
   async completeSession() {
-    // When completed, we want to save the session and toggle break
-    const secondsToSave = this.sessionSeconds;
-    this.stopTimer(); // This will call saveSession if sessionSeconds > 0
+    // When manually skipping or timer ends, save session if in Focus mode
+    if (!this.isBreak && this.sessionSeconds > 0) {
+      this.saveSession(this.sessionSeconds);
+    }
+    
+    this.isRunning = false;
+    clearInterval(this.timer);
+    this.sessionSeconds = 0;
+    this.sessionStartTime = null;
     
     if (this.isBreak) {
-      this.showToast('Break over! Time to focus.');
+      this.showToast('Break skipped! Time to focus.');
+      this.sendNotification('Dev Focus', 'Break over! Time to focus.');
     } else {
       this.showToast('Focus session completed!');
+      this.sendNotification('Dev Focus', 'Focus session completed! Take a break.');
     }
 
     this.isBreak = !this.isBreak;
     this.resetTimer();
+  }
+
+  async openSettings() {
+    if (this.isRunning) {
+      const confirm = await this.alertCtrl.create({
+        header: 'Timer is running',
+        message: 'Do you want to stop the timer and change settings?',
+        buttons: [
+          { text: 'No', role: 'cancel' },
+          {
+            text: 'Yes',
+            handler: () => {
+              this.stopTimer();
+              this.showSettingsAlert();
+            }
+          }
+        ]
+      });
+      await confirm.present();
+    } else {
+      this.showSettingsAlert();
+    }
+  }
+
+  private async showSettingsAlert() {
+    const alert = await this.alertCtrl.create({
+      header: 'Timer Settings',
+      inputs: [
+        {
+          name: 'focusMinutes',
+          type: 'number',
+          placeholder: 'Focus Minutes',
+          value: this.focusMinutes.toString(),
+          min: 1,
+          max: 60
+        },
+        {
+          name: 'breakMinutes',
+          type: 'number',
+          placeholder: 'Break Minutes',
+          value: this.breakMinutes.toString(),
+          min: 1,
+          max: 30
+        }
+      ],
+      buttons: [
+        { text: 'Cancel', role: 'cancel' },
+        {
+          text: 'Save',
+          handler: (data) => {
+            const newFocus = parseInt(data.focusMinutes, 10);
+            const newBreak = parseInt(data.breakMinutes, 10);
+            
+            if (!isNaN(newFocus) && newFocus > 0 && !isNaN(newBreak) && newBreak > 0) {
+              this.authService.updatePomodoroSettings(newFocus, newBreak).subscribe({
+                next: () => {
+                  this.focusMinutes = newFocus;
+                  this.breakMinutes = newBreak;
+                  this.resetTimer();
+                  this.showToast('Timer settings saved to profile!');
+                },
+                error: (err) => {
+                  console.error('Failed to save settings:', err);
+                  this.showToast('Failed to save settings to profile');
+                }
+              });
+            } else {
+              this.showToast('Invalid input! Please enter positive numbers.');
+              return false; // keep alert open
+            }
+            return true;
+          }
+        }
+      ]
+    });
+    await alert.present();
   }
 
   private async showToast(message: string) {

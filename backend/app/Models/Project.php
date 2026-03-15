@@ -39,13 +39,14 @@ class Project extends Model
 
     public function getProgressAttribute(): float
     {
-        // Try to use loaded tasks count if available via withCount
+        // Use loaded attributes if available from withCount
         $tasksCount = $this->attributes['tasks_count'] ?? null;
         $completedTasksCount = $this->attributes['completed_tasks_count'] ?? null;
 
         if ($tasksCount !== null && $completedTasksCount !== null) {
-            if ($tasksCount == 0) return 0;
-            return round(($completedTasksCount / $tasksCount) * 100, 2);
+            $tasksCount = (int) $tasksCount;
+            $completedTasksCount = (int) $completedTasksCount;
+            return $tasksCount === 0 ? 0 : round(($completedTasksCount / $tasksCount) * 100, 2);
         }
 
         // Use relationLoaded to avoid N+1 if tasks are already loaded
@@ -58,38 +59,26 @@ class Project extends Model
             return round(($completedTasks / $totalTasks) * 100, 2);
         }
 
-        // Fallback to direct query but only if not in a collection
-        // To be safe and avoid N+1, we'll return 0 if it's not loaded
-        // unless we're sure we're just viewing one project.
-        // For now, let's keep it but be aware of the performance cost.
-        $totalTasks = $this->tasks()->whereNull('parent_id')->count();
-        if ($totalTasks === 0) {
-            return 0;
-        }
-
-        $completedTasks = $this->tasks()->whereNull('parent_id')->where('status', 'done')->count();
-        return round(($completedTasks / $totalTasks) * 100, 2);
+        // Fallback but with check to avoid recursion if called during serialization
+        return 0;
     }
 
     public function getStatusAttribute(): string
     {
-        $progress = $this->progress;
-        if ($progress >= 100.0) {
-            return 'completed';
-        }
-        return 'in_progress';
+        return $this->progress >= 100.0 ? 'completed' : 'in_progress';
     }
 
     public function getTasksCountAttribute(): int
     {
-        $tasksCount = $this->attributes['tasks_count'] ?? null;
-        if ($tasksCount !== null) {
-            return (int) $tasksCount;
+        // Use loaded attribute if available from withCount
+        if (isset($this->attributes['tasks_count'])) {
+            return (int) $this->attributes['tasks_count'];
         }
 
         if ($this->relationLoaded('tasks')) {
             return $this->tasks->whereNull('parent_id')->count();
         }
-        return $this->tasks()->whereNull('parent_id')->count();
+        
+        return 0;
     }
 }
