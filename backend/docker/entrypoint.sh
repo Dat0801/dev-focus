@@ -24,6 +24,10 @@ sed -i "s/listen 80;/listen $PORT;/g" /etc/nginx/http.d/default.conf
 echo "Starting PHP-FPM..."
 php-fpm -D -O
 
+# Start Laravel Queue Worker in the background
+echo "Starting Laravel Queue Worker..."
+php artisan queue:work --tries=3 --timeout=90 --no-interaction &
+
 # Start nginx in the foreground
 echo "Starting Nginx on port $PORT..."
 nginx -g "daemon off;"
