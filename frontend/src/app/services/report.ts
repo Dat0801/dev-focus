@@ -157,4 +157,42 @@ export class ReportService {
     const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
     saveAs(blob, `DevFocus_Report_${month}.xlsx`);
   }
+
+  async downloadTaskImportTemplate() {
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet('Tasks Import');
+
+    // Define columns to match Report
+    worksheet.columns = [
+      { header: 'Status', key: 'status', width: 15 },
+      { header: 'Start Date (YYYY-MM-DD)', key: 'start_date', width: 20 },
+      { header: 'End Date (YYYY-MM-DD)', key: 'end_date', width: 20 },
+      { header: 'Detail Task (*)', key: 'title', width: 40 },
+      { header: 'Remark', key: 'remark', width: 60 },
+    ];
+
+    // Styling header
+    const headerRow = worksheet.getRow(1);
+    headerRow.font = { bold: true, color: { argb: 'FFFFFFFF' } };
+    headerRow.fill = {
+      type: 'pattern',
+      pattern: 'solid',
+      fgColor: { argb: 'FF7C4DFF' } // Primary purple
+    };
+    headerRow.alignment = { vertical: 'middle', horizontal: 'center' };
+
+    // Add sample row
+    worksheet.addRow({
+      status: 'todo',
+      start_date: new Date().toISOString().split('T')[0],
+      end_date: new Date().toISOString().split('T')[0],
+      title: 'Sample Task Name',
+      remark: 'Describe what needs to be done'
+    });
+
+    // Write to buffer and save
+    const buffer = await workbook.xlsx.writeBuffer();
+    const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    saveAs(blob, `Task_Import_Template.xlsx`);
+  }
 }

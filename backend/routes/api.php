@@ -17,6 +17,9 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::get('/tasks/today', [TaskController::class, 'today']);
     Route::get('/tasks/upcoming', [TaskController::class, 'upcoming']);
+    Route::get('/tasks/import/logs', [TaskController::class, 'importLogs']);
+    Route::post('/tasks/import', [TaskController::class, 'import']);
+    Route::get('/tasks/import/{id}', [TaskController::class, 'importStatus']);
     Route::get('/reports/months-with-data', [ReportController::class, 'monthsWithData']);
     Route::get('/reports/tasks-by-month', [ReportController::class, 'tasksByMonth']);
     Route::get('/reports/export-data', [ReportController::class, 'exportData']);

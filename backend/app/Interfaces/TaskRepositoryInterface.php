@@ -18,4 +18,6 @@ interface TaskRepositoryInterface
     public function getTasksByMonth(string $month): Collection;
     public function getMonthsWithData(): Collection;
     public function getProjectsWithTasksByMonth(string $month): Collection;
+    public function import(array $tasks): string;
+    public function getImportLogs(): Collection;
 }

@@ -2,8 +2,11 @@ import { Component, OnInit } from '@angular/core';
 import { AlertController, LoadingController, ModalController, ToastController } from '@ionic/angular';
 import { ActivatedRoute, Router } from '@angular/router';
 import { TaskService } from '../../services/task';
+import { ReportService } from '../../services/report';
 import { AddTaskComponent } from './components/add-task/add-task.component';
 import { TaskDetailComponent } from './components/task-detail/task-detail.component';
+import { ImportLogsComponent } from './components/import-logs/import-logs.component';
+import { ViewChild, ElementRef } from '@angular/core';
 
 @Component({
   selector: 'app-tasks',
@@ -12,6 +15,7 @@ import { TaskDetailComponent } from './components/task-detail/task-detail.compon
   standalone: false,
 })
 export class TasksPage implements OnInit {
+  @ViewChild('fileInput') fileInput!: ElementRef;
   tasks: any[] = [];
   filteredTasks: any[] = [];
   filter: string = 'all';
@@ -20,6 +24,7 @@ export class TasksPage implements OnInit {
 
   constructor(
     private taskService: TaskService,
+    private reportService: ReportService,
     private loadingCtrl: LoadingController,
     private toastCtrl: ToastController,
     private alertCtrl: AlertController,
@@ -238,5 +243,57 @@ export class TasksPage implements OnInit {
   segmentChanged(ev: any) {
     this.filter = ev.detail.value;
     this.loadTasks();
+  }
+
+  async downloadTemplate() {
+    try {
+      await this.reportService.downloadTaskImportTemplate();
+      this.showToast('Template downloaded');
+    } catch (error) {
+      this.showToast('Failed to download template');
+    }
+  }
+
+  async openImportLogs() {
+    const modal = await this.modalCtrl.create({
+      component: ImportLogsComponent
+    });
+    return await modal.present();
+  }
+
+  triggerImport() {
+    this.fileInput.nativeElement.click();
+  }
+
+  async onFileSelected(event: any) {
+    const file = event.target.files[0];
+    if (file) {
+      const loading = await this.loadingCtrl.create({
+        message: 'Importing tasks...',
+        spinner: 'crescent'
+      });
+      await loading.present();
+
+      this.taskService.importTasks(file).subscribe({
+        next: (res) => {
+          loading.dismiss();
+          this.showToast(res.message || 'Tiến trình import đã bắt đầu. Hãy kiểm tra log để xem chi tiết.');
+          this.loadTasks();
+          // Reset file input
+          this.fileInput.nativeElement.value = '';
+          if (res.import_log_id) {
+            this.openImportLogs();
+          }
+        },
+        error: (err) => {
+          loading.dismiss();
+          const errorMessage = err.error?.message || 'Failed to import tasks';
+          this.showToast(errorMessage);
+          console.error('Import error:', err);
+          // Reset file input
+          this.fileInput.nativeElement.value = '';
+        }
+      });
+    }
   }
 }

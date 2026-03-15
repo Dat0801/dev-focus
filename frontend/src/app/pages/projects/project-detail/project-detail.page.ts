@@ -48,6 +48,7 @@ export class ProjectDetailPage implements OnInit {
       const status = task.status || 'todo';
       if (this.selectedTab === 'todo') return status === 'todo';
       if (this.selectedTab === 'in-progress') return status === 'in_progress';
+      if (this.selectedTab === 'on-hold') return status === 'on_hold';
       if (this.selectedTab === 'done') return status === 'done';
       return true;
     });

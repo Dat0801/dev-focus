@@ -4,6 +4,7 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { IonicModule } from '@ionic/angular';
 import { AddTaskComponent } from './add-task/add-task.component';
 import { TaskDetailComponent } from './task-detail/task-detail.component';
+import { ImportLogsComponent } from './import-logs/import-logs.component';
 import { FormatWorkHoursPipe } from '../../../pipes/format-work-hours.pipe';
 
 @NgModule({
@@ -14,7 +15,7 @@ import { FormatWorkHoursPipe } from '../../../pipes/format-work-hours.pipe';
     IonicModule,
     FormatWorkHoursPipe
   ],
-  declarations: [AddTaskComponent, TaskDetailComponent],
-  exports: [AddTaskComponent, TaskDetailComponent]
+  declarations: [AddTaskComponent, TaskDetailComponent, ImportLogsComponent],
+  exports: [AddTaskComponent, TaskDetailComponent, ImportLogsComponent, FormatWorkHoursPipe]
 })
 export class TasksComponentsModule {}

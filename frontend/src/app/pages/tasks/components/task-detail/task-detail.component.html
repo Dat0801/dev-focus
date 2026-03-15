@@ -22,7 +22,7 @@
           [class.selected]="editedTask.status === s.value"
           [class]="'status-' + s.value"
           (click)="selectStatus(s.value)">
-          <ion-icon [name]="s.value === 'done' ? 'checkmark-circle' : s.value === 'in_progress' ? 'play-circle' : 'ellipse-outline'"></ion-icon>
+          <ion-icon [name]="s.value === 'done' ? 'checkmark-circle' : s.value === 'in_progress' ? 'play-circle' : s.value === 'on_hold' ? 'pause-circle' : 'ellipse-outline'"></ion-icon>
           {{ s.label }}
         </div>
       </div>

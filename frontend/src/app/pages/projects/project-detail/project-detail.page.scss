@@ -317,6 +317,17 @@ ion-content {
       }
     }
 
+    &.status-on-hold {
+      color: #fbc02d;
+      background: #fff9c4;
+      padding: 2px 6px;
+      border-radius: 6px;
+
+      ion-icon {
+        color: #fbc02d;
+      }
+    }
+
     &.sub-tasks-info {
       color: #7c4dff;
       background: #f0ebff;

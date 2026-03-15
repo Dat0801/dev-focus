@@ -87,6 +87,11 @@ ion-content {
         color: #2e7d32;
         border-color: #2e7d32;
       }
+      &.status-on_hold {
+        background: #fff9c4;
+        color: #fbc02d;
+        border-color: #fbc02d;
+      }
     }
   }
 

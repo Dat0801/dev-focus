@@ -22,7 +22,7 @@ class UpdateTaskRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'title' => 'sometimes|string|max:255',
+            'title' => 'sometimes|string',
             'description' => 'nullable|string',
             'due_date' => 'nullable|date',
             'start_date' => 'nullable|date',
@@ -37,12 +37,12 @@ class UpdateTaskRequest extends FormRequest
             'estimated_pomodoros' => 'nullable|integer|min:1',
             'completed_pomodoros' => 'nullable|integer|min:0',
             'priority' => 'sometimes|in:low,medium,high,urgent',
-            'status' => 'sometimes|in:todo,in_progress,done',
+            'status' => 'sometimes|in:todo,in_progress,done,on_hold',
             'project_id' => 'nullable|exists:projects,id',
             'sub_tasks' => 'nullable|array',
             'sub_tasks.*.id' => 'nullable|uuid',
-            'sub_tasks.*.title' => 'required|string|max:255',
-            'sub_tasks.*.status' => 'nullable|in:todo,in_progress,done',
+            'sub_tasks.*.title' => 'required|string',
+            'sub_tasks.*.status' => 'nullable|in:todo,in_progress,done,on_hold',
             'sub_tasks.*.priority' => 'nullable|in:low,medium,high,urgent',
             'sub_tasks.*.due_date' => 'nullable|date',
         ];

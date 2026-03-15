@@ -7,6 +7,7 @@ use App\Http\Requests\StoreTaskRequest;
 use App\Http\Requests\UpdateTaskRequest;
 use App\Http\Resources\TaskResource;
 use App\Services\TaskService;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
@@ -84,5 +85,53 @@ class TaskController extends Controller
     public function upcoming(Request $request): AnonymousResourceCollection
     {
         return TaskResource::collection($this->taskService->getUpcomingTasks($request->query('date')));
+    }
+
+    public function import(Request $request): JsonResponse
+    {
+        $request->validate([
+            'tasks' => 'required|array',
+            'tasks.*.title' => 'required|string',
+        ]);
+
+        try {
+            $importLogId = $this->taskService->importTasks($request->input('tasks'));
+            return response()->json([
+                'message' => 'Tasks import started',
+                'import_log_id' => $importLogId,
+                'success' => true
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => $e->getMessage(),
+                'success' => false
+            ], 400);
+        }
+    }
+    public function importStatus(string $id): JsonResponse
+    {
+        $importLog = \App\Models\ImportLog::where('user_id', Auth::id())
+            ->find($id);
+
+        if (!$importLog) {
+            return response()->json([
+                'message' => 'Import log not found',
+                'success' => false
+            ], 404);
+        }
+
+        return response()->json([
+            'import_log' => $importLog,
+            'success' => true
+        ]);
+    }
+
+    public function importLogs(): JsonResponse
+    {
+        $logs = $this->taskService->getImportLogs();
+        return response()->json([
+            'import_logs' => $logs,
+            'success' => true
+        ]);
     }
 }

@@ -4,9 +4,12 @@ namespace App\Repositories;
 
 use App\Interfaces\TaskRepositoryInterface;
 use App\Models\Task;
+use App\Models\WorkLog;
+use Carbon\Carbon;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class TaskRepository implements TaskRepositoryInterface
 {
@@ -49,10 +52,16 @@ class TaskRepository implements TaskRepositoryInterface
         
         $task = Task::create($data);
         
+        $totalMinutes = 0;
         if (!empty($workLogs)) {
             foreach ($workLogs as $log) {
                 $task->workLogs()->create($log);
+                $totalMinutes += $log['duration_minutes'] ?? 0;
             }
+        }
+
+        if ($totalMinutes > 0) {
+            $task->update(['work_hours' => round($totalMinutes / 60, 2)]);
         }
 
         if (!empty($subTasks)) {
@@ -103,15 +112,18 @@ class TaskRepository implements TaskRepositoryInterface
         if ($workLogs !== null) {
             // Simple sync: delete existing and recreate
             $task->workLogs()->delete();
+            $totalMinutes = 0;
             foreach ($workLogs as $log) {
                 unset($log['id']); // Remove ID to create new
                 $task->workLogs()->create($log);
+                $totalMinutes += $log['duration_minutes'] ?? 0;
             }
+            $task->update(['work_hours' => round($totalMinutes / 60, 2)]);
         }
 
         if ($subTasks !== null) {
             // For sub-tasks, we might want to be more careful. 
-            // If they have an ID, update them. If not, create them.
+            // If they have an ID, update them. If not, check if they exist by title.
             // Tasks not in the list should be deleted? 
             // For simplicity, let's just update/create.
             foreach ($subTasks as $subTaskData) {
@@ -121,10 +133,19 @@ class TaskRepository implements TaskRepositoryInterface
                         $subTask->update($subTaskData);
                     }
                 } else {
-                    $subTaskData['parent_id'] = $task->id;
-                    $subTaskData['user_id'] = $task->user_id;
-                    $subTaskData['project_id'] = $task->project_id;
-                    Task::create($subTaskData);
+                    // Try to find sub-task by title under the same parent
+                    $existingSubTask = $task->subTasks()
+                        ->where('title', $subTaskData['title'])
+                        ->first();
+                    
+                    if ($existingSubTask) {
+                        $existingSubTask->update($subTaskData);
+                    } else {
+                        $subTaskData['parent_id'] = $task->id;
+                        $subTaskData['user_id'] = $task->user_id;
+                        $subTaskData['project_id'] = $task->project_id;
+                        Task::create($subTaskData);
+                    }
                 }
             }
         }
@@ -216,6 +237,28 @@ class TaskRepository implements TaskRepositoryInterface
                     ->where('status', 'done')
                     ->where('end_date', 'like', "$month%");
             })
+            ->get();
+    }
+
+    public function import(array $tasks): string
+    {
+        $userId = Auth::id();
+        
+        $importLog = \App\Models\ImportLog::create([
+            'user_id' => $userId,
+            'status' => 'pending',
+            'total_count' => count($tasks),
+        ]);
+
+        \App\Jobs\ImportTasksJob::dispatchSync($tasks, $userId, $importLog->id);
+
+        return $importLog->id;
+    }
+
+    public function getImportLogs(): Collection
+    {
+        return \App\Models\ImportLog::where('user_id', Auth::id())
+            ->orderBy('created_at', 'desc')
             ->get();
     }
 }

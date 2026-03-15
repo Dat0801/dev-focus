@@ -65,4 +65,14 @@ class TaskService
     {
         return $this->taskRepository->getProjectsWithTasksByMonth($month);
     }
+
+    public function importTasks(array $tasks): string
+    {
+        return $this->taskRepository->import($tasks);
+    }
+
+    public function getImportLogs(): Collection
+    {
+        return $this->taskRepository->getImportLogs();
+    }
 }

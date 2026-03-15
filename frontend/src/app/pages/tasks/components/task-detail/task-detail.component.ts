@@ -9,7 +9,6 @@ import { FormatWorkHoursPipe } from '../../../../pipes/format-work-hours.pipe';
   templateUrl: './task-detail.component.html',
   styleUrls: ['./task-detail.component.scss'],
   standalone: false,
-  providers: [FormatWorkHoursPipe]
 })
 export class TaskDetailComponent implements OnInit {
   @Input() task: any;
@@ -32,6 +31,7 @@ export class TaskDetailComponent implements OnInit {
   statuses = [
     { label: 'To Do', value: 'todo' },
     { label: 'In Progress', value: 'in_progress' },
+    { label: 'On Hold', value: 'on_hold' },
     { label: 'Done', value: 'done' }
   ];
 

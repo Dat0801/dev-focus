@@ -56,6 +56,12 @@
       </div>
       <div 
         class="tab-item" 
+        [class.active]="selectedTab === 'on-hold'" 
+        (click)="selectTab('on-hold')">
+        On Hold
+      </div>
+      <div 
+        class="tab-item" 
         [class.active]="selectedTab === 'done'" 
         (click)="selectTab('done')">
         Done
@@ -94,6 +100,11 @@
               <span class="meta-item status-done" *ngIf="task.status === 'done'">
                 <ion-icon name="checkmark-circle-outline"></ion-icon>
                 Done
+              </span>
+              
+              <span class="meta-item status-on-hold" *ngIf="task.status === 'on_hold'">
+                <ion-icon name="pause-circle-outline"></ion-icon>
+                On Hold
               </span>
 
               <span class="meta-item sub-tasks-info" *ngIf="task.sub_tasks?.length > 0">

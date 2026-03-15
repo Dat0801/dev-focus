@@ -1,0 +1,30 @@
+.error-container {
+    background: #f9f9f9;
+    font-size: 0.85em;
+    color: #b00020;
+    max-height: 150px;
+    overflow-y: auto;
+}
+
+.error-header {
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.error-item {
+    margin-bottom: 2px;
+}
+
+ion-badge {
+    padding: 5px 10px;
+    border-radius: 4px;
+}
+
+ion-item-divider {
+    min-height: 1px;
+}
+
+ion-progress-bar {
+    height: 4px;
+    margin: 5px 0;
+}
