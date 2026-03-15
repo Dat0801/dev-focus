@@ -93,7 +93,7 @@ export class TaskService {
           row.eachCell((cell, colNumber) => {
             const header = cell.value?.toString().toLowerCase() || '';
             if (header.includes('project')) projectColumnIndex = colNumber;
-            if (header.includes('title') || header.includes('tên')) titleColumnIndex = colNumber;
+            if (header.includes('title') || header.includes('tên') || header.includes('detail task')) titleColumnIndex = colNumber;
             if (header.includes('status') || header.includes('trạng thái')) statusColumnIndex = colNumber;
             if (header.includes('start') || header.includes('bắt đầu')) startDateColumnIndex = colNumber;
             if (header.includes('end') || header.includes('kết thúc')) endDateColumnIndex = colNumber;
@@ -104,8 +104,8 @@ export class TaskService {
 
         // Use detected indices or fallback to defaults
         const statusRaw = row.getCell(statusColumnIndex !== -1 ? statusColumnIndex : 1).value?.toString();
-        const startDateRaw = row.getCell(startDateColumnIndex !== -1 ? startDateColumnIndex : 2).value?.toString();
-        const endDateRaw = row.getCell(endDateColumnIndex !== -1 ? endDateColumnIndex : 3).value?.toString();
+        const startDateRaw = this.formatDate(row.getCell(startDateColumnIndex !== -1 ? startDateColumnIndex : 2).value);
+        const endDateRaw = this.formatDate(row.getCell(endDateColumnIndex !== -1 ? endDateColumnIndex : 3).value);
         const title = row.getCell(titleColumnIndex !== -1 ? titleColumnIndex : 4).value?.toString();
         const remark = row.getCell(remarkColumnIndex !== -1 ? remarkColumnIndex : 5).value?.toString() || '';
         const projectName = projectColumnIndex !== -1 
@@ -137,12 +137,29 @@ export class TaskService {
     }
     // If it's a string, try to parse it
     if (typeof value === 'string') {
-      const date = new Date(value);
+      const trimmedValue = value.trim();
+      
+      // Try to match DD/MM/YYYY or DD.MM.YYYY
+      const dateMatch = trimmedValue.match(/^(\d{1,2})[\/\. \-](\d{1,2})[\/\. \-](\d{2,4})$/);
+      if (dateMatch) {
+        let day = dateMatch[1].padStart(2, '0');
+        let month = dateMatch[2].padStart(2, '0');
+        let year = dateMatch[3];
+        if (year.length === 2) year = '20' + year;
+        
+        // Return in YYYY-MM-DD format for backend compatibility
+        return `${year}-${month}-${day}`;
+      }
+
+      const date = new Date(trimmedValue);
       if (!isNaN(date.getTime())) {
         return date.toISOString().split('T')[0];
       }
+      
+      // If it still fails, return the raw string to let the backend try
+      return trimmedValue;
     }
-    return null;
+    return value.toString();
   }
 }
 

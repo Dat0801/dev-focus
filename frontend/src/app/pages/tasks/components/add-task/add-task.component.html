@@ -19,6 +19,7 @@
         placeholder="Task name"
         class="task-name-input"
         autofocus="true"
+        (paste)="onPasteTitle($event)"
       ></ion-input>
       <ion-textarea
         [(ngModel)]="description"

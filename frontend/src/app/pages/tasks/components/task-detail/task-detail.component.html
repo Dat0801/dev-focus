@@ -32,7 +32,8 @@
       <ion-input 
         class="task-name-input"
         placeholder="What's on your mind?" 
-        [(ngModel)]="editedTask.title">
+        [(ngModel)]="editedTask.title"
+        (paste)="onPasteTitle($event)">
       </ion-input>
       
       <ion-textarea 

@@ -250,7 +250,7 @@ class TaskRepository implements TaskRepositoryInterface
             'total_count' => count($tasks),
         ]);
 
-        \App\Jobs\ImportTasksJob::dispatchSync($tasks, $userId, $importLog->id);
+        \App\Jobs\ImportTasksJob::dispatch($tasks, $userId, $importLog->id);
 
         return $importLog->id;
     }

@@ -299,19 +299,64 @@ class ImportTasksJob implements ShouldQueue
     {
         if (empty($dateStr)) return null;
         
-        $formats = ['d.m.Y', 'd/m/Y', 'Y-m-d', 'd-m-Y', 'm/d/Y'];
+        // Remove extra spaces and handle cases like '06 . 03 . 2026'
+        $dateStr = trim($dateStr);
+        Log::debug("Attempting to parse date: '$dateStr'");
+
+        // Handle Excel serial dates (e.g., "46086")
+        if (is_numeric($dateStr) && (int)$dateStr > 30000 && (int)$dateStr < 60000) {
+            try {
+                // Excel dates are number of days since 1900-01-01
+                $result = Carbon::createFromTimestamp(($dateStr - 25569) * 86400)->format('Y-m-d H:i:s');
+                Log::debug("Date '$dateStr' parsed as Excel serial -> '$result'");
+                return $result;
+            } catch (\Exception $e) {
+                Log::warning("Failed to parse Excel serial date: $dateStr");
+            }
+        }
+        
+        // Common formats with . / -
+        $formats = [
+            'Y-m-d', // Check ISO first as frontend might already have converted it
+            'd.m.Y', 'd/m/Y', 'd-m-Y',
+            'j.n.Y', 'j/n/Y', 'j-n-Y',
+            'm/d/Y', 'm-d-Y',
+            'd.m.y', 'd/m/y', 'd-m-y',
+            'j.n.y', 'j/n/y', 'j-n-y'
+        ];
         
         foreach ($formats as $format) {
             try {
-                return Carbon::createFromFormat($format, trim($dateStr))->format('Y-m-d H:i:s');
+                $carbon = Carbon::createFromFormat($format, $dateStr);
+                if ($carbon) {
+                    $result = $carbon->format('Y-m-d H:i:s');
+                    Log::debug("Date '$dateStr' parsed successfully with format '$format' -> '$result'");
+                    return $result;
+                }
             } catch (\Exception $e) {
                 continue;
             }
         }
         
+        // If all formats fail, try to let Carbon figure it out
         try {
-            return Carbon::parse($dateStr)->format('Y-m-d H:i:s');
+            $result = Carbon::parse($dateStr)->format('Y-m-d H:i:s');
+            Log::debug("Date '$dateStr' parsed with Carbon::parse() -> '$result'");
+            return $result;
         } catch (\Exception $e) {
+            // Last resort: handle d/m/Y manually if Carbon::parse is confused
+            if (preg_match('/^(\d{1,2})[\/\. \-](\d{1,2})[\/\. \-](\d{2,4})$/', $dateStr, $m)) {
+                try {
+                    $year = strlen($m[3]) === 2 ? '20' . $m[3] : $m[3];
+                    $result = Carbon::create($year, $m[2], $m[1])->format('Y-m-d H:i:s');
+                    Log::debug("Date '$dateStr' parsed manually -> '$result'");
+                    return $result;
+                } catch (\Exception $ex) {
+                    Log::warning("Date '$dateStr' failed manual parsing");
+                    return null;
+                }
+            }
+            Log::warning("Date '$dateStr' could not be parsed by any method");
             return null;
         }
     }
@@ -325,7 +370,9 @@ class ImportTasksJob implements ShouldQueue
             $line = trim($line);
             if (empty($line)) continue;
             
-            if (preg_match('/^(\d{1,2}[\.\-\/]\d{1,2}[\.\-\/]\d{2,4})[:\s]+(.*?)(?::\s*|(?:\s+))(\d+(?:\.\d+)?(?:h|m|p|min|hours|minutes)?)$/i', $line, $matches)) {
+            // Regex for date: description: duration (e.g. 06.03.2026: Task title: 2h)
+            // Updated to be more flexible with colons and spaces
+            if (preg_match('/^(\d{1,2}[\.\-\/]\d{1,2}[\.\-\/]\d{2,4})[:\s]+(.*?)(?::\s*|(?:\s+))(\d+(?:\.\d+)?\s*(?:h|m|p|min|hours|minutes)?)$/i', $line, $matches)) {
                 $dateStr = $matches[1];
                 $description = trim($matches[2]);
                 $durationStr = strtolower(trim($matches[3]));

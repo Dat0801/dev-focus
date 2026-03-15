@@ -253,6 +253,34 @@ export class TaskDetailComponent implements OnInit {
     }
   }
 
+  onPasteTitle(event: ClipboardEvent) {
+    const pastedText = event.clipboardData?.getData('text');
+    if (!pastedText) return;
+
+    const lines = pastedText.split('\n').map(line => line.trim()).filter(line => line !== '');
+    if (lines.length > 1) {
+      event.preventDefault();
+      
+      // First line stays as the main title
+      this.editedTask.title = lines[0];
+      
+      // Rest become sub-tasks
+      const newSubTasks = lines.slice(1).map(line => ({
+        title: line,
+        status: 'todo',
+        priority: 'medium',
+        parent_id: this.editedTask.id,
+        project_id: this.editedTask.project_id,
+        user_id: this.editedTask.user_id
+      }));
+
+      if (!this.editedTask.sub_tasks) {
+        this.editedTask.sub_tasks = [];
+      }
+      this.editedTask.sub_tasks.push(...newSubTasks);
+    }
+  }
+
   calculateTotalHours() {
     let totalMinutes = 0;
     this.editedTask.work_logs.forEach((log: any) => {

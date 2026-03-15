@@ -27,6 +27,33 @@ export class ReportService {
     return this.http.get(`${this.apiUrl}/export-data`, { params });
   }
 
+  private formatDate(date: any): string {
+    if (!date) return '';
+    const d = new Date(date);
+    if (isNaN(d.getTime())) return '';
+    const day = d.getDate().toString().padStart(2, '0');
+    const month = (d.getMonth() + 1).toString().padStart(2, '0');
+    const year = d.getFullYear();
+    return `${day}.${month}.${year}`;
+  }
+
+  private formatDuration(minutes: number): string {
+    if (!minutes || minutes <= 0) return '0p';
+    
+    if (minutes < 60) {
+      return `${Math.round(minutes)}p`;
+    }
+    
+    const h = Math.floor(minutes / 60);
+    const p = Math.round(minutes % 60);
+    
+    if (p === 0) {
+      return `${h}h`;
+    }
+    
+    return `${h}h${p}p`;
+  }
+
   async exportTasksToExcel(month: string) {
     const response: any = await firstValueFrom(this.getExportData(month));
     const projects = response.data;
@@ -77,8 +104,8 @@ export class ReportService {
             // Collect logs from task itself
             if (task.work_logs && task.work_logs.length > 0) {
               task.work_logs.forEach((log: any) => {
-                const date = new Date(log.log_date).toLocaleDateString('en-GB'); // DD/MM/YYYY
-                const duration = log.duration_minutes ? `${(log.duration_minutes / 60).toFixed(1)}h` : '0h';
+                const date = this.formatDate(log.log_date);
+                const duration = this.formatDuration(log.duration_minutes);
                 workLogs.push(`${date}: ${log.description || ''}: ${duration}`);
               });
             }
@@ -88,8 +115,8 @@ export class ReportService {
               task.sub_tasks.forEach((subTask: any) => {
                 if (subTask.work_logs && subTask.work_logs.length > 0) {
                   subTask.work_logs.forEach((log: any) => {
-                    const date = new Date(log.log_date).toLocaleDateString('en-GB');
-                    const duration = log.duration_minutes ? `${(log.duration_minutes / 60).toFixed(1)}h` : '0h';
+                    const date = this.formatDate(log.log_date);
+                    const duration = this.formatDuration(log.duration_minutes);
                     workLogs.push(`[${subTask.title}] ${date}: ${log.description || ''}: ${duration}`);
                   });
                 }
@@ -107,8 +134,8 @@ export class ReportService {
 
             const row = worksheet.addRow({
               status: statusMap[task.status] || task.status,
-              start_date: task.start_date ? new Date(task.start_date).toLocaleDateString('en-GB') : '',
-              end_date: task.end_date ? new Date(task.end_date).toLocaleDateString('en-GB') : '',
+              start_date: this.formatDate(task.start_date),
+              end_date: this.formatDate(task.end_date),
               title: task.title,
               remark: remark
             });

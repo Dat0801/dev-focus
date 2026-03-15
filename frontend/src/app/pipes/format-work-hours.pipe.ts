@@ -8,12 +8,12 @@ export class FormatWorkHoursPipe implements PipeTransform {
 
   transform(hoursDecimal: number | null | undefined): string {
     if (hoursDecimal === null || hoursDecimal === undefined || hoursDecimal <= 0) {
-      return '0m';
+      return '0p';
     }
 
     if (hoursDecimal < 1) {
       const minutes = Math.round(hoursDecimal * 60);
-      return `${minutes}m`;
+      return `${minutes}p`;
     }
 
     const hours = Math.floor(hoursDecimal);
@@ -23,7 +23,7 @@ export class FormatWorkHoursPipe implements PipeTransform {
       return `${hours}h`;
     }
 
-    return `${hours}h ${remainingMinutes}m`;
+    return `${hours}h${remainingMinutes}p`;
   }
 
 }

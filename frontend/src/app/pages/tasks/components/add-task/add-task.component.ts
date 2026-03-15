@@ -169,6 +169,31 @@ export class AddTaskComponent implements OnInit {
     this.calculateTotalHours();
   }
 
+  onPasteTitle(event: ClipboardEvent) {
+    const pastedText = event.clipboardData?.getData('text');
+    if (!pastedText) return;
+
+    const lines = pastedText.split('\n').map(line => line.trim()).filter(line => line !== '');
+    if (lines.length > 1) {
+      event.preventDefault();
+      
+      // First line stays as the main title
+      this.taskName = lines[0];
+      
+      // Rest become sub-tasks
+      const newSubTasks = lines.slice(1).map(line => ({
+        title: line,
+        status: 'todo',
+        priority: 'medium'
+      }));
+
+      if (!this.subTasks) {
+        this.subTasks = [];
+      }
+      this.subTasks.push(...newSubTasks);
+    }
+  }
+
   onPasteSubTask(event: ClipboardEvent, index: number) {
     const pastedText = event.clipboardData?.getData('text');
     if (!pastedText) return;
