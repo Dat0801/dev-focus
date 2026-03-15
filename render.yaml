@@ -1,9 +1,9 @@
 services:
-  # 1. Redis Service (Dành cho Queue và Cache)
-  - type: redis
+  # 1. Redis Service (For Queue and Cache)
+  - type: keyvalue
     name: dev-focus-redis
-    ipAllowList: [] # Chỉ cho phép các service nội bộ truy cập
-    plan: free # Có thể đổi sang starter nếu cần persistence
+    ipAllowList: [] # Only allow internal service access
+    plan: free
 
   # 2. Backend API Service
   - type: web
@@ -25,15 +25,13 @@ services:
         value: redis
       - key: REDIS_URL
         fromService:
-          type: redis
+          type: keyvalue
           name: dev-focus-redis
           property: connectionString
       - key: DB_CONNECTION
         value: pgsql
-      # Nếu bạn dùng PostgreSQL nội bộ của Render, có thể dùng biến DATABASE_URL
-      # Hoặc bạn có thể thêm các biến DB_HOST, DB_DATABASE, ... từ Render Dashboard
 
-  # 3. Background Worker (Xử lý Queue)
+  # 3. Background Worker (Queue Processing)
   - type: worker
     name: dev-focus-worker
     env: php
@@ -49,15 +47,16 @@ services:
         value: redis
       - key: REDIS_URL
         fromService:
-          type: redis
+          type: keyvalue
           name: dev-focus-redis
           property: connectionString
       - key: DB_CONNECTION
         value: pgsql
 
   # 4. Frontend (Ionic/Angular)
-  - type: static_site
+  - type: web
     name: dev-focus-frontend
+    env: static
     region: singapore
     plan: free
     rootDir: frontend
