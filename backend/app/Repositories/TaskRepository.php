@@ -176,9 +176,46 @@ class TaskRepository implements TaskRepositoryInterface
     public function getTasksByMonth(string $month): Collection
     {
         return Task::where('user_id', Auth::id())
+            ->where('status', 'done')
             ->with(['project', 'workLogs', 'subTasks.workLogs'])
-            ->where('due_date', 'like', "$month%")
+            ->where('end_date', 'like', "$month%")
             ->whereNull('parent_id') // Only show top-level tasks
+            ->get();
+    }
+
+    public function getMonthsWithData(): Collection
+    {
+        // Get unique months from tasks (only done tasks with end_date)
+        return Task::where('user_id', Auth::id())
+            ->where('status', 'done')
+            ->whereNotNull('end_date')
+            ->selectRaw("DATE_FORMAT(end_date, '%Y-%m') as month")
+            ->distinct()
+            ->orderBy('month', 'desc')
+            ->pluck('month');
+    }
+
+    public function getProjectsWithTasksByMonth(string $month): Collection
+    {
+        // We want all projects that have completed tasks in this month
+        return \App\Models\Project::where('user_id', Auth::id())
+            ->with(['tasks' => function($query) use ($month) {
+                $query->whereNull('parent_id')
+                    ->where('status', 'done')
+                    ->where('end_date', 'like', "$month%")
+                    ->with(['workLogs' => function($q) use ($month) {
+                        $q->where('log_date', 'like', "$month%");
+                    }, 'subTasks' => function($q) use ($month) {
+                        $q->with(['workLogs' => function($ql) use ($month) {
+                            $ql->where('log_date', 'like', "$month%");
+                        }]);
+                    }]);
+            }])
+            ->whereHas('tasks', function($query) use ($month) {
+                $query->whereNull('parent_id')
+                    ->where('status', 'done')
+                    ->where('end_date', 'like', "$month%");
+            })
             ->get();
     }
 }

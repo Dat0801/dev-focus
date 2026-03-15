@@ -16,4 +16,6 @@ interface TaskRepositoryInterface
     public function getTodayTasks(?string $date = null): Collection;
     public function getUpcomingTasks(?string $date = null): Collection;
     public function getTasksByMonth(string $month): Collection;
+    public function getMonthsWithData(): Collection;
+    public function getProjectsWithTasksByMonth(string $month): Collection;
 }

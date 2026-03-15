@@ -1,7 +1,8 @@
 import { Component } from '@angular/core';
-import { AlertController, LoadingController, ToastController } from '@ionic/angular';
+import { AlertController, LoadingController, ToastController, ActionSheetController } from '@ionic/angular';
 import { Router } from '@angular/router';
 import { ProjectService } from '../../services/project';
+import { ReportService } from '../../services/report';
 
 @Component({
   selector: 'app-projects',
@@ -15,9 +16,11 @@ export class ProjectsPage {
 
   constructor(
     private projectService: ProjectService,
+    private reportService: ReportService,
     private loadingCtrl: LoadingController,
     private alertCtrl: AlertController,
     private toastCtrl: ToastController,
+    private actionSheetCtrl: ActionSheetController,
     private router: Router
   ) {}
 
@@ -129,6 +132,71 @@ export class ProjectsPage {
         this.showToast('Failed to delete project');
       }
     });
+  }
+
+  async openReportModal() {
+    const loading = await this.loadingCtrl.create({
+      message: 'Loading months...'
+    });
+    await loading.present();
+
+    this.reportService.getMonthsWithData().subscribe({
+      next: async (months: string[]) => {
+        await loading.dismiss();
+        
+        if (months.length === 0) {
+          this.showToast('No data available for report');
+          return;
+        }
+
+        const buttons = months.map(month => ({
+          text: this.formatMonthLabel(month),
+          handler: () => {
+            this.exportReport(month);
+          }
+        }));
+
+        const actionSheet = await this.actionSheetCtrl.create({
+          header: 'Select Month for Report',
+          buttons: [
+            ...buttons,
+            {
+              text: 'Cancel',
+              role: 'cancel'
+            }
+          ]
+        });
+
+        await actionSheet.present();
+      },
+      error: async () => {
+        await loading.dismiss();
+        this.showToast('Failed to load months');
+      }
+    });
+  }
+
+  formatMonthLabel(monthStr: string): string {
+    const [year, month] = monthStr.split('-');
+    const date = new Date(parseInt(year), parseInt(month) - 1);
+    return date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+  }
+
+  async exportReport(month: string) {
+    const loading = await this.loadingCtrl.create({
+      message: 'Generating Excel report...'
+    });
+    await loading.present();
+
+    try {
+      await this.reportService.exportTasksToExcel(month);
+      this.showToast('Report exported successfully');
+    } catch (error) {
+      console.error(error);
+      this.showToast('Failed to export report');
+    } finally {
+      await loading.dismiss();
+    }
   }
 
   async showToast(message: string) {

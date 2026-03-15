@@ -55,4 +55,14 @@ class TaskService
     {
         return $this->taskRepository->getTasksByMonth($month);
     }
+
+    public function getMonthsWithData(): Collection
+    {
+        return $this->taskRepository->getMonthsWithData();
+    }
+
+    public function getProjectsWithTasksByMonth(string $month): Collection
+    {
+        return $this->taskRepository->getProjectsWithTasksByMonth($month);
+    }
 }
