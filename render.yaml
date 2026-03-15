@@ -53,15 +53,15 @@ services:
       - key: DB_CONNECTION
         value: pgsql
 
-  # 4. Frontend (Ionic/Angular)
+  # 4. Frontend (Ionic/Angular Static Site)
   - type: web
     name: dev-focus-frontend
-    env: static
+    runtime: static
     region: singapore
     plan: free
     rootDir: frontend
     buildCommand: npm install && npm run build
-    publishDir: www
+    staticPublishPath: www
     envVars:
       - key: API_BASE_URL
         fromService:
