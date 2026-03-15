@@ -75,14 +75,17 @@ class PomodoroRepository implements PomodoroRepositoryInterface
     public function getTodaySessions(): Collection
     {
         return PomodoroSession::where('user_id', Auth::id())
-            ->whereDate('created_at', Carbon::today())
+            ->whereDate('created_at', Carbon::today()->toDateString())
             ->get();
     }
 
     public function getWeeklySessions(): Collection
     {
         return PomodoroSession::where('user_id', Auth::id())
-            ->whereBetween('created_at', [Carbon::now()->startOfWeek(), Carbon::now()->endOfWeek()])
+            ->whereBetween('created_at', [
+                Carbon::now()->startOfWeek()->toDateTimeString(),
+                Carbon::now()->endOfWeek()->toDateTimeString()
+            ])
             ->get();
     }
 }
