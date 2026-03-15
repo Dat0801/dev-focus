@@ -18,7 +18,7 @@ return [
     'stateful' => array_map('trim', explode(',', env('SANCTUM_STATEFUL_DOMAINS', sprintf(
         '%s%s%s',
         'localhost,localhost:3000,127.0.0.1,127.0.0.1:8000,::1,',
-        'dev-focus.onrender.com,',
+        'dev-focus.onrender.com,api-dev-focus.onrender.com',
         Sanctum::currentApplicationUrlWithPort()
     )))),
 

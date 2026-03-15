@@ -207,10 +207,18 @@ class TaskRepository implements TaskRepositoryInterface
     public function getMonthsWithData(): Collection
     {
         // Get unique months from tasks (only done tasks with end_date)
-        return Task::where('user_id', Auth::id())
+        $query = Task::where('user_id', Auth::id())
             ->where('status', 'done')
-            ->whereNotNull('end_date')
-            ->selectRaw("DATE_FORMAT(end_date, '%Y-%m') as month")
+            ->whereNotNull('end_date');
+
+        if (config('database.default') === 'pgsql') {
+            return $query->selectRaw("TO_CHAR(end_date, 'YYYY-MM') as month")
+                ->distinct()
+                ->orderBy('month', 'desc')
+                ->pluck('month');
+        }
+
+        return $query->selectRaw("DATE_FORMAT(end_date, '%Y-%m') as month")
             ->distinct()
             ->orderBy('month', 'desc')
             ->pluck('month');
