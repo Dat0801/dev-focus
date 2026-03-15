@@ -132,6 +132,41 @@
       </div>
     </div>
 
+    <div class="section sub-tasks-section">
+      <div class="sub-tasks-header">
+        <div class="label">SUB TASKS</div>
+        <ion-button fill="clear" color="primary" size="small" (click)="addSubTask()" class="add-sub-task-btn">
+          <ion-icon name="add-circle-outline" slot="start"></ion-icon>
+          Add Sub-task
+        </ion-button>
+      </div>
+      
+      <div class="sub-tasks-list">
+        <div *ngFor="let sub of subTasks; let i = index" class="sub-task-item" [class.completed]="sub.status === 'done'">
+          <div class="sub-task-row">
+            <div class="checkbox-wrapper">
+              <div 
+                class="custom-checkbox" 
+                [class.checked]="sub.status === 'done'"
+                (click)="toggleSubTaskStatus(i)">
+                <ion-icon *ngIf="sub.status === 'done'" name="checkmark"></ion-icon>
+              </div>
+            </div>
+            <ion-input
+              type="text"
+              [(ngModel)]="sub.title"
+              placeholder="Sub-task title"
+              class="sub-task-title"
+              (paste)="onPasteSubTask($event, i)"
+            ></ion-input>
+            <div class="remove-sub-task-btn" (click)="removeSubTask(i)">
+              <ion-icon name="close-outline"></ion-icon>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <div class="section work-logs-section">
       <div class="work-logs-header">
         <div class="label">WORK LOGS</div>
@@ -154,15 +189,16 @@
               [(ngModel)]="log.description"
               placeholder="What did you do?"
               class="log-description"
+              (paste)="onPasteWorkLog($event, i)"
             ></ion-input>
             <ion-input
               type="number"
-              step="0.25"
-              [(ngModel)]="log.duration_hours"
+              step="1"
+              [(ngModel)]="log.duration_minutes"
               (ionChange)="onWorkLogItemChange()"
               class="log-duration"
             ></ion-input>
-            <span class="hours-suffix">h</span>
+            <span class="hours-suffix">m</span>
           </div>
           <div class="remove-log-btn" (click)="removeWorkLog(i)">
             <ion-icon name="close-outline"></ion-icon>

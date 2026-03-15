@@ -208,6 +208,127 @@ ion-content {
     }
   }
 
+  .sub-tasks-section {
+    margin-bottom: 32px;
+    background: #f7f8fc;
+    padding: 16px;
+    border-radius: 16px;
+
+    .sub-tasks-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+
+      .label {
+        margin-bottom: 0;
+        font-size: 13px;
+        font-weight: 700;
+        color: #74777f;
+        letter-spacing: 0.5px;
+      }
+
+      .add-sub-task-btn {
+        --padding-start: 8px;
+        --padding-end: 8px;
+        margin: 0;
+        height: 32px;
+        font-size: 13px;
+        font-weight: 600;
+      }
+    }
+
+    .sub-tasks-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .sub-task-item {
+      background: #ffffff;
+      border-radius: 12px;
+      padding: 12px;
+      transition: all 0.2s ease;
+      border: 1px solid #e1e2ec;
+
+      &.completed {
+        background: #f0f1f8;
+        border-color: transparent;
+        opacity: 0.7;
+
+        .sub-task-title {
+          text-decoration: line-through;
+          color: #74777f;
+        }
+      }
+
+      .sub-task-row {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+      }
+
+      .checkbox-wrapper {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .custom-checkbox {
+        width: 20px;
+        height: 20px;
+        border: 2px solid #e1e2ec;
+        border-radius: 6px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.2s ease;
+
+        ion-icon {
+          font-size: 14px;
+          color: #ffffff;
+        }
+
+        &.checked {
+          background: #7c4dff;
+          border-color: #7c4dff;
+        }
+      }
+
+      .sub-task-title {
+        flex: 1;
+        --padding-start: 0;
+        --padding-end: 0;
+        font-size: 14px;
+        font-weight: 500;
+        color: #1a1c24;
+
+        &::placeholder {
+          color: #74777f;
+          font-weight: 400;
+        }
+      }
+
+      .remove-sub-task-btn {
+        width: 24px;
+        height: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #74777f;
+        cursor: pointer;
+        border-radius: 50%;
+        transition: all 0.2s ease;
+
+        &:hover {
+          background: #f0f1f8;
+          color: #1a1c24;
+        }
+      }
+    }
+  }
+
   .work-logs-section {
     .work-logs-header {
       display: flex;

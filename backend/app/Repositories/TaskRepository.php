@@ -83,6 +83,23 @@ class TaskRepository implements TaskRepositoryInterface
         // Only update fields that are in fillable
         $updated = $task->update($data);
 
+        // If project_id or user_id changed, update all sub-tasks
+        if (isset($data['project_id']) || isset($data['user_id'])) {
+            $updateData = [];
+            if (isset($data['project_id'])) {
+                $updateData['project_id'] = $data['project_id'];
+            }
+            if (isset($data['user_id'])) {
+                $updateData['user_id'] = $data['user_id'];
+            }
+            $task->subTasks()->update($updateData);
+        }
+
+        // If task is marked as done, also mark all sub-tasks as done
+        if (isset($data['status']) && $data['status'] === 'done') {
+            $task->subTasks()->update(['status' => 'done']);
+        }
+
         if ($workLogs !== null) {
             // Simple sync: delete existing and recreate
             $task->workLogs()->delete();

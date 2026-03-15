@@ -39,12 +39,12 @@ class Project extends Model
 
     public function getProgressAttribute(): float
     {
-        $totalTasks = $this->tasks()->count();
+        $totalTasks = $this->tasks()->whereNull('parent_id')->count();
         if ($totalTasks === 0) {
             return 0;
         }
 
-        $completedTasks = $this->tasks()->where('status', 'done')->count();
+        $completedTasks = $this->tasks()->whereNull('parent_id')->where('status', 'done')->count();
         return round(($completedTasks / $totalTasks) * 100, 2);
     }
 
@@ -59,6 +59,6 @@ class Project extends Model
 
     public function getTasksCountAttribute(): int
     {
-        return $this->tasks()->count();
+        return $this->tasks()->whereNull('parent_id')->count();
     }
 }

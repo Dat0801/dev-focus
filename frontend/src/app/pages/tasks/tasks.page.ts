@@ -139,6 +139,7 @@ export class TasksPage implements OnInit {
         end_date: data.end_date,
         work_hours: data.work_hours,
         work_logs: data.work_logs,
+        sub_tasks: data.sub_tasks,
         estimated_pomodoros: data.estimated_pomodoros,
         completed_pomodoros: 0
       };
@@ -182,6 +183,9 @@ export class TasksPage implements OnInit {
     this.taskService.updateTask(task.id, { status: newStatus }).subscribe({
       next: () => {
         task.status = newStatus;
+        if (newStatus === 'done' && task.sub_tasks) {
+          task.sub_tasks.forEach((sub: any) => sub.status = 'done');
+        }
         this.applyFilters();
         this.showToast(newStatus === 'done' ? 'Task completed!' : 'Task reopened');
       },

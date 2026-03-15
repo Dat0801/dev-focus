@@ -70,6 +70,6 @@ class Task extends Model
 
     public function workLogs(): HasMany
     {
-        return $this->hasMany(WorkLog::class)->orderBy('log_date', 'desc');
+        return $this->hasMany(WorkLog::class)->orderBy('log_date', 'asc');
     }
 }

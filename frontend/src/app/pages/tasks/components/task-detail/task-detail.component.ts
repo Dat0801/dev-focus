@@ -55,12 +55,11 @@ export class TaskDetailComponent implements OnInit {
       this.editedTask.sub_tasks = [];
     }
     
-    // Format dates for inputs
+    // Format work logs for UI
     this.editedTask.work_logs = this.editedTask.work_logs.map((log: any) => ({
       ...log,
       log_date: log.log_date ? new Date(log.log_date).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
-      // Add a property to help with UI editing if needed
-      duration_hours: (log.duration_minutes / 60).toFixed(2)
+      duration_minutes: log.duration_minutes || 0
     }));
 
     // Format sub-tasks
@@ -103,6 +102,9 @@ export class TaskDetailComponent implements OnInit {
     this.taskService.updateTask(this.editedTask.id, { status: newStatus }).subscribe({
       next: () => {
         this.editedTask.status = newStatus;
+        if (newStatus === 'done' && this.editedTask.sub_tasks) {
+          this.editedTask.sub_tasks.forEach((sub: any) => sub.status = 'done');
+        }
         this.showToast(newStatus === 'done' ? 'Task completed!' : 'Task reopened');
       },
       error: () => this.showToast('Failed to update status')
@@ -110,10 +112,9 @@ export class TaskDetailComponent implements OnInit {
   }
 
   addWorkLog() {
-    this.editedTask.work_logs.unshift({
+    this.editedTask.work_logs.push({
       log_date: new Date().toISOString().split('T')[0],
       description: '',
-      duration_hours: '0.00',
       duration_minutes: 0
     });
   }
@@ -123,17 +124,140 @@ export class TaskDetailComponent implements OnInit {
     this.onWorkLogItemChange();
   }
 
+  onPasteWorkLog(event: ClipboardEvent, index: number) {
+    let pastedText = event.clipboardData?.getData('text');
+    if (!pastedText) return;
+
+    // Remove BOM and other potential invisible characters at the beginning
+    pastedText = pastedText.replace(/^\uFEFF/, '').trim();
+
+    const lines = pastedText.split('\n').filter(line => line.trim() !== '');
+    
+    // Check if the pasted text matches our special format: DD.MM.YYYY: ...
+    // Using a more flexible regex for day/month
+    const dateRegex = /\d{1,2}\.\d{1,2}\.\d{4}/;
+    const isSpecialFormat = lines.some(line => dateRegex.test(line.trim()));
+
+    if (isSpecialFormat) {
+      event.preventDefault();
+      
+      const parsedLogs: any[] = [];
+      lines.forEach(line => {
+        const parsed = this.parseSingleWorkLogLine(line.trim());
+        if (parsed) {
+          parsedLogs.push(parsed);
+        }
+      });
+
+      if (parsedLogs.length > 0) {
+        const currentLog = this.editedTask.work_logs[index];
+        const isEmpty = !currentLog.description && (!currentLog.duration_minutes || currentLog.duration_minutes === 0);
+
+        if (isEmpty) {
+          // Replace current empty log
+          this.editedTask.work_logs.splice(index, 1, ...parsedLogs);
+        } else {
+          // Insert after current log
+          this.editedTask.work_logs.splice(index + 1, 0, ...parsedLogs);
+        }
+        this.calculateTotalHours();
+      }
+    }
+  }
+
+  private parseSingleWorkLogLine(line: string) {
+    // Supports: 
+    // 1. DD.MM.YYYY: Description: Duration
+    // 2. DD.MM.YYYY: Duration
+    const parts = line.split(':').map(p => p.trim());
+    if (parts.length < 2) return null;
+
+    const dateStr = parts[0];
+    let durationStr = '';
+    let description = '';
+
+    if (parts.length === 2) {
+      // Case: DD.MM.YYYY: Duration
+      durationStr = parts[1];
+      description = '';
+    } else {
+      // Case: DD.MM.YYYY: Description: Duration
+      durationStr = parts[parts.length - 1];
+      description = parts.slice(1, -1).join(':').trim();
+    }
+
+    // Parse Date: DD.MM.YYYY -> YYYY-MM-DD
+    // Using regex to extract only digits to avoid invisible characters
+    const dateMatch = dateStr.match(/(\d{1,2})\.(\d{1,2})\.(\d{4})/);
+    if (!dateMatch) return null;
+    
+    const day = dateMatch[1].padStart(2, '0');
+    const month = dateMatch[2].padStart(2, '0');
+    const year = dateMatch[3];
+    const formattedDate = `${year}-${month}-${day}`;
+
+    // Parse Duration: 1h, 30p, etc.
+    let durationMinutes = 0;
+    const durationMatch = durationStr.match(/(\d+(?:\.\d+)?)\s*([hp])/i);
+    if (durationMatch) {
+      const value = parseFloat(durationMatch[1]);
+      const unit = durationMatch[2].toLowerCase();
+      if (unit === 'h') {
+        durationMinutes = value * 60;
+      } else if (unit === 'p') {
+        durationMinutes = value;
+      }
+    } else {
+      const val = parseFloat(durationStr);
+      if (!isNaN(val)) durationMinutes = val; // Default to minutes if no unit
+    }
+
+    return {
+      log_date: formattedDate,
+      description: description,
+      duration_minutes: durationMinutes
+    };
+  }
+
   onWorkLogItemChange() {
     this.calculateTotalHours();
+  }
+
+  onPasteSubTask(event: ClipboardEvent, index: number) {
+    const pastedText = event.clipboardData?.getData('text');
+    if (!pastedText) return;
+
+    const lines = pastedText.split('\n').map(line => line.trim()).filter(line => line !== '');
+    if (lines.length > 1) {
+      event.preventDefault();
+      
+      const newSubTasks = lines.map(line => ({
+        title: line,
+        status: 'todo',
+        priority: 'medium',
+        parent_id: this.editedTask.id,
+        project_id: this.editedTask.project_id,
+        user_id: this.editedTask.user_id
+      }));
+
+      const currentSubTask = this.editedTask.sub_tasks[index];
+      const isEmpty = !currentSubTask.title;
+
+      if (isEmpty) {
+        // Replace current empty sub-task
+        this.editedTask.sub_tasks.splice(index, 1, ...newSubTasks);
+      } else {
+        // Insert after current sub-task
+        this.editedTask.sub_tasks.splice(index + 1, 0, ...newSubTasks);
+      }
+    }
   }
 
   calculateTotalHours() {
     let totalMinutes = 0;
     this.editedTask.work_logs.forEach((log: any) => {
-      // If duration_hours was edited, update duration_minutes
-      const mins = parseFloat(log.duration_hours) * 60;
-      log.duration_minutes = isNaN(mins) ? 0 : mins;
-      totalMinutes += log.duration_minutes;
+      const mins = parseFloat(log.duration_minutes as any);
+      totalMinutes += isNaN(mins) ? 0 : mins;
     });
     this.editedTask.work_hours = parseFloat((totalMinutes / 60).toFixed(2));
   }
@@ -188,7 +312,7 @@ export class TaskDetailComponent implements OnInit {
     const work_logs = this.editedTask.work_logs.map((log: any) => ({
       log_date: log.log_date,
       description: log.description,
-      duration_minutes: log.duration_hours * 60
+      duration_minutes: log.duration_minutes || 0
     }));
 
     // Prepare sub tasks for saving

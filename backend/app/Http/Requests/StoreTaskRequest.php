@@ -39,6 +39,12 @@ class StoreTaskRequest extends FormRequest
             'priority' => 'nullable|in:low,medium,high,urgent',
             'status' => 'nullable|in:todo,in_progress,done',
             'project_id' => 'nullable|exists:projects,id',
+            'sub_tasks' => 'nullable|array',
+            'sub_tasks.*.id' => 'nullable|uuid',
+            'sub_tasks.*.title' => 'required|string|max:255',
+            'sub_tasks.*.status' => 'nullable|in:todo,in_progress,done',
+            'sub_tasks.*.priority' => 'nullable|in:low,medium,high,urgent',
+            'sub_tasks.*.due_date' => 'nullable|date',
         ];
     }
 }
