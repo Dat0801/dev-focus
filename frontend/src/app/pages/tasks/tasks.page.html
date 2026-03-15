@@ -45,24 +45,30 @@
       <ion-segment-button value="upcoming">
         <ion-label>Upcoming</ion-label>
       </ion-segment-button>
-      <ion-segment-button value="completed">
-        <ion-label>Completed</ion-label>
+      <ion-segment-button value="todo">
+        <ion-label>To-do</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="in_progress">
+        <ion-label>In Progress</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="done">
+        <ion-label>Done</ion-label>
       </ion-segment-button>
     </ion-segment>
   </div>
 
   <div class="filters-container ion-padding-horizontal">
-    <ion-button fill="clear" class="filter-btn">
+    <ion-button fill="clear" class="filter-btn" (click)="presentPriorityFilter()" [class.active-filter]="selectedPriority !== 'all'">
       <ion-icon slot="start" name="filter-outline"></ion-icon>
-      <ion-label>Priority</ion-label>
+      <ion-label>{{ selectedPriority === 'all' ? 'Priority' : (selectedPriority | titlecase) }}</ion-label>
     </ion-button>
-    <ion-button fill="clear" class="filter-btn">
-      <ion-icon slot="start" name="bookmark"></ion-icon>
-      <ion-label>Labels</ion-label>
+    <ion-button fill="clear" class="filter-btn" (click)="presentProjectFilter()" [class.active-filter]="selectedProject !== 'all'">
+      <ion-icon slot="start" name="apps-outline"></ion-icon>
+      <ion-label>{{ selectedProject === 'all' ? 'Project' : getProjectName(selectedProject) }}</ion-label>
     </ion-button>
     <ion-button fill="clear" class="filter-btn" (click)="goToProjects()">
-      <ion-icon slot="start" name="folder"></ion-icon>
-      <ion-label>Project</ion-label>
+      <ion-icon slot="start" name="add-outline"></ion-icon>
+      <ion-label>New Project</ion-label>
     </ion-button>
   </div>
 </ion-header>

@@ -6,7 +6,7 @@
       </div>
       <div class="header-right">
         <ion-button class="header-icon-btn" fill="clear">
-          <ion-icon name="settings-sharp"></ion-icon>
+          <ion-icon name="settings-outline"></ion-icon>
         </ion-button>
         <div class="profile-avatar">
           <ion-icon name="person-circle-outline"></ion-icon>
@@ -14,12 +14,8 @@
       </div>
     </div>
   </ion-toolbar>
-</ion-header>
 
-<ion-content class="ion-padding">
-  <div class="main-container">
-    
-    <!-- Task Selector Card -->
+  <div class="task-selector-header ion-padding-horizontal">
     <div class="task-selector-card" (click)="selectTask()">
       <div class="task-icon">
         <ion-icon name="layers-outline"></ion-icon>
@@ -31,7 +27,12 @@
         <ion-icon name="chevron-expand-outline"></ion-icon>
       </div>
     </div>
+  </div>
+</ion-header>
 
+<ion-content class="ion-padding">
+  <div class="main-container">
+    
     <!-- Circular Timer -->
     <div class="timer-section">
       <div class="circular-timer">

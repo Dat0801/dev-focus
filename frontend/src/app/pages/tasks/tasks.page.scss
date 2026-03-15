@@ -22,32 +22,6 @@ ion-header {
       color: #1a1c24;
       margin: 0;
     }
-
-    .header-right {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-
-      .header-icon-btn {
-        --color: #74777f;
-        margin: 0;
-      }
-
-      .profile-avatar {
-        width: 36px;
-        height: 36px;
-        background: #f0f1f8;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: #74777f;
-
-        ion-icon {
-          font-size: 24px;
-        }
-      }
-    }
   }
 }
 
@@ -128,6 +102,11 @@ ion-header {
     ion-icon {
       font-size: 16px;
       margin-right: 4px;
+    }
+
+    &.active-filter {
+      --background: #f0ebff;
+      --color: #7c4dff;
     }
   }
 }

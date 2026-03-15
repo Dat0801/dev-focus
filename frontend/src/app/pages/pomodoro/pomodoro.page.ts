@@ -69,10 +69,10 @@ export class PomodoroPage implements OnInit, OnDestroy {
   }
 
   loadTasks() {
-    const localDate = new Date().toISOString().split('T')[0];
-    this.taskService.getTodayTasks(localDate).subscribe({
+    this.taskService.getTasks().subscribe({
       next: (res: any) => {
-        this.tasks = res.data;
+        // Filter tasks that are NOT done
+        this.tasks = (res.data || res).filter((t: any) => t.status !== 'done');
       },
       error: () => {
         this.showToast('Failed to load tasks');
@@ -89,7 +89,7 @@ export class PomodoroPage implements OnInit, OnDestroy {
   async selectTask() {
     if (this.tasks.length === 0) {
       const toast = await this.toastCtrl.create({
-        message: 'No tasks found for today. Create or schedule a task first!',
+        message: 'No pending tasks found. Create a task first!',
         duration: 3000,
         position: 'bottom',
         color: 'warning'

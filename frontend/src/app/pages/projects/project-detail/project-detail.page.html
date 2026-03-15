@@ -8,12 +8,59 @@
         <h1 class="header-title">{{ projectTitle }}</h1>
       </div>
       <div class="header-right">
-        <ion-button fill="clear" class="more-btn" (click)="presentActionSheet()">
-          <ion-icon name="ellipsis-horizontal"></ion-icon>
+        <ion-button class="header-icon-btn" fill="clear">
+          <ion-icon name="notifications-outline"></ion-icon>
         </ion-button>
+        <div class="profile-avatar">
+          <ion-icon name="person-circle-outline"></ion-icon>
+        </div>
       </div>
     </div>
   </ion-toolbar>
+
+  <div class="search-container ion-padding-horizontal">
+    <ion-searchbar 
+      placeholder="Search tasks in this project..." 
+      class="custom-searchbar"
+      [(ngModel)]="searchQuery"
+      (ionInput)="handleSearch($event)">
+    </ion-searchbar>
+  </div>
+
+  <div class="segment-container ion-padding-horizontal">
+    <ion-segment (ionChange)="segmentChanged($event)" [value]="selectedTab" mode="md" scrollable="true">
+      <ion-segment-button value="all">
+        <ion-label>All</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="todo">
+        <ion-label>To-do</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="in_progress">
+        <ion-label>In Progress</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="on_hold">
+        <ion-label>On Hold</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="done">
+        <ion-label>Done</ion-label>
+      </ion-segment-button>
+    </ion-segment>
+  </div>
+
+  <div class="filters-container ion-padding-horizontal">
+    <ion-button fill="clear" class="filter-btn" (click)="presentPriorityFilter()" [class.active-filter]="selectedPriority !== 'all'">
+      <ion-icon slot="start" name="filter-outline"></ion-icon>
+      <ion-label>{{ selectedPriority === 'all' ? 'Priority' : (selectedPriority | titlecase) }}</ion-label>
+    </ion-button>
+    <ion-button fill="clear" class="filter-btn" (click)="presentDeadlineFilter()" [class.active-filter]="selectedDeadline !== 'all'">
+      <ion-icon slot="start" name="calendar-outline"></ion-icon>
+      <ion-label>{{ selectedDeadline === 'all' ? 'Deadline' : (selectedDeadline | titlecase) }}</ion-label>
+    </ion-button>
+    <ion-button fill="clear" class="filter-btn" (click)="presentActionSheet()">
+      <ion-icon slot="start" name="ellipsis-horizontal"></ion-icon>
+      <ion-label>More</ion-label>
+    </ion-button>
+  </div>
 </ion-header>
 
 <ion-content class="ion-padding">
@@ -37,35 +84,6 @@
         <span class="stat-value" *ngIf="stat.type !== 'progress'">{{ stat.value }}</span>
       </div>
       <span class="stat-label">{{ stat.label }}</span>
-    </div>
-  </div>
-
-  <div class="tabs-container">
-    <div class="custom-tabs">
-      <div 
-        class="tab-item" 
-        [class.active]="selectedTab === 'todo'" 
-        (click)="selectTab('todo')">
-        To-do
-      </div>
-      <div 
-        class="tab-item" 
-        [class.active]="selectedTab === 'in-progress'" 
-        (click)="selectTab('in-progress')">
-        In Progress
-      </div>
-      <div 
-        class="tab-item" 
-        [class.active]="selectedTab === 'on-hold'" 
-        (click)="selectTab('on-hold')">
-        On Hold
-      </div>
-      <div 
-        class="tab-item" 
-        [class.active]="selectedTab === 'done'" 
-        (click)="selectTab('done')">
-        Done
-      </div>
     </div>
   </div>
 

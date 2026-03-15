@@ -8,6 +8,8 @@ import { TaskDetailComponent } from './components/task-detail/task-detail.compon
 import { ImportLogsComponent } from './components/import-logs/import-logs.component';
 import { ViewChild, ElementRef } from '@angular/core';
 
+import { ProjectService } from '../../services/project';
+
 @Component({
   selector: 'app-tasks',
   templateUrl: './tasks.page.html',
@@ -21,9 +23,13 @@ export class TasksPage implements OnInit {
   filter: string = 'all';
   searchQuery: string = '';
   todayDate: string = '';
+  selectedPriority: string = 'all';
+  selectedProject: string = 'all';
+  projects: any[] = [];
 
   constructor(
     private taskService: TaskService,
+    private projectService: ProjectService,
     private reportService: ReportService,
     private loadingCtrl: LoadingController,
     private toastCtrl: ToastController,
@@ -35,11 +41,20 @@ export class TasksPage implements OnInit {
 
   ngOnInit() {
     this.setTodayDate();
+    this.loadProjects();
     this.route.queryParams.subscribe(params => {
       if (params['filter']) {
         this.filter = params['filter'];
       }
       this.loadTasks();
+    });
+  }
+
+  loadProjects() {
+    this.projectService.getProjects().subscribe({
+      next: (res: any) => {
+        this.projects = res.data;
+      }
     });
   }
 
@@ -75,9 +90,6 @@ export class TasksPage implements OnInit {
     } else if (this.filter === 'upcoming') {
       const localDate = new Date().toISOString().split('T')[0];
       obs = this.taskService.getUpcomingTasks(localDate);
-    } else if (this.filter === 'completed') {
-      // Assuming there's a way to filter completed tasks, or we filter locally
-      obs = this.taskService.getTasks();
     } else {
       obs = this.taskService.getTasks();
     }
@@ -98,16 +110,24 @@ export class TasksPage implements OnInit {
   applyFilters() {
     let tempTasks = [...this.tasks];
 
-    // Filter by segment
-    if (this.filter === 'completed') {
-      tempTasks = tempTasks.filter(t => t.status === 'done');
-    } else if (this.filter === 'all') {
-      // Show all except maybe we want to show everything
+    // Status filter (only if not a time-based filter)
+    if (this.filter !== 'all' && this.filter !== 'today' && this.filter !== 'upcoming') {
+      tempTasks = tempTasks.filter(t => t.status === this.filter);
     }
 
-    // Filter by search query
+    // Priority filter
+    if (this.selectedPriority !== 'all') {
+      tempTasks = tempTasks.filter(t => t.priority === this.selectedPriority);
+    }
+
+    // Project filter
+    if (this.selectedProject !== 'all') {
+      tempTasks = tempTasks.filter(t => t.project_id === this.selectedProject);
+    }
+
+    // Search filter
     if (this.searchQuery && this.searchQuery.trim() !== '') {
-      const query = this.searchQuery.toLowerCase();
+      const query = this.searchQuery.toLowerCase().trim();
       tempTasks = tempTasks.filter(t => 
         t.title.toLowerCase().includes(query) || 
         (t.description && t.description.toLowerCase().includes(query))
@@ -115,6 +135,97 @@ export class TasksPage implements OnInit {
     }
 
     this.filteredTasks = tempTasks;
+  }
+
+  async presentPriorityFilter() {
+    const actionSheet = await this.alertCtrl.create({
+      header: 'Filter by Priority',
+      buttons: [
+        {
+          text: 'Cancel',
+          role: 'cancel'
+        },
+        {
+          text: 'All',
+          handler: () => {
+            this.selectedPriority = 'all';
+            this.applyFilters();
+          }
+        },
+        {
+          text: 'High',
+          handler: () => {
+            this.selectedPriority = 'high';
+            this.applyFilters();
+          }
+        },
+        {
+          text: 'Medium',
+          handler: () => {
+            this.selectedPriority = 'medium';
+            this.applyFilters();
+          }
+        },
+        {
+          text: 'Low',
+          handler: () => {
+            this.selectedPriority = 'low';
+            this.applyFilters();
+          }
+        }
+      ]
+    });
+
+    await actionSheet.present();
+  }
+
+  async presentProjectFilter() {
+    if (this.projects.length === 0) {
+      this.showToast('No projects found');
+      return;
+    }
+
+    const inputs = this.projects.map(p => ({
+      name: 'project',
+      type: 'radio' as const,
+      label: p.name,
+      value: p.id,
+      checked: this.selectedProject === p.id
+    }));
+
+    const alert = await this.alertCtrl.create({
+      header: 'Filter by Project',
+      inputs: [
+        {
+          name: 'project',
+          type: 'radio',
+          label: 'All Projects',
+          value: 'all',
+          checked: this.selectedProject === 'all'
+        },
+        ...inputs
+      ],
+      buttons: [
+        {
+          text: 'Cancel',
+          role: 'cancel'
+        },
+        {
+          text: 'Apply',
+          handler: (value) => {
+            this.selectedProject = value;
+            this.applyFilters();
+          }
+        }
+      ]
+    });
+
+    await alert.present();
+  }
+
+  getProjectName(id: string): string {
+    const project = this.projects.find(p => p.id === id);
+    return project ? project.name : 'Project';
   }
 
   handleSearch(ev: any) {

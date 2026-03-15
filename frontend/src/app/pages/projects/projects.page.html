@@ -17,32 +17,43 @@
       </div>
     </div>
   </ion-toolbar>
+
+  <div class="search-container ion-padding-horizontal">
+    <ion-searchbar 
+      placeholder="Search projects..." 
+      class="custom-searchbar"
+      [(ngModel)]="searchQuery"
+      (ionInput)="handleSearch($event)">
+    </ion-searchbar>
+  </div>
+
+  <div class="segment-container ion-padding-horizontal">
+    <ion-segment (ionChange)="segmentChanged($event)" [value]="selectedTab" mode="md" scrollable="true">
+      <ion-segment-button value="all">
+        <ion-label>All</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="in_progress">
+        <ion-label>In Progress</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="completed">
+        <ion-label>Completed</ion-label>
+      </ion-segment-button>
+    </ion-segment>
+  </div>
+
+  <div class="filters-container ion-padding-horizontal">
+    <ion-button fill="clear" class="filter-btn" (click)="presentCategoryFilter()" [class.active-filter]="selectedCategory !== 'all'">
+      <ion-icon slot="start" name="filter-outline"></ion-icon>
+      <ion-label>{{ selectedCategory === 'all' ? 'Category' : selectedCategory }}</ion-label>
+    </ion-button>
+    <ion-button fill="clear" class="filter-btn" (click)="presentDeadlineFilter()" [class.active-filter]="selectedDeadline !== 'all'">
+      <ion-icon slot="start" name="calendar-outline"></ion-icon>
+      <ion-label>{{ selectedDeadline === 'all' ? 'Deadline' : (selectedDeadline | titlecase) }}</ion-label>
+    </ion-button>
+  </div>
 </ion-header>
 
 <ion-content class="ion-padding-horizontal">
-  <div class="tabs-container">
-    <div class="custom-tabs">
-      <div 
-        class="tab-item" 
-        [class.active]="selectedTab === 'all'" 
-        (click)="selectedTab = 'all'">
-        All Projects
-      </div>
-      <div 
-        class="tab-item" 
-        [class.active]="selectedTab === 'in_progress'" 
-        (click)="selectedTab = 'in_progress'">
-        In Progress
-      </div>
-      <div 
-        class="tab-item" 
-        [class.active]="selectedTab === 'completed'" 
-        (click)="selectedTab = 'completed'">
-        Completed
-      </div>
-    </div>
-  </div>
-
   <div class="projects-list">
     <div class="project-card" *ngFor="let project of filteredProjects" (click)="viewProjectDetail(project)">
       <div class="card-header">

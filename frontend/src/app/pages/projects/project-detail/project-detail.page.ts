@@ -15,7 +15,10 @@ import { TaskDetailComponent } from '../../tasks/components/task-detail/task-det
 export class ProjectDetailPage implements OnInit {
   projectId: string | null = null;
   projectTitle: string = 'Loading...';
-  selectedTab: string = 'todo';
+  selectedTab: string = 'all';
+  searchQuery: string = '';
+  selectedPriority: string = 'all';
+  selectedDeadline: string = 'all';
   project: any;
 
   getCompletedSubTasksCount(task: any): number {
@@ -45,13 +48,134 @@ export class ProjectDetailPage implements OnInit {
     if (!this.project || !this.project.tasks) return [];
     
     return this.project.tasks.filter((task: any) => {
+      // Status filter
       const status = task.status || 'todo';
-      if (this.selectedTab === 'todo') return status === 'todo';
-      if (this.selectedTab === 'in-progress') return status === 'in_progress';
-      if (this.selectedTab === 'on-hold') return status === 'on_hold';
-      if (this.selectedTab === 'done') return status === 'done';
-      return true;
+      let matchesStatus = true;
+      if (this.selectedTab !== 'all') {
+        matchesStatus = status === this.selectedTab;
+      }
+
+      // Priority filter
+      let matchesPriority = true;
+      if (this.selectedPriority !== 'all') {
+        matchesPriority = task.priority === this.selectedPriority;
+      }
+
+      // Deadline filter
+      let matchesDeadline = true;
+      if (this.selectedDeadline !== 'all') {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        
+        const nextWeek = new Date(today);
+        nextWeek.setDate(today.getDate() + 7);
+
+        if (!task.due_date) {
+          matchesDeadline = false;
+        } else {
+          const dueDate = new Date(task.due_date);
+          dueDate.setHours(0, 0, 0, 0);
+
+          if (this.selectedDeadline === 'overdue') {
+            matchesDeadline = dueDate < today && task.status !== 'done';
+          } else if (this.selectedDeadline === 'today') {
+            matchesDeadline = dueDate.getTime() === today.getTime();
+          } else if (this.selectedDeadline === 'this_week') {
+            matchesDeadline = dueDate >= today && dueDate <= nextWeek;
+          }
+        }
+      }
+
+      // Search filter
+      let matchesSearch = true;
+      if (this.searchQuery && this.searchQuery.trim() !== '') {
+        const query = this.searchQuery.toLowerCase().trim();
+        matchesSearch = task.title.toLowerCase().includes(query) || 
+                       (task.description && task.description.toLowerCase().includes(query));
+      }
+
+      return matchesStatus && matchesSearch && matchesPriority && matchesDeadline;
     });
+  }
+
+  async presentPriorityFilter() {
+    const alert = await this.alertCtrl.create({
+      header: 'Filter by Priority',
+      buttons: [
+        {
+          text: 'Cancel',
+          role: 'cancel'
+        },
+        {
+          text: 'All',
+          handler: () => {
+            this.selectedPriority = 'all';
+          }
+        },
+        {
+          text: 'High',
+          handler: () => {
+            this.selectedPriority = 'high';
+          }
+        },
+        {
+          text: 'Medium',
+          handler: () => {
+            this.selectedPriority = 'medium';
+          }
+        },
+        {
+          text: 'Low',
+          handler: () => {
+            this.selectedPriority = 'low';
+          }
+        }
+      ]
+    });
+
+    await alert.present();
+  }
+
+  async presentDeadlineFilter() {
+    const actionSheet = await this.actionSheetCtrl.create({
+      header: 'Filter by Deadline',
+      buttons: [
+        {
+          text: 'All',
+          cssClass: this.selectedDeadline === 'all' ? 'selected-filter' : '',
+          handler: () => {
+            this.selectedDeadline = 'all';
+          }
+        },
+        {
+          text: 'Overdue',
+          cssClass: this.selectedDeadline === 'overdue' ? 'selected-filter' : '',
+          handler: () => {
+            this.selectedDeadline = 'overdue';
+          }
+        },
+        {
+          text: 'Due Today',
+          cssClass: this.selectedDeadline === 'today' ? 'selected-filter' : '',
+          handler: () => {
+            this.selectedDeadline = 'today';
+          }
+        },
+        {
+          text: 'Due this Week',
+          cssClass: this.selectedDeadline === 'this_week' ? 'selected-filter' : '',
+          handler: () => {
+            this.selectedDeadline = 'this_week';
+          }
+        },
+        {
+          text: 'Cancel',
+          role: 'cancel'
+        }
+      ]
+    });
+
+    await actionSheet.present();
   }
 
   formatStatus(status: string): string {
@@ -97,6 +221,14 @@ export class ProjectDetailPage implements OnInit {
 
   selectTab(tab: string) {
     this.selectedTab = tab;
+  }
+
+  segmentChanged(ev: any) {
+    this.selectedTab = ev.detail.value;
+  }
+
+  handleSearch(ev: any) {
+    this.searchQuery = ev.detail.value;
   }
 
   async addTask() {

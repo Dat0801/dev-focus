@@ -11,42 +11,50 @@ ion-content {
   margin: 0 auto;
 }
 
+// Task Selector Header
+.task-selector-header {
+  background: white;
+  padding-top: 8px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+}
+
 // Task Selector Card
 .task-selector-card {
   width: 100%;
-  background: white;
-  border-radius: 40px;
-  padding: 12px 20px;
+  background: #f8f9ff;
+  border-radius: 16px;
+  padding: 10px 16px;
   display: flex;
   align-items: center;
   gap: 12px;
-  box-shadow: var(--focus-timer-shadow);
-  margin-bottom: 20px;
+  box-shadow: none;
+  margin-bottom: 0;
 
   .task-icon {
-    background: #f0f4ff;
-    width: 36px;
-    height: 36px;
+    background: #eef2ff;
+    width: 32px;
+    height: 32px;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
     color: var(--focus-timer-purple);
-    font-size: 20px;
+    font-size: 18px;
   }
 
   .task-info {
     flex: 1;
     .task-label {
-      font-weight: 500;
-      color: #4a4a68;
-      font-size: 15px;
+      font-weight: 600;
+      color: #1a1c24;
+      font-size: 14px;
     }
   }
 
   .task-chevron {
-    color: #a0a0c0;
-    font-size: 20px;
+    color: #74777f;
+    font-size: 18px;
   }
 }
 

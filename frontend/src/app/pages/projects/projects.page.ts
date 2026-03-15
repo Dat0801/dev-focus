@@ -12,7 +12,11 @@ import { ReportService } from '../../services/report';
 })
 export class ProjectsPage {
   projects: any[] = [];
+  filteredProjects: any[] = [];
   selectedTab: string = 'all';
+  searchQuery: string = '';
+  selectedCategory: string = 'all';
+  selectedDeadline: string = 'all';
 
   constructor(
     private projectService: ProjectService,
@@ -28,9 +32,143 @@ export class ProjectsPage {
     this.loadProjects();
   }
 
-  get filteredProjects() {
-    if (this.selectedTab === 'all') return this.projects;
-    return this.projects.filter(p => p.status === this.selectedTab);
+  segmentChanged(ev: any) {
+    this.selectedTab = ev.detail.value;
+    this.applyFilters();
+  }
+
+  handleSearch(ev: any) {
+    this.searchQuery = ev.detail.value;
+    this.applyFilters();
+  }
+
+  applyFilters() {
+    let tempProjects = [...this.projects];
+
+    // Filter by tab status
+    if (this.selectedTab !== 'all') {
+      tempProjects = tempProjects.filter(p => p.status === this.selectedTab);
+    }
+
+    // Filter by category
+    if (this.selectedCategory !== 'all') {
+      tempProjects = tempProjects.filter(p => p.category === this.selectedCategory);
+    }
+
+    // Filter by deadline
+    if (this.selectedDeadline !== 'all') {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      
+      const nextWeek = new Date(today);
+      nextWeek.setDate(today.getDate() + 7);
+
+      tempProjects = tempProjects.filter(p => {
+        if (!p.deadline) return false;
+        const deadlineDate = new Date(p.deadline);
+        deadlineDate.setHours(0, 0, 0, 0);
+
+        if (this.selectedDeadline === 'overdue') {
+          return deadlineDate < today && p.status !== 'completed';
+        } else if (this.selectedDeadline === 'today') {
+          return deadlineDate.getTime() === today.getTime();
+        } else if (this.selectedDeadline === 'this_week') {
+          return deadlineDate >= today && deadlineDate <= nextWeek;
+        }
+        return true;
+      });
+    }
+
+    // Filter by search query
+    if (this.searchQuery && this.searchQuery.trim() !== '') {
+      const query = this.searchQuery.toLowerCase().trim();
+      tempProjects = tempProjects.filter(p => 
+        p.name.toLowerCase().includes(query) || 
+        (p.category && p.category.toLowerCase().includes(query))
+      );
+    }
+
+    this.filteredProjects = tempProjects;
+  }
+
+  async presentCategoryFilter() {
+    const categories = [...new Set(this.projects.map(p => p.category).filter(c => !!c))];
+    
+    const buttons = categories.map(cat => ({
+      text: cat,
+      cssClass: this.selectedCategory === cat ? 'selected-filter' : '',
+      handler: () => {
+        this.selectedCategory = cat;
+        this.applyFilters();
+      }
+    }));
+
+    const actionSheet = await this.actionSheetCtrl.create({
+      header: 'Filter by Category',
+      buttons: [
+        {
+          text: 'All Categories',
+          cssClass: this.selectedCategory === 'all' ? 'selected-filter' : '',
+          handler: () => {
+            this.selectedCategory = 'all';
+            this.applyFilters();
+          }
+        },
+        ...buttons,
+        {
+          text: 'Cancel',
+          role: 'cancel'
+        }
+      ]
+    });
+
+    await actionSheet.present();
+  }
+
+  async presentDeadlineFilter() {
+    const actionSheet = await this.actionSheetCtrl.create({
+      header: 'Filter by Deadline',
+      buttons: [
+        {
+          text: 'All',
+          cssClass: this.selectedDeadline === 'all' ? 'selected-filter' : '',
+          handler: () => {
+            this.selectedDeadline = 'all';
+            this.applyFilters();
+          }
+        },
+        {
+          text: 'Overdue',
+          cssClass: this.selectedDeadline === 'overdue' ? 'selected-filter' : '',
+          handler: () => {
+            this.selectedDeadline = 'overdue';
+            this.applyFilters();
+          }
+        },
+        {
+          text: 'Due Today',
+          cssClass: this.selectedDeadline === 'today' ? 'selected-filter' : '',
+          handler: () => {
+            this.selectedDeadline = 'today';
+            this.applyFilters();
+          }
+        },
+        {
+          text: 'Due this Week',
+          cssClass: this.selectedDeadline === 'this_week' ? 'selected-filter' : '',
+          handler: () => {
+            this.selectedDeadline = 'this_week';
+            this.applyFilters();
+          }
+        },
+        {
+          text: 'Cancel',
+          role: 'cancel'
+        }
+      ]
+    });
+
+    await actionSheet.present();
   }
 
   async loadProjects() {
@@ -40,6 +178,7 @@ export class ProjectsPage {
     this.projectService.getProjects().subscribe({
       next: (res: any) => {
         this.projects = res.data;
+        this.applyFilters();
         loading.dismiss();
       },
       error: () => {

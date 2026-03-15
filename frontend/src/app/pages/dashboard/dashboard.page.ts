@@ -86,8 +86,8 @@ export class DashboardPage implements OnInit {
   }
 
   loadUpcomingTasks() {
-    this.http.get(`${environment.apiUrl}/tasks/upcoming`).subscribe((res: any) => {
-      // If the backend returns a wrapped response (e.g., from TaskResource::collection)
+    this.http.get(`${environment.apiUrl}/tasks`).subscribe((res: any) => {
+      // Load all tasks for the dashboard
       this.upcomingTasks = res.data || res;
     });
   }

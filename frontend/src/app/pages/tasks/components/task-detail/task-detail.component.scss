@@ -24,7 +24,7 @@ ion-header {
     .close-btn {
       --background: #f0f1f8;
       --border-radius: 50%;
-      --color: #74777f;
+      --color: var(--header-icon-color);
       width: 36px;
       height: 36px;
       margin: 0;
