@@ -1,0 +1,72 @@
+services:
+  # 1. Redis Service (Dành cho Queue và Cache)
+  - type: redis
+    name: dev-focus-redis
+    ipAllowList: [] # Chỉ cho phép các service nội bộ truy cập
+    plan: free # Có thể đổi sang starter nếu cần persistence
+
+  # 2. Backend API Service
+  - type: web
+    name: dev-focus-api
+    env: php
+    region: singapore
+    plan: free
+    rootDir: backend
+    buildCommand: |
+      composer install --no-dev --optimize-autoloader
+      php artisan migrate --force
+    startCommand: php artisan serve --host=0.0.0.0 --port=$PORT
+    envVars:
+      - key: APP_ENV
+        value: production
+      - key: APP_DEBUG
+        value: false
+      - key: QUEUE_CONNECTION
+        value: redis
+      - key: REDIS_URL
+        fromService:
+          type: redis
+          name: dev-focus-redis
+          property: connectionString
+      - key: DB_CONNECTION
+        value: pgsql
+      # Nếu bạn dùng PostgreSQL nội bộ của Render, có thể dùng biến DATABASE_URL
+      # Hoặc bạn có thể thêm các biến DB_HOST, DB_DATABASE, ... từ Render Dashboard
+
+  # 3. Background Worker (Xử lý Queue)
+  - type: worker
+    name: dev-focus-worker
+    env: php
+    region: singapore
+    plan: free
+    rootDir: backend
+    buildCommand: composer install --no-dev --optimize-autoloader
+    startCommand: php artisan queue:work --tries=3 --timeout=90
+    envVars:
+      - key: APP_ENV
+        value: production
+      - key: QUEUE_CONNECTION
+        value: redis
+      - key: REDIS_URL
+        fromService:
+          type: redis
+          name: dev-focus-redis
+          property: connectionString
+      - key: DB_CONNECTION
+        value: pgsql
+
+  # 4. Frontend (Ionic/Angular)
+  - type: static
+    name: dev-focus-frontend
+    env: static
+    region: singapore
+    plan: free
+    rootDir: frontend
+    buildCommand: npm install && npm run build
+    publishDir: www
+    envVars:
+      - key: API_BASE_URL
+        fromService:
+          type: web
+          name: dev-focus-api
+          property: host
